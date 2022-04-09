@@ -1,7 +1,11 @@
 plugins {
     id 'com.android.dynamic-feature'
     id 'org.jetbrains.kotlin.android'
+    id 'dagger.hilt.android.plugin'
+    id "androidx.navigation.safeargs.kotlin"
+    id "kotlin-kapt"
 }
+
 android {
     compileSdk 32
 
@@ -26,9 +30,21 @@ android {
 dependencies {
     implementation project(":app")
 
+    // define a BOM and its version
+    implementation(platform("com.squareup.okhttp3:okhttp-bom:4.9.3"))
+
+    implementation "com.squareup.retrofit2:retrofit:$versions.retrofit"
     implementation "androidx.core:core-ktx:$versions.core_ktx"
     testImplementation "junit:junit:$versions.junit"
     androidTestImplementation "androidx.test.ext:junit:$versions.androidx_junit"
     androidTestImplementation "androidx.test.espresso:espresso-core:$versions.espresso_core"
     androidTestImplementation "androidx.annotation:annotation:$versions.annotation"
+    testImplementation "com.squareup.okhttp3:mockwebserver:$versions.okhttp_mock_server"
+    implementation "androidx.swiperefreshlayout:swiperefreshlayout:$versions.swipe_refresh_layout"
+
+    kapt "com.google.dagger:hilt-compiler:$versions.hilt"
+    // Hilt
+    implementation "com.google.dagger:hilt-android:$versions.hilt"
+    androidTestImplementation "com.google.dagger:hilt-android-testing:$versions.hilt"
+    kaptAndroidTest "com.google.dagger:hilt-android-compiler:$versions.hilt"
 }
