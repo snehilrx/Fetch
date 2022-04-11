@@ -1,5 +1,5 @@
 plugins {
-    id 'com.android.dynamic-feature'
+    id "com.android.library"
     id 'org.jetbrains.kotlin.android'
     id 'dagger.hilt.android.plugin'
     id "androidx.navigation.safeargs.kotlin"
@@ -11,7 +11,10 @@ android {
 
     defaultConfig {
         minSdk 23
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        targetSdk 32
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "com.otaku.kickassanime.api.CustomTest"
     }
 
     buildTypes {
@@ -25,26 +28,29 @@ android {
         dataBinding true
         viewBinding true
     }
+
+    namespace 'com.otaku.kickassanime'
 }
 
 dependencies {
-    implementation project(":app")
 
     // define a BOM and its version
     implementation(platform("com.squareup.okhttp3:okhttp-bom:4.9.3"))
-
+    implementation project(path: ":base")
     implementation "com.squareup.retrofit2:retrofit:$versions.retrofit"
     implementation "androidx.core:core-ktx:$versions.core_ktx"
     testImplementation "junit:junit:$versions.junit"
     androidTestImplementation "androidx.test.ext:junit:$versions.androidx_junit"
     androidTestImplementation "androidx.test.espresso:espresso-core:$versions.espresso_core"
     androidTestImplementation "androidx.annotation:annotation:$versions.annotation"
-    testImplementation "com.squareup.okhttp3:mockwebserver:$versions.okhttp_mock_server"
+    testImplementation "com.squareup.okhttp3:mockwebserver:5.0.0-alpha.6"
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:$versions.swipe_refresh_layout"
-
+    implementation "com.squareup.retrofit2:converter-gson:$versions.gson_conveter"
     kapt "com.google.dagger:hilt-compiler:$versions.hilt"
+    implementation 'com.google.android.material:material:1.5.0'
+
     // Hilt
     implementation "com.google.dagger:hilt-android:$versions.hilt"
-    androidTestImplementation "com.google.dagger:hilt-android-testing:$versions.hilt"
     kaptAndroidTest "com.google.dagger:hilt-android-compiler:$versions.hilt"
+    androidTestImplementation "com.google.dagger:hilt-android-testing:$versions.hilt"
 }
