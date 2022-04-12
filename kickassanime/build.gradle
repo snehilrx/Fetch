@@ -15,8 +15,17 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "com.otaku.kickassanime.api.CustomTest"
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments += ["room.schemaLocation":
+                                      "$projectDir/schemas".toString()]
+            }
+        }
     }
-
+    sourceSets {
+        androidTest.assets.srcDirs +=
+                files("$projectDir/schemas".toString())
+    }
     buildTypes {
         release {
             minifyEnabled false
@@ -47,7 +56,13 @@ dependencies {
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:$versions.swipe_refresh_layout"
     implementation "com.squareup.retrofit2:converter-gson:$versions.gson_conveter"
     kapt "com.google.dagger:hilt-compiler:$versions.hilt"
-    implementation 'com.google.android.material:material:1.5.0'
+    implementation "com.google.android.material:material:$versions.material"
+
+    implementation "org.threeten:threetenbp:$versions.threetenbp"
+    // Room
+    implementation "androidx.room:room-runtime:$versions.room"
+    implementation "androidx.room:room-common:$versions.room"
+    kapt "androidx.room:room-compiler:$versions.room"
 
     // Hilt
     implementation "com.google.dagger:hilt-android:$versions.hilt"
