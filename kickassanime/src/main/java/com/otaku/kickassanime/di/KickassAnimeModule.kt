@@ -5,15 +5,14 @@ import com.google.gson.GsonBuilder
 import com.otaku.kickassanime.Strings
 import com.otaku.kickassanime.api.KickassAnimeService
 import com.otaku.kickassanime.api.conveter.FindJsonInTextConverterFactory
-import com.otaku.kickassanime.api.model.AnimeInformation
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
-import okhttp3.OkHttpClient
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -35,8 +34,6 @@ object KickassAnimeModule {
 
     @Provides
     @Singleton
-    fun gson(): Gson = GsonBuilder().serializeNulls().registerTypeAdapter(
-        AnimeInformation::class.java, AnimeInformation.animeInformationDeSerializer
-    ).create()
+    fun gson(): Gson = GsonBuilder().serializeNulls().create()
 
 }
