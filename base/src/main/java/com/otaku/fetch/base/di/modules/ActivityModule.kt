@@ -1,4 +1,4 @@
-package com.testing.skeletonapp.di.modules
+package com.otaku.fetch.base.di.modules
 
 import dagger.Module
 import dagger.hilt.InstallIn
