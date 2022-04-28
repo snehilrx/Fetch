@@ -49,6 +49,7 @@ dependencies {
     implementation "com.squareup.retrofit2:retrofit:$versions.retrofit"
     implementation "androidx.core:core-ktx:$versions.core_ktx"
     testImplementation "junit:junit:$versions.junit"
+    testImplementation "androidx.paging:paging-common:$versions.paging"
     androidTestImplementation "androidx.test.ext:junit:$versions.androidx_junit"
     androidTestImplementation "androidx.test.espresso:espresso-core:$versions.espresso_core"
     androidTestImplementation "androidx.annotation:annotation:$versions.annotation"
@@ -57,6 +58,7 @@ dependencies {
     implementation "com.squareup.retrofit2:converter-gson:$versions.gson_conveter"
     kapt "com.google.dagger:hilt-compiler:$versions.hilt"
     implementation "com.google.android.material:material:$versions.material"
+    implementation "androidx.paging:paging-runtime:$versions.paging"
 
     implementation "org.threeten:threetenbp:$versions.threetenbp"
     // Room
