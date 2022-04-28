@@ -20,5 +20,6 @@ ext.versions = [
         glide               : '4.13.1',
         swipe_refresh_layout: '1.2.0-alpha01',
         okhttp              : '5.0.0-alpha.6',
-        gson_conveter       : '2.9.0'
+        gson_conveter       : '2.9.0',
+        threetenbp          : '1.6.0'
 ]

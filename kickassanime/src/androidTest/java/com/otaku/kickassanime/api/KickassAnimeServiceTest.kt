@@ -5,8 +5,9 @@ import com.otaku.kickassanime.Strings
 import dagger.hilt.android.testing.CustomTestApplication
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
-import org.junit.Assert.*
 import kotlinx.coroutines.runBlocking
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -30,9 +31,10 @@ class KickassAnimeServiceTest {
     @Test
     fun testGetAllAnimeEntries() {
         runBlocking {
+            val results = kickassAnimeService.getAllAnimeEntries()
             assertTrue(
                 "No anime found in  ${Strings.KICKASSANIME_URL}/anime-list",
-                kickassAnimeService.getAllAnimeEntries().isNotEmpty()
+                results.isNotEmpty()
             )
         }
     }
@@ -40,9 +42,10 @@ class KickassAnimeServiceTest {
     @Test
     fun testGetNewSeasonAnimeEntries() {
         runBlocking {
+            val result = kickassAnimeService.getNewSeasonAnimeEntries()
             assertTrue(
                 "No anime found in  ${Strings.KICKASSANIME_URL}/anime-list",
-                kickassAnimeService.getNewSeasonAnimeEntries().isNotEmpty()
+                result.isNotEmpty()
             )
         }
     }
@@ -50,9 +53,10 @@ class KickassAnimeServiceTest {
     @Test
     fun testGetFrontPageAnimeList() {
         runBlocking {
+            val result = kickassAnimeService.getFrontPageAnimeList(0).anime.anime
             assertTrue(
                 "No anime found in  ${Strings.KICKASSANIME_URL}/anime-list",
-                kickassAnimeService.getFrontPageAnimeList(0).anime.anime.isNotEmpty()
+                result.isNotEmpty()
             )
         }
     }
@@ -68,7 +72,7 @@ class KickassAnimeServiceTest {
                 animeAndEpisodes
             )
             assertNotNull("animeAndEpisodes.anime == null", animeAndEpisodes.anime)
-            assertNotNull("animeAndEpisodes.episode == null", animeAndEpisodes.episode)
+            assertNotNull("animeAndEpisodes.episode == null", animeAndEpisodes.episodeInformation)
             assertNotNull(
                 "animeAndEpisodes.anime.animeId == null",
                 animeAndEpisodes.anime!!.animeId

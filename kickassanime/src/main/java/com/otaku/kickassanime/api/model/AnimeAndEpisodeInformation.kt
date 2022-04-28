@@ -3,10 +3,10 @@ package com.otaku.kickassanime.api.model
 import com.google.gson.annotations.SerializedName
 
 data class AnimeAndEpisodeInformation (
-    @SerializedName("anime"       ) var anime      : AnimeInformation?   = AnimeInformation(),
-    @SerializedName("episode"     ) var episode    : Episode?            = Episode(),
-    @SerializedName("ext_servers" ) var extServers : ArrayList<String>   = arrayListOf(),
-    @SerializedName("episodes"    ) var episodes   : ArrayList<Episodes> = arrayListOf()
+    @SerializedName("anime") val anime: AnimeInformation? = AnimeInformation(),
+    @SerializedName("episode") val episodeInformation: EpisodeInformation? = EpisodeInformation(),
+    @SerializedName("ext_servers") val extServers: ArrayList<String> = arrayListOf(),
+    @SerializedName("episodes") val episodes: ArrayList<Episodes> = arrayListOf()
 )
 
 
