@@ -1,0 +1,16 @@
+plugins {
+    id 'java-library'
+    id 'org.jetbrains.kotlin.jvm'
+}
+
+dependencies {
+    implementation("com.squareup.okhttp3:okhttp:5.0.0-alpha.7")
+    implementation("ru.gildor.coroutines:kotlin-coroutines-okhttp:1.0")
+
+    implementation group: 'org.mozilla', name: 'rhino', version: '1.7.12'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_7
+    targetCompatibility = JavaVersion.VERSION_1_7
+}
