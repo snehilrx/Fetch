@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<font-family xmlns:app="http://schemas.android.com/apk/res-auto">
+    <font
+        app:font="@font/sohne_extraleicht"
+        app:fontStyle="normal"
+        app:fontWeight="100" />
+
+    <font
+        app:font="@font/sohne_extraleicht_kursiv"
+        app:fontStyle="italic"
+        app:fontWeight="100" />
+
+    <font
+        app:font="@font/sohne_leicht"
+        app:fontStyle="normal"
+        app:fontWeight="200" />
+
+    <font
+        app:font="@font/sohne_leicht_kursiv"
+        app:fontStyle="italic"
+        app:fontWeight="200" />
+
+    <font
+        app:font="@font/sohne_buch"
+        app:fontStyle="normal"
+        app:fontWeight="300" />
+
+    <font
+        app:font="@font/sohne_buchkursiv"
+        app:fontStyle="italic"
+        app:fontWeight="300" />
+
+    <font
+        app:font="@font/sohne_kraftig"
+        app:fontStyle="normal"
+        app:fontWeight="400" />
+
+    <font
+        app:font="@font/sohne_kraftig_kursiv"
+        app:fontStyle="italic"
+        app:fontWeight="400" />
+
+    <font
+        app:font="@font/sohne_halbfett"
+        app:fontStyle="normal"
+        app:fontWeight="500" />
+
+    <font
+        app:font="@font/sohne_halbfett_kursiv"
+        app:fontStyle="italic"
+        app:fontWeight="500" />
+
+    <font
+        app:font="@font/sohne_dreiviertelfett"
+        app:fontStyle="normal"
+        app:fontWeight="600" />
+
+    <font
+        app:font="@font/sohne_dreiviertelfett_kursiv"
+        app:fontStyle="italic"
+        app:fontWeight="600" />
+
+    <font
+        app:font="@font/sohne_fett"
+        app:fontStyle="normal"
+        app:fontWeight="700" />
+
+    <font
+        app:font="@font/sohne_fett_kursiv"
+        app:fontStyle="italic"
+        app:fontWeight="700" />
+
+    <font
+        app:font="@font/sohne_extrafett"
+        app:fontStyle="normal"
+        app:fontWeight="800" />
+
+    <font
+        app:font="@font/sohne_extrafett_kursiv"
+        app:fontStyle="italic"
+        app:fontWeight="800" />
+
+</font-family>

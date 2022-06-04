@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="cardview_height">250dp</dimen>
+    <dimen name="cardview_height_with_reflection">375dp</dimen>
+    <dimen name="item_view_width">180dp</dimen>
+    <dimen name="item_spacing">16dp</dimen>
+</resources>

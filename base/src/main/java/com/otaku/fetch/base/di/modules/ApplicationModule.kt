@@ -1,5 +1,6 @@
 package com.otaku.fetch.base.di.modules
 
+import  com.fetch.cloudflarebypass.CloudflareHTTPClient
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -16,9 +17,9 @@ object ApplicationModule {
     @Singleton
     fun getOkHttp() : OkHttpClient {
         val logger = HttpLoggingInterceptor()
+        val cloudflareHTTPClient = CloudflareHTTPClient(logger)
         logger.level = HttpLoggingInterceptor.Level.HEADERS
-        return OkHttpClient.Builder().addInterceptor(logger)
-            .build()
+        return cloudflareHTTPClient.okHttpClient
     }
 
 }
