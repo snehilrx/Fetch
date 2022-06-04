@@ -1,13 +1,13 @@
 package com.otaku.kickassanime.db.models.entity
 
 import androidx.room.Entity
-import org.threeten.bp.OffsetDateTime
 
 @Entity(
     tableName = "front_page_episodes",
-    primaryKeys = ["episodeSlugId"]
+    primaryKeys = ["episodeSlugId", "animeSlugId"]
 )
 data class FrontPageEpisodes(
+    val animeSlugId: Int,
     val episodeSlugId: Int,
-    val date: OffsetDateTime?
+    val pageNo: Int
 )

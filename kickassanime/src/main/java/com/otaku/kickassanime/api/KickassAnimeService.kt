@@ -10,25 +10,25 @@ interface KickassAnimeService {
     @POST("/api/frontpage_video_list/all/{pageNo}")
     suspend fun getFrontPageAnimeList(
         @Path("pageNo") pageNo: Int
-    ): AnimeListFrontPageResponse
+    ): AnimeListFrontPageResponse?
 
     @GET("/anime-list")
     @JsonInText("animes")
-    suspend fun getAllAnimeEntries(): List<AnimeResponse>
+    suspend fun getAllAnimeEntries(): List<AnimeResponse>?
 
     @GET("/new-season")
     @JsonInText("animes")
-    suspend fun getNewSeasonAnimeEntries(): List<AnimeResponse>
+    suspend fun getNewSeasonAnimeEntries(): List<AnimeResponse>?
 
     @FormUrlEncoded
     @POST("/api/anime_search")
-    suspend fun search(@Field("keyword") query: String): List<AnimeSearchResponse>
+    suspend fun search(@Field("keyword") query: String): List<AnimeSearchResponse>?
 
     @GET("{slug}")
     @JsonInText
-    suspend fun getAnimeEpisode(@Path("slug", encoded = true) path: String): AnimeAndEpisodeInformation
+    suspend fun getAnimeEpisode(@Path("slug", encoded = true) path: String): AnimeAndEpisodeInformation?
 
     @GET("{slug}")
     @JsonInText("anime")
-    suspend fun getAnimeInformation(@Path("slug", encoded = true) path: String): AnimeInformation
+    suspend fun getAnimeInformation(@Path("slug", encoded = true) path: String): AnimeInformation?
 }
