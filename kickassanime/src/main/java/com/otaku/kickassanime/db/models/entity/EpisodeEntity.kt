@@ -4,7 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
-import org.threeten.bp.OffsetDateTime
+import org.threeten.bp.LocalDateTime
 
 @Entity(
     tableName = "episode",
@@ -19,6 +19,7 @@ data class EpisodeEntity(
     val name: String? = null,
     val title: String? = null,
     val episodeSlug: String? = null,
+    @PrimaryKey
     val episodeSlugId: Int,
     val dub: String? = null,
     val link1: String? = null,
@@ -28,11 +29,10 @@ data class EpisodeEntity(
     @ColumnInfo(index = true)
     val animeId: String? = null,
     val sector: String? = null,
-    val createdDate: OffsetDateTime? = null,
+    val createdDate: LocalDateTime? = null,
     val next: Int? = null,
     val prev: Int? = null,
-    @PrimaryKey
-    val episodeId: Int,
+    val episodeId: Int? = null,
     val rating: Int? = null,
     val votes: String? = null,
     val favourite: Boolean? = null

@@ -1,17 +1,19 @@
 package com.otaku.kickassanime.db.models.entity
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
-import org.threeten.bp.OffsetDateTime
+import org.threeten.bp.LocalDateTime
 
 @Entity(
-    tableName = "anime"
+    tableName = "anime",
+    indices = [Index(value = ["animeId"], unique = true)]
 )
 data class AnimeEntity(
-    @PrimaryKey
-    var animeId: Int,
+    var animeId: Int? = null,
     var malId: Int? = null,
     var simklId: Int? = null,
+    @PrimaryKey
     var animeSlugId: Int,
     var name: String? = null,
     var enTitle: String? = null,
@@ -19,8 +21,8 @@ data class AnimeEntity(
     var description: String? = null,
     var status: String? = null,
     var image: String? = null,
-    var startdate: OffsetDateTime? = null,
-    var enddate: OffsetDateTime? = null,
+    var startdate: LocalDateTime? = null,
+    var enddate: LocalDateTime? = null,
     var broadcastDay: String? = null,
     var broadcastTime: String? = null,
     var source: String? = null,
