@@ -1,3 +1,37 @@
 <resources>
+    <!-- Base application theme. -->
+    <style name="Theme.Fetch" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">@color/purple_200</item>
+        <item name="colorPrimaryVariant">@color/purple_700</item>
+        <item name="colorOnPrimary">@color/black</item>
+        <!-- Secondary brand color. -->
+        <item name="colorSecondary">@color/teal_200</item>
+        <item name="colorSecondaryVariant">@color/teal_200</item>
+        <item name="colorOnSecondary">@color/black</item>
+        <!-- Status bar color. -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <!-- Customize your theme here. -->
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowTranslucentNavigation">true</item>
+        <item name="fontFamily">@font/sohne</item>
+    </style>
 
+    <style name="ShapeAppearanceOverlay.Fetch.CardView" parent="">
+        <item name="cornerSize">5%</item>
+        <item name="android:padding">2dp</item>
+    </style>
+
+    <style name="ShapeAppearanceOverlay.Fetch.CardViewRounded" parent="">
+        <item name="cornerSize">5%</item>
+    </style>
+
+    <style name="ShapeAppearanceOverlay.Fetch.CardView.Thumbnail" parent="ShapeAppearanceOverlay.Fetch.CardView">
+        <item name="cornerSizeBottomLeft">0%</item>
+        <item name="cornerSizeBottomRight">0%</item>
+    </style>
+
+    <style name="Fetch.ChipText" parent="TextAppearance.Material3.LabelSmall">
+        <item name="android:textColor">#fff</item>
+    </style>
 </resources>

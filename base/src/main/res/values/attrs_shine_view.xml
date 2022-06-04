@@ -1,0 +1,7 @@
+<resources>
+    <declare-styleable name="ShineView">
+        <attr name="statusbarHeight" format="dimension" />
+        <attr name="scrimHeight" format="dimension" />
+        <attr name="toolbarHeight" format="dimension" />
+    </declare-styleable>
+</resources>
