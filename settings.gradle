@@ -16,3 +16,4 @@ rootProject.name = "Fetch"
 include ':app'
 include ':kickassanime'
 include ':base'
+include ':base:cloudflarebypass'

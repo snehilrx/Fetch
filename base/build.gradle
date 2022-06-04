@@ -6,14 +6,13 @@ plugins {
 }
 
 android {
-    compileSdk 32
+    compileSdk env.compileSdk
 
     defaultConfig {
-        minSdk 23
-        targetSdk 32
-        versionCode 1
-        versionName "1.0"
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        minSdk env.minSdk
+        targetSdk env.targetSdk
+
+        testInstrumentationRunner env.testInstrumentationRunner
     }
 
     buildTypes {
@@ -39,25 +38,37 @@ android {
 }
 
 dependencies {
+    implementation "androidx.core:core-ktx:$versions.core_ktx"
+    implementation "androidx.appcompat:appcompat:$versions.appcompat"
+    implementation "com.google.android.material:material:$versions.material"
+    implementation "androidx.swiperefreshlayout:swiperefreshlayout:$versions.swipe_refresh_layout"
+    implementation "com.github.sparrow007:carouselrecyclerview:$versions.carouselrecyclerview"
+    implementation "androidx.palette:palette:$versions.palette"
+
     // Hilt
     implementation "com.google.dagger:hilt-android:$versions.hilt"
-    androidTestImplementation "com.google.dagger:hilt-android-testing:$versions.hilt"
-    kaptAndroidTest "com.google.dagger:hilt-android-compiler:$versions.hilt"
-
-    implementation "com.github.bumptech.glide:glide:$versions.glide"
-
-    kapt "com.github.bumptech.glide:compiler:$versions.glide"
+    implementation project(path: ':base:cloudflarebypass')
     kapt "com.google.dagger:hilt-compiler:$versions.hilt"
-    // define required OkHttp artifacts without version
+
+    // okhttp
     implementation("com.squareup.okhttp3:okhttp:$versions.okhttp")
     implementation("com.squareup.okhttp3:logging-interceptor:$versions.okhttp")
 
-    implementation 'androidx.core:core-ktx:1.7.0'
-    implementation 'androidx.appcompat:appcompat:1.4.1'
-    implementation 'com.google.android.material:material:1.5.0'
-    testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+    // Glide
+    implementation "com.github.bumptech.glide:glide:$versions.glide"
+    implementation group: 'com.github.bumptech.glide', name: 'okhttp3-integration', version: versions.glide_okhttp
+    kapt "com.github.bumptech.glide:compiler:$versions.glide"
+
+
+    /* test dependency */
+    androidTestImplementation "androidx.test.espresso:espresso-core:$versions.espresso_core"
+    testImplementation "junit:junit:$versions.junit"
+    androidTestImplementation "androidx.test.ext:junit:$versions.androidx_junit"
+
+    // hilt
+    androidTestImplementation "com.google.dagger:hilt-android-testing:$versions.hilt"
+    kaptAndroidTest "com.google.dagger:hilt-android-compiler:$versions.hilt"
+
     kapt "com.github.bumptech.glide:compiler:$versions.glide"
     implementation "com.github.bumptech.glide:glide:$versions.glide"
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:$versions.swipe_refresh_layout"
