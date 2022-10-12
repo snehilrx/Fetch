@@ -31,12 +31,10 @@ class KickassAnimeServiceUnitTest {
     fun testGetAllAnimeEntries() {
         runBlocking {
             val results = kickassAnimeService.getAllAnimeEntries()
-            results?.let {
-                assertTrue(
-                    "No anime found in  ${Strings.KICKASSANIME_URL}/anime-list",
-                    it.isNotEmpty()
-                )
-            }
+            assertTrue(
+                "No anime found in  ${Strings.KICKASSANIME_URL}/anime-list",
+                results.isNotEmpty()
+            )
         }
     }
 
@@ -46,7 +44,7 @@ class KickassAnimeServiceUnitTest {
             val result = kickassAnimeService.getNewSeasonAnimeEntries()
             assertTrue(
                 "No anime found in  ${Strings.KICKASSANIME_URL}/anime-list",
-                result?.isNotEmpty() == true
+                result.isNotEmpty()
             )
         }
     }
@@ -54,10 +52,10 @@ class KickassAnimeServiceUnitTest {
     @Test
     fun testGetFrontPageAnimeList() {
         runBlocking {
-            val result = kickassAnimeService.getFrontPageAnimeList(0)?.anime?.anime
+            val result = kickassAnimeService.getFrontPageAnimeList(0).anime
             assertTrue(
                 "No anime found in  ${Strings.KICKASSANIME_URL}/anime-list",
-                result?.isNotEmpty() == true
+                result.isNotEmpty()
             )
         }
     }
@@ -65,18 +63,18 @@ class KickassAnimeServiceUnitTest {
     @Test
     fun testGetAnimeEpisode() {
         runBlocking {
-            val episodeSlug = kickassAnimeService.getFrontPageAnimeList(0)?.anime?.anime?.get(0)?.slug
+            val episodeSlug = kickassAnimeService.getFrontPageAnimeList(0).anime.get(0).slug
             assertNotNull("No episode found in page 0", episodeSlug)
             val animeAndEpisodes = kickassAnimeService.getAnimeEpisode(episodeSlug!!)
             assertNotNull(
                 "No anime parsed in  ${Strings.KICKASSANIME_URL}/anime-list",
                 animeAndEpisodes
             )
-            assertNotNull("animeAndEpisodes.anime == null", animeAndEpisodes?.anime)
-            assertNotNull("animeAndEpisodes.episode == null", animeAndEpisodes?.episodeInformation)
+            assertNotNull("animeAndEpisodes.anime == null", animeAndEpisodes.anime)
+            assertNotNull("animeAndEpisodes.episode == null", animeAndEpisodes.episodeInformation)
             assertNotNull(
                 "animeAndEpisodes.anime.animeId == null",
-                animeAndEpisodes?.anime?.animeId
+                animeAndEpisodes.anime?.animeId
             )
         }
     }
@@ -86,7 +84,7 @@ class KickassAnimeServiceUnitTest {
         runBlocking {
             val results = kickassAnimeService.search("dragon")
             assertNotNull(results)
-            assertTrue("Nothing found for keyword dragon", results?.isNotEmpty() == true)
+            assertTrue("Nothing found for keyword dragon", results.isNotEmpty())
         }
     }
 
@@ -94,11 +92,11 @@ class KickassAnimeServiceUnitTest {
     fun testGetAnimeInformation() {
         runBlocking {
             val animeSlug =
-                kickassAnimeService.getFrontPageAnimeList(0)?.anime?.anime?.get(0)?.slug?.dropLastWhile { it != '/' }
+                kickassAnimeService.getFrontPageAnimeList(0).anime[0].slug?.dropLastWhile { it != '/' }
             assertNotNull("No episode found in page 0", animeSlug)
             val anime = kickassAnimeService.getAnimeInformation(animeSlug!!)
             assertNotNull("No anime found in  ${Strings.KICKASSANIME_URL}/anime-list", anime)
-            assertNotNull("animeAndEpisodes.anime == null", anime?.rating)
+            assertNotNull("animeAndEpisodes.anime == null", anime.rating)
         }
     }
 

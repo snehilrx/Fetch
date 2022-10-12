@@ -1,0 +1,10 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        <activity
+            android:name="com.otaku.fetch.base.TestActivity"
+            android:exported="false"
+            android:theme="@style/Theme.MaterialComponents.DayNight"
+            />
+    </application>
+</manifest>

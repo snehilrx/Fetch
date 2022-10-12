@@ -6,5 +6,86 @@
     <fragment
         android:id="@+id/frontPageFragment"
         android:name="com.otaku.kickassanime.page.frontpage.FrontPageFragment"
-        android:label="FrontPageFragment" />
+        android:label="@string/module_name"
+        >
+        <action
+            android:id="@+id/action_frontPageFragment_to_allListFragment"
+            app:destination="@id/allListFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:launchSingleTop="true"
+            app:popEnterAnim="@anim/slide_out_left"
+            app:popUpTo="@id/frontPageFragment"
+            app:restoreState="false" />
+        <action
+            android:id="@+id/action_frontPageFragment_to_dubListFragment"
+            app:destination="@id/dubListFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:launchSingleTop="true"
+            app:popExitAnim="@anim/slide_out_left"
+            app:popUpTo="@id/frontPageFragment"
+            app:restoreState="false" />
+        <action
+            android:id="@+id/action_frontPageFragment_to_subListFragment"
+            app:destination="@id/subListFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:launchSingleTop="true"
+            app:popExitAnim="@anim/slide_out_left"
+            app:popUpTo="@id/frontPageFragment"
+            app:restoreState="false" />
+        <action
+            android:id="@+id/action_frontPageFragment_to_episodeFragment"
+            app:destination="@id/episodeFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/allListFragment"
+        android:name="com.otaku.kickassanime.page.frontpage.list.AllListFragment"
+        android:label="@string/new_anime" >
+        <action
+            android:id="@+id/action_allListFragment_to_episodeFragment"
+            app:destination="@id/episodeFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/dubListFragment"
+        android:name="com.otaku.kickassanime.page.frontpage.list.DubListFragment"
+        android:label="@string/dubbed_anime">
+        <action
+            android:id="@+id/action_dubListFragment_to_episodeFragment"
+            app:destination="@id/episodeFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/subListFragment"
+        android:name="com.otaku.kickassanime.page.frontpage.list.SubListFragment"
+        android:label="@string/subbed_anime">
+        <action
+            android:id="@+id/action_subListFragment_to_episodeFragment"
+            app:destination="@id/episodeFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/episodeFragment"
+        android:name="com.otaku.kickassanime.page.episodepage.EpisodeFragment"
+        android:label="{title}" >
+        <argument
+            android:name="title"
+            app:argType="string" />
+        <argument
+            android:name="episodeSlugId"
+            app:argType="integer" />
+        <argument
+            android:name="animeSlugId"
+            app:argType="integer" />
+        <action
+            android:id="@+id/action_episodeFragment_to_videoPlayer"
+            app:destination="@id/videoPlayer" />
+    </fragment>
+    <activity
+        android:id="@+id/videoPlayer"
+        android:name="com.otaku.kickassanime.page.video.VideoPlayer"
+        android:label="VideoPlayer" >
+        <argument
+            android:name="videoEmbededLink"
+            app:argType="string" />
+    </activity>
 </navigation>

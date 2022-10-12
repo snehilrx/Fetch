@@ -10,12 +10,12 @@ data class AnimeTile(
     val episodeSlug: String,
     val episodeSlugId: Int,
     val image: String,
-    val type: String,
+    val sector: String,
     val episodeNumber: String,
     val pageNo: Int
 ) : ITileData {
     override val imageUrl: String
         get() = "${Strings.KICKASSANIME_URL}/uploads/$image"
     override val tags: List<String>
-        get() = listOf(type, "EP $episodeNumber")
+        get() = listOf(sector, "EP $episodeNumber")
 }

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+    <data>
+        <variable
+            name="title"
+            type="CharSequence" />
+        <variable
+            name="actionButtonText"
+            type="CharSequence" />
+    </data>
+    <FrameLayout
+        android:orientation="horizontal"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <com.google.android.material.textview.MaterialTextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="start|center"
+            android:textSize="24sp"
+            android:layout_marginStart="12dp"
+            android:textAppearance="@style/TextAppearance.Material3.ActionBar.Title"
+            android:text="@{title}" />
+
+        <Button
+            android:id="@+id/actionButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end|center"
+            android:layout_marginEnd="12dp"
+            android:contentDescription="@string/more"
+            android:text="@{actionButtonText}" />
+    </FrameLayout>
+</layout>

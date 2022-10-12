@@ -1,9 +1,6 @@
 package com.otaku.kickassanime.utils
 
-import com.otaku.kickassanime.api.model.Anime
-import com.otaku.kickassanime.api.model.AnimeInformation
-import com.otaku.kickassanime.api.model.AnimeResponse
-import com.otaku.kickassanime.api.model.EpisodeInformation
+import com.otaku.kickassanime.api.model.*
 import com.otaku.kickassanime.db.models.entity.AnimeEntity
 import com.otaku.kickassanime.db.models.entity.EpisodeEntity
 
@@ -23,8 +20,7 @@ fun Anime.asAnimeEntity(): AnimeEntity {
         animeSlugId = this.slug?.substringBeforeLast("/")?.substringAfterLast("-")?.toInt() ?: 0,
         animeslug = this.slug?.removeSuffix("/anime/")?.substringBeforeLast("/"),
         name = this.name,
-        image = this.poster,
-        type = this.type
+        image = this.poster
     )
 }
 
@@ -39,53 +35,49 @@ fun Anime.asEpisodeEntity(): EpisodeEntity {
 }
 
 @Suppress("unused")
-fun AnimeInformation.asAnimeEntity(): AnimeEntity {
-    return AnimeEntity(
-        animeId = this.animeId?.toInt() ?: 0,
-        animeSlugId = this.slug?.substringAfterLast("-")?.toInt() ?: 0,
-        animeslug = this.slug?.removeSuffix("/anime/")?.substringBeforeLast("-"),
-        rating = this.rating,
-        broadcastDay = this.broadcastDay,
-        startdate = this.startdate?.let { Utils.parseDateTime(it) },
-        enTitle = this.enTitle,
-        broadcastTime = this.broadcastTime,
-        source = this.source,
-        duration = this.duration,
-        name = this.name,
-        enddate = this.enddate?.let { Utils.parseDateTime(it) },
-        image = this.image,
-        status = this.status,
-        description = this.description,
-        site = this.site,
-        infoLink = this.infoLink,
-        createddate = this.createddate,
-        malId = this.malId?.toIntOrNull(),
-        simklId = this.simklId?.toIntOrNull(),
-        type = this.type
-    )
+fun AnimeInformation.asAnimeEntity(animeEntity: AnimeEntity): AnimeEntity {
+    val anime = this
+    return animeEntity.apply {
+        animeId = animeId ?: aid?.toInt()
+        rating = rating ?: anime.rating
+        broadcastDay = broadcastDay ?: anime.broadcastDay
+        startdate = startdate ?: anime.startdate?.let { Utils.parseDate(it) }
+        enTitle = enTitle ?: anime.enTitle
+        broadcastTime = broadcastTime ?: anime.broadcastTime
+        source = source ?: anime.source
+        duration = duration ?: anime.duration
+        enddate = enddate ?: anime.enddate?.let { Utils.parseDate(it) }
+        status = status ?: anime.status
+        description = description ?: anime.description
+        site = site ?: anime.site
+        infoLink = infoLink ?: anime.infoLink
+        createddate = createddate ?: anime.createddate
+        malId = malId ?: anime.malId?.toIntOrNull()
+        simklId = simklId ?: anime.simklId?.toIntOrNull()
+        type = type ?: anime.type
+    }
 }
 
-@Suppress("unused")
-fun EpisodeInformation.asEpisodeEntity(): EpisodeEntity {
-    return EpisodeEntity(
-        episodeId = this.epId?.toIntOrNull() ?: 0,
-        animeId = this.animeId,
-        link1 = this.link1,
-        link2 = this.link2,
-        next = this.next?.slug?.substringAfterLast("-")?.toInt(),
-        episodeSlugId = this.slug?.substringAfterLast("-")?.toInt() ?: 0,
-        createdDate = this.createdDate?.let { Utils.parseDateTime(it) },
-        episodeSlug = this.slug?.removeSuffix("/anime/")?.substringBeforeLast("-"),
-        title = this.title,
-        sector = this.sector,
-        votes = this.votes,
-        link4 = this.link4,
-        rating = this.rating,
-        prev = this.next?.slug?.substringAfterLast("-")?.toInt(),
-        name = this.name,
-        link3 = this.link3,
-        favourite = this.favourite
-    )
+fun EpisodeInformation.asEpisodeEntity(e: EpisodeEntity): EpisodeEntity {
+    val response = this
+    return e.apply {
+        episodeId = response.epId?.toIntOrNull() ?: 0
+        animeId = response.animeId
+        link1 = response.link1
+        link2 = response.link2
+        next = response.next?.slug?.substringAfterLast("-")?.toInt()
+        title = response.title
+        votes = response.votes
+        link4 = response.link4
+        rating = response.rating
+        prev = response.next?.slug?.substringAfterLast("-")?.toInt()
+        link3 = response.link3
+        favourite = response.favourite
+    }
+}
+fun AnimeAndEpisodeInformation.asEpisodeEntity(e: EpisodeEntity): EpisodeEntity? {
+    val response = this.episodeInformation ?: return null
+    return response.asEpisodeEntity(e)
 }
 
 //fun Episodes.asEpisodeEntity(): EpisodeEntity {

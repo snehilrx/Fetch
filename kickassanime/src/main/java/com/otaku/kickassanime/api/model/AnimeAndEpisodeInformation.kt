@@ -1,7 +1,9 @@
 package com.otaku.kickassanime.api.model
 
+import androidx.annotation.Keep
 import com.google.gson.annotations.SerializedName
 
+@Keep
 data class AnimeAndEpisodeInformation (
     @SerializedName("anime") val anime: AnimeInformation? = AnimeInformation(),
     @SerializedName("episode") val episodeInformation: EpisodeInformation? = EpisodeInformation(),

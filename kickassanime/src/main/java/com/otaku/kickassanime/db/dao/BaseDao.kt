@@ -6,14 +6,14 @@ import androidx.room.OnConflictStrategy.REPLACE
 @Dao
 interface BaseDao<T> {
     @Insert(onConflict = REPLACE)
-    fun insert(vararg obj: T)
+    suspend fun insert(vararg obj: T)
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun insertAll(obj: List<T>)
+    suspend fun insertAll(obj: List<T>)
 
     @Delete
-    fun delete(vararg obj: T)
+    suspend fun delete(vararg obj: T)
 
     @Update
-    fun updateAll(episode: List<T>)
+    suspend fun updateAll(vararg episode: T)
 }

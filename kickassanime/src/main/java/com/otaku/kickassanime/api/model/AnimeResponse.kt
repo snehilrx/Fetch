@@ -1,7 +1,9 @@
 package com.otaku.kickassanime.api.model
 
+import androidx.annotation.Keep
 import com.google.gson.annotations.SerializedName
 
+@Keep
 data class AnimeResponse(
     @SerializedName("anime_id") val animeId: String? = null,
     @SerializedName("name") val name: String? = null,

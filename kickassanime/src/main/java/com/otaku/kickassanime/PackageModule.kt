@@ -3,12 +3,11 @@ package com.otaku.kickassanime
 import android.content.res.Resources
 import android.graphics.drawable.Drawable
 import androidx.core.content.res.ResourcesCompat
-import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.NavHostFragment
 import com.otaku.fetch.AppModule
 import com.otaku.kickassanime.page.MainFragment
-import javax.inject.Inject
 
-class PackageModule @Inject constructor() : AppModule {
+class PackageModule : AppModule {
 
     private val mainFragment: MainFragment = MainFragment()
 
@@ -23,7 +22,7 @@ class PackageModule @Inject constructor() : AppModule {
         TODO("Not yet implemented")
     }
 
-    override fun getMainFragment(link: String): Fragment {
+    override fun getMainFragment(link: String): NavHostFragment {
         return mainFragment
     }
 }

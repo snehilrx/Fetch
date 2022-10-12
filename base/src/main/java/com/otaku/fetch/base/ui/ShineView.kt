@@ -1,6 +1,5 @@
 package com.otaku.fetch.base.ui
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
@@ -23,7 +22,7 @@ class ShineView : View, AppBarLayout.OnOffsetChangedListener {
 
     private var toolBarHeight: Float = 0f
     private var scrimHeight: Float = 0f
-    private var oProgress: Float = 1f
+    private var oProgress: Float = -1f
     private var progress: Float = 0f
 
     constructor(context: Context) : super(context) {
@@ -64,7 +63,8 @@ class ShineView : View, AppBarLayout.OnOffsetChangedListener {
     var shineColor: Int = Color.TRANSPARENT
         set(value) {
             field = value
-            invalidate()
+            setShader()
+            this.invalidate()
         }
 
     private var mPaint: Paint = Paint().apply {
@@ -75,22 +75,7 @@ class ShineView : View, AppBarLayout.OnOffsetChangedListener {
         progress = (-verticalOffset / appBarLayout.totalScrollRange.toFloat())
         if (oProgress == progress) return
         if (progress.isFinite() && statusbarHeight > 0) {
-            val toShow = (toolBarHeight * (1 - progress)).coerceAtLeast(statusbarHeight)
-            val radius = appBarLayout.width / 2 * (1 - progress + 0.2)
-            val translateX = radius + toShow
-            val x1 = radius * cos(toRadians(45 + 45.0 * progress)) + translateX
-            val y1 = radius * sin(toRadians(45 + 45.0 * progress))
-            val y0 = radius * sin(toRadians(220 + 50.0 * progress))
-            val x0 = radius * cos(toRadians(220 + 50.0 * progress)) + translateX
-            mPaint.shader = LinearGradient(
-                x0.toFloat(),
-                y0.toFloat(),
-                x1.toFloat(),
-                y1.toFloat(),
-                adjustAlpha(shineColor, (progress + 0.5f).coerceAtMost(1f)),
-                Color.TRANSPARENT,
-                Shader.TileMode.CLAMP
-            )
+            setShader()
             invalidate()
             if (progress >= 1.0f) {
                 bringViewToFront()
@@ -101,19 +86,45 @@ class ShineView : View, AppBarLayout.OnOffsetChangedListener {
         oProgress = progress
     }
 
+    private fun setShader(viewWidth: Int = width) {
+        val toShow = (toolBarHeight * (1 - progress)).coerceAtLeast(statusbarHeight)
+        val radius = viewWidth / 2 * (1 - progress + 0.2)
+        val translateX = radius + toShow
+        val x1 = radius * cos(toRadians(45 + 45.0 * progress)) + translateX
+        val y1 = radius * sin(toRadians(45 + 45.0 * progress))
+        val y0 = radius * sin(toRadians(220 + 50.0 * progress))
+        val x0 = radius * cos(toRadians(220 + 50.0 * progress)) + translateX
+        mPaint.shader = LinearGradient(
+            x0.toFloat(),
+            y0.toFloat(),
+            x1.toFloat(),
+            y1.toFloat(),
+            getColor(),
+            Color.TRANSPARENT,
+            Shader.TileMode.CLAMP
+        )
+    }
+
+    private fun getColor() = adjustAlpha(shineColor, (progress + 0.5f).coerceAtMost(1f))
+
+    // to fix view flickering
+    private var lock = true
     private fun sendViewToBack() {
+        if(lock) return
         val parent = parent as ViewGroup
         parent.removeView(this)
         parent.addView(this, 0)
+        lock = true
     }
-
     private fun bringViewToFront() {
+        if(!lock) return
         parent.bringChildToFront(this)
+        lock = false
     }
 
     @ColorInt
     fun adjustAlpha(@ColorInt color: Int, factor: Float): Int {
-        val alpha = (Color.alpha(color) * factor).roundToInt()
+        val alpha = ((Color.alpha(color) * factor).roundToInt()+50).coerceAtMost(255)
         val red = Color.red(color)
         val green = Color.green(color)
         val blue = Color.blue(color)
@@ -136,7 +147,6 @@ class ShineView : View, AppBarLayout.OnOffsetChangedListener {
         super.onDetachedFromWindow()
     }
 
-    @SuppressLint("DrawAllocation")
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         canvas.drawRect(0F, 0F, width.toFloat(), height.toFloat() - (scrimHeight * progress), mPaint)

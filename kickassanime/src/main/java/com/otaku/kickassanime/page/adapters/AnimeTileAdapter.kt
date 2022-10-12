@@ -11,10 +11,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.otaku.kickassanime.db.models.AnimeTile
 
 class AnimeTileAdapter<T : ViewDataBinding>(
-    private val limit: Int = 0,
     @LayoutRes private val layoutId: Int,
-    private val onBind: (T, AnimeTile) -> Unit
-) : PagingDataAdapter<AnimeTile, AnimeTileAdapter<T>.AnimeTileViewHolder>(AnimeTileComparator) {
+    private val onBind: (T, AnimeTile) -> Unit,
+) : PagingDataAdapter<AnimeTile, AnimeTileAdapter.AnimeTileViewHolder<T>>(AnimeTileComparator) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
         AnimeTileViewHolder(
@@ -23,13 +22,7 @@ class AnimeTileAdapter<T : ViewDataBinding>(
             ),
             onBind
         )
-
-    override fun getItemCount(): Int {
-        val count = super.getItemCount()
-        return if (limit in 1..count) limit else count
-    }
-
-    inner class AnimeTileViewHolder(private val binding: T, private val onBind: (T, AnimeTile) -> Unit) :
+    class AnimeTileViewHolder<T: ViewDataBinding>(private val binding: T, private val onBind: (T, AnimeTile) -> Unit) :
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(item: AnimeTile) = with(binding) {
@@ -45,7 +38,13 @@ class AnimeTileAdapter<T : ViewDataBinding>(
             oldItem == newItem
     }
 
-    override fun onBindViewHolder(holder: AnimeTileViewHolder, position: Int) {
-        getItem(position)?.let { holder.bind(it) }
+    override fun onBindViewHolder(holder: AnimeTileViewHolder<T>, position: Int) {
+        getItem(position)?.let {
+            holder.bind(it)
+        }
+    }
+
+    companion object{
+        const val TAG ="ANIME_TILE_ADAPTER"
     }
 }

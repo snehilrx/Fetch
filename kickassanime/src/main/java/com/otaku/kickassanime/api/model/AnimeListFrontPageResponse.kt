@@ -1,8 +1,9 @@
 package com.otaku.kickassanime.api.model
 
+import androidx.annotation.Keep
 import com.google.gson.annotations.SerializedName
 
-
+@Keep
 data class Anime (
     @SerializedName("episode"      ) val episode     : String? = null,
     /** anime/boruto-naruto-next-generations-923495/episode-245-958365 */
@@ -13,11 +14,8 @@ data class Anime (
     @SerializedName("poster"       ) val poster      : String? = null
 )
 
-data class AnimeCollection (
-    @SerializedName("all") val anime : List<Anime>
-)
-
-
+@Keep
 data class AnimeListFrontPageResponse (
-    @SerializedName("data") val anime : AnimeCollection
+    @SerializedName("data") val anime : List<Anime>,
+    @SerializedName("page" ) var page : Int
 )

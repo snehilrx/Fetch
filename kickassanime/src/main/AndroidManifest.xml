@@ -1,6 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.otaku.kickassanime">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <uses-permission android:name="android.permission.INTERNET" android:required="true"/>
+    <uses-permission
+        android:name="android.permission.INTERNET"
+        android:required="true" />
+
+    <application>
+        <activity
+            android:theme="@style/Theme.Material3.DayNight.NoActionBar"
+            android:screenOrientation="landscape"
+            android:name=".page.video.VideoPlayer"
+            android:exported="false" />
+    </application>
+
 </manifest>

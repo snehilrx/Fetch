@@ -1,62 +1,70 @@
 package com.otaku.kickassanime.page.frontpage
 
-import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
-import androidx.core.view.isVisible
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
-import androidx.paging.CombinedLoadStates
-import androidx.paging.LoadState
-import androidx.paging.PagingDataAdapter
-import androidx.recyclerview.widget.LinearLayoutManager
-import com.maxkeppeler.sheets.info.InfoSheet
-import com.mikepenz.iconics.IconicsDrawable
-import com.mikepenz.iconics.typeface.library.fontawesome.FontAwesome
-import com.mikepenz.iconics.utils.colorInt
-import com.mikepenz.iconics.utils.sizeDp
+import android.view.ViewGroup
+import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.activityViewModels
+import androidx.recyclerview.widget.ConcatAdapter
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.GridLayoutManager.SpanSizeLookup
 import com.otaku.fetch.base.databinding.CarouselItemLayoutBinding
 import com.otaku.fetch.base.databinding.TileItemBinding
-import com.otaku.fetch.base.ui.BindingFragment
 import com.otaku.kickassanime.R
 import com.otaku.kickassanime.databinding.FragmentFrontPageBinding
-import com.otaku.kickassanime.page.adapters.AnimeTileAdapter
-import com.otaku.kickassanime.page.adapters.HeadingViewHolder
-import com.otaku.kickassanime.page.adapters.ItemListAdapter
-import com.otaku.kickassanime.page.adapters.SimpleItem
-import com.otaku.kickassanime.utils.Constraints.NETWORK_PAGE_SIZE
-import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
-import javax.inject.Inject
+import com.otaku.kickassanime.db.models.AnimeTile
+import com.otaku.kickassanime.page.adapters.AnimeTileAdapterNoPaging
+import com.otaku.kickassanime.page.adapters.CarouselAdapter
+import com.otaku.kickassanime.page.adapters.HeaderAdapter
+import com.otaku.kickassanime.page.frontpage.data.FrontPageViewModel
+import com.otaku.kickassanime.utils.Utils.showError
 
-@AndroidEntryPoint
-class FrontPageFragment : BindingFragment<FragmentFrontPageBinding>(R.layout.fragment_front_page) {
+class FrontPageFragment : FrontPageBaseFragment() {
 
-    private val frontPageViewModel: FrontPageViewModel by viewModels()
+    private lateinit var binding: FragmentFrontPageBinding
+    private val frontPageViewModel: FrontPageViewModel by activityViewModels()
 
-    @Inject
-    lateinit var itemListAdapter: ItemListAdapter
 
-    private val newAnimeAdapter = AnimeTileAdapter<CarouselItemLayoutBinding>(
-        NETWORK_PAGE_SIZE,
+    private val newAnimeAdapter = AnimeTileAdapterNoPaging<CarouselItemLayoutBinding>(
         com.otaku.fetch.base.R.layout.carousel_item_layout
     ) { binding, item ->
         binding.tileData = item
+        binding.root.setOnClickListener { onItemClick(item) }
     }
 
-    private val subbedAnimeAdapter = AnimeTileAdapter<TileItemBinding>(
-        NETWORK_PAGE_SIZE,
+    private fun onItemClick(item: AnimeTile) {
+        navigate(
+            FrontPageFragmentDirections.actionFrontPageFragmentToEpisodeFragment(
+                title = item.title,
+                episodeSlugId = item.episodeSlugId,
+                animeSlugId = item.animeSlugId
+            )
+        )
+    }
+
+    private val subbedAnimeAdapter = AnimeTileAdapterNoPaging<TileItemBinding>(
         com.otaku.fetch.base.R.layout.tile_item
     ) { binding, item ->
         binding.tileData = item
+        binding.root.setOnClickListener { onItemClick(item) }
     }
 
-    private val dubbedAnimeAdapter = AnimeTileAdapter<TileItemBinding>(
-        NETWORK_PAGE_SIZE,
+    private val dubbedAnimeAdapter = AnimeTileAdapterNoPaging<TileItemBinding>(
         com.otaku.fetch.base.R.layout.tile_item
     ) { binding, item ->
         binding.tileData = item
+        binding.root.setOnClickListener { onItemClick(item) }
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_front_page, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -66,84 +74,87 @@ class FrontPageFragment : BindingFragment<FragmentFrontPageBinding>(R.layout.fra
     }
 
     private fun initFrontPageList() {
-        itemListAdapter.submitList(
-            listOf(
-                HeadingViewHolder.Heading("New Anime"),
-                SimpleItem(ItemListAdapter.VIEW_TYPE_CAROUSEL, newAnimeAdapter),
-                HeadingViewHolder.Heading("Subbed Anime"),
-                SimpleItem(ItemListAdapter.VIEW_TYPE_GRID, subbedAnimeAdapter),
-                HeadingViewHolder.Heading("Dubbed Anime"),
-                SimpleItem(ItemListAdapter.VIEW_TYPE_GRID, dubbedAnimeAdapter),
-            )
-        )
-        binding.frontPageList.adapter = itemListAdapter
-        binding.frontPageList.layoutManager = LinearLayoutManager(context)
+        val adapter = ConcatAdapter().apply {
+            addAdapter(HeaderAdapter(getString(R.string.new_anime), getString(R.string.more)) {
+                navigate(FrontPageFragmentDirections.actionFrontPageFragmentToAllListFragment())
+            })
+            addAdapter(CarouselAdapter(newAnimeAdapter))
+            addAdapter(HeaderAdapter(getString(R.string.subbed_anime), getString(R.string.more)) {
+                navigate(FrontPageFragmentDirections.actionFrontPageFragmentToSubListFragment())
+            })
+            addAdapter(subbedAnimeAdapter)
+            addAdapter(HeaderAdapter(getString(R.string.dubbed_anime), getString(R.string.more)) {
+                navigate(FrontPageFragmentDirections.actionFrontPageFragmentToDubListFragment())
+            })
+            addAdapter(dubbedAnimeAdapter)
+        }
+        binding.container.adapter = adapter
+        val spanCount = resources.getInteger(com.otaku.fetch.base.R.integer.span_count)
+        (binding.container.layoutManager as? GridLayoutManager)?.spanSizeLookup =
+            object : SpanSizeLookup() {
+                override fun getSpanSize(position: Int): Int {
+                    return when (position) {
+                        0, 1, 2, subbedAnimeAdapter.itemCount + 3 -> spanCount
+                        else -> 1
+                    }
+                }
+            }
+        binding.refreshLayout.setOnRefreshListener {
+            frontPageViewModel.refreshAllPages()
+        }
     }
 
     private fun initFlow() {
         frontPageViewModel.all.observe(viewLifecycleOwner) { data ->
-            newAnimeAdapter.submitData(lifecycle, data)
+            Log.i(TAG, "for all anime ${data.size} items loaded")
+            newAnimeAdapter.submitList(data)
         }
-        frontPageViewModel.subs.observe(viewLifecycleOwner) { data ->
-            subbedAnimeAdapter.submitData(lifecycle, data)
+        frontPageViewModel.sub.observe(viewLifecycleOwner) { data ->
+            Log.i(TAG, "for sub anime ${data.size} items loaded")
+            subbedAnimeAdapter.submitList(data)
         }
-        frontPageViewModel.dubs.observe(viewLifecycleOwner) { data ->
-            dubbedAnimeAdapter.submitData(lifecycle, data)
+        frontPageViewModel.dub.observe(viewLifecycleOwner) { data ->
+            Log.i(TAG, "for dub anime ${data.size} items loaded")
+            dubbedAnimeAdapter.submitList(data)
         }
-        lifecycleScope.launch {
 
-            fun attachLoadStateToUI(
-                loadState: CombinedLoadStates,
-                adapter: PagingDataAdapter<*, *>
-            ) {
-                loadState.mediator?.refresh?.let {
-                    if (it is LoadState.Error) {
-                        showError(it)
-                    }
+        frontPageViewModel.isLoading().observe(viewLifecycleOwner) {
+            when (it) {
+                is FrontPageViewModel.State.FAILED -> {
+                    Log.e(TAG, "NETWORK CALL FAILED")
+                    it.exception?.let { exception -> showError(exception.cause, requireActivity()) }
+                    binding.refreshLayout.isRefreshing = false
                 }
 
-                val isListEmpty =
-                    loadState.refresh is LoadState.NotLoading && adapter.itemCount == 0
+                is FrontPageViewModel.State.LOADING -> {
+                    Log.i(TAG, "NETWORK CALL REQUESTED")
+                    binding.refreshLayout.isRefreshing = true
+                }
 
-                // show empty list
-                binding.emptyList.isVisible = isListEmpty
-                // Only show the list if refresh succeeds, either from the the local db or the remote.
-                binding.frontPageList.isVisible =
-                    loadState.source.refresh is LoadState.NotLoading || loadState.mediator?.refresh is LoadState.NotLoading
-                // Show loading spinner during initial load or refresh.
-                binding.progressBar.isVisible = loadState.mediator?.refresh is LoadState.Loading
-                // Show the retry state if initial load or refresh fails.
-                binding.retryBtn.isVisible =
-                    loadState.mediator?.refresh is LoadState.Error && adapter.itemCount == 0
-            }
-
-            subbedAnimeAdapter.loadStateFlow.collect {
-                attachLoadStateToUI(it, subbedAnimeAdapter)
-            }
-
-            dubbedAnimeAdapter.loadStateFlow.collect {
-                attachLoadStateToUI(it, dubbedAnimeAdapter)
-            }
-
-            newAnimeAdapter.loadStateFlow.collect {
-                attachLoadStateToUI(it, newAnimeAdapter)
+                is FrontPageViewModel.State.SUCCESS -> {
+                    Log.i(TAG, "NETWORK CALL SUCCESS")
+                    binding.refreshLayout.isRefreshing = false
+                }
             }
         }
     }
 
-    private fun showError(loadingError: LoadState.Error) {
-        val errorIcon = IconicsDrawable(requireActivity(), FontAwesome.Icon.faw_bug).apply {
-            colorInt = Color.RED
-            sizeDp = 24
-        }
-        InfoSheet().show(requireActivity()) {
-            title("Oops, we got an error")
-            loadingError.error.localizedMessage?.let { content(it) }
-            onPositive("ok", errorIcon) {
-                dismiss()
-            }
-        }
+    override fun onPause() {
+        super.onPause()
+        binding.refreshLayout.isEnabled = false
+        frontPageViewModel.appbarOffset = appbarController.saveAppbar() ?: 0
     }
+
+    override fun onResume() {
+        super.onResume()
+        binding.refreshLayout.isEnabled = true
+        appbarController.restoreAppbar(frontPageViewModel.appbarOffset)
+    }
+
+    companion object {
+        private const val TAG = "FrontPageFragment"
+    }
+
 }
 
 

@@ -6,6 +6,10 @@ plugins {
     id "kotlin-kapt"
 }
 
+import java.nio.file.Paths
+import java.nio.file.Files
+import java.nio.charset.StandardCharsets
+
 android {
     compileSdk env.compileSdk
 
@@ -16,8 +20,7 @@ android {
         testInstrumentationRunner env.testInstrumentationRunner
         javaCompileOptions {
             annotationProcessorOptions {
-                arguments += ["room.schemaLocation":
-                                      "$projectDir/schemas".toString()]
+                arguments += ["room.schemaLocation": "$projectDir/schemas".toString()]
             }
         }
     }
@@ -31,12 +34,38 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-
     buildFeatures {
         dataBinding true
         viewBinding true
     }
+    hilt {
+        enableTransformForLocalTests = true
+    }
 
+    task PreBuild {
+        gradle.taskGraph.addTaskExecutionListener(new TaskExecutionListener() {
+            @Override
+            void beforeExecute(Task task) {
+
+            }
+
+            @Override
+            void afterExecute(Task task, TaskState taskState) {
+                if("generateSafeArgsDebug" <=> task.name){
+                    def builds = new File("${projectDir.path}/build/generated/source/navigation-args")
+                    builds.eachFileRecurse(groovy.io.FileType.FILES) { file ->
+                        if (file.name.matches('.*Directions\\.kt$')) {
+                            def fPath = Paths.get(file.absolutePath)
+                            List<String> lines = Files.readAllLines(fPath, StandardCharsets.UTF_8)
+                            lines.set(3 - 1, "import com.otaku.kickassanime.R")
+                            Files.write(fPath, lines, StandardCharsets.UTF_8)
+                            println file.path
+                        }
+                    }
+                }
+            }
+        })
+    }
     namespace 'com.otaku.kickassanime'
 }
 
@@ -44,12 +73,20 @@ dependencies {
     implementation project(path: ":base")
     implementation "androidx.core:core-ktx:$versions.core_ktx"
     implementation "com.google.android.material:material:$versions.material"
-    implementation 'androidx.navigation:navigation-fragment-ktx:2.4.2'
+    implementation 'androidx.navigation:navigation-fragment-ktx:2.5.0'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'androidx.recyclerview:recyclerview:1.2.1'
+    implementation 'androidx.test.espresso:espresso-contrib:3.4.0'
+    implementation 'androidx.navigation:navigation-ui-ktx:2.5.0'
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.5.0'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.0'
+    implementation 'androidx.appcompat:appcompat:1.4.2'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     testImplementation "androidx.paging:paging-common:$versions.paging"
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:$versions.swipe_refresh_layout"
     implementation "com.squareup.retrofit2:converter-gson:$versions.gson_conveter"
     implementation "com.github.sparrow007:carouselrecyclerview:$versions.carouselrecyclerview"
-    implementation "com.mikepenz:iconics-core:$versions.iconics"
+    implementation "com.mikepenz:iconics-core:5.3.4"
     implementation 'com.mikepenz:fontawesome-typeface:5.13.3.0-kotlin@aar'
     implementation "com.maxkeppeler.sheets:core:$versions.sheets"
     implementation "com.maxkeppeler.sheets:info:$versions.sheets"
@@ -58,14 +95,15 @@ dependencies {
 
     // OkHttp / Retrofit
     implementation "com.squareup.retrofit2:retrofit:$versions.retrofit"
-    implementation(platform("com.squareup.okhttp3:okhttp-bom:4.9.3"))
+    implementation(platform('com.squareup.okhttp3:okhttp-bom:5.0.0-alpha.10'))
 
     implementation "org.threeten:threetenbp:$versions.threetenbp"
-
+    implementation 'com.facebook.shimmer:shimmer:0.5.0'
     // Room
     implementation "androidx.room:room-ktx:$versions.room"
     implementation "androidx.room:room-common:$versions.room"
     implementation "androidx.room:room-paging:$versions.room"
+    testImplementation project(path: ':base:cloudflarebypass')
     kapt "androidx.room:room-compiler:$versions.room"
 
     // Hilt
@@ -83,6 +121,6 @@ dependencies {
     // hilt
     kaptAndroidTest "com.google.dagger:hilt-android-compiler:$versions.hilt"
     androidTestImplementation "com.google.dagger:hilt-android-testing:$versions.hilt"
-    androidTestImplementation "androidx.annotation:annotation:$versions.annotation"
 
+    androidTestImplementation("com.squareup.okhttp3:mockwebserver:5.0.0-alpha.7")
 }

@@ -20,7 +20,7 @@ import android.graphics.*
 import android.util.AttributeSet
 import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
+import androidx.constraintlayout.widget.ConstraintLayout
 import com.jackandphantom.carouselrecyclerview.R
 
 
@@ -32,7 +32,7 @@ import com.jackandphantom.carouselrecyclerview.R
  * All the draw event are also propagated to the reflection view, so it take twice the time to render. :(
  * */
 
-class ReflectionViewContainer : LinearLayout {
+class ReflectionViewContainer : ConstraintLayout {
 
     companion object {
         // Relative height of the view to generate reflection aka Reflection Depth/Length
@@ -113,10 +113,6 @@ class ReflectionViewContainer : LinearLayout {
             mReflectionGap
         )
         a.recycle()
-
-        // Setting the orientation of linear layout as vertical as reflection view should be
-        // just below the main view
-        orientation = VERTICAL
     }
 
     override fun onFinishInflate() {
@@ -130,13 +126,6 @@ class ReflectionViewContainer : LinearLayout {
             }
             addView(mReflect)
         }
-    }
-
-
-    @SuppressLint("DrawAllocation")
-    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        mReflect.copyMeasuredDimension()
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
     }
 
     override fun generateDefaultLayoutParams(): LayoutParams {
@@ -153,7 +142,7 @@ class ReflectionViewContainer : LinearLayout {
     }
 
 
-    class LayoutParams : LinearLayout.LayoutParams {
+    class LayoutParams : ConstraintLayout.LayoutParams {
         private var relativeDepth = DEFAULT_RELATIVE_DEPTH
         private var gap = DEFAULT_GAP
 
@@ -180,7 +169,6 @@ class ReflectionViewContainer : LinearLayout {
         context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
     ) : View(context, attrs, defStyleAttr) {
 
-        private lateinit var mMode: PorterDuffXfermode
         private lateinit var toReflect: View
         private var mGap = 0f
         private var mRelDepth = 0f
@@ -191,6 +179,10 @@ class ReflectionViewContainer : LinearLayout {
             toReflect = view
             mGap = gap
             mRelDepth = relDepth
+            setMeasuredDimension(
+                toReflect.measuredWidth,
+                (mRelDepth * toReflect.measuredHeight).toInt()
+            )
         }
 
         @SuppressLint("DrawAllocation")
@@ -203,52 +195,9 @@ class ReflectionViewContainer : LinearLayout {
                 Shader.TileMode.CLAMP
             )
             mPaint.shader = mShader
-            mPaint.xfermode = mMode
+            mPaint.xfermode = PorterDuffXfermode(PorterDuff.Mode.DST_IN)
         }
 
-        fun copyMeasuredDimension() {
-
-            val p = layoutParams
-            val q = toReflect.layoutParams
-            /** [ MATCHING REFLECTION VIEW DIMENSIONS WITH THE MAIN VIEW ] */
-            toReflect.measure(
-                MeasureSpec.makeMeasureSpec(resources.displayMetrics.widthPixels, MeasureSpec.AT_MOST),
-                MeasureSpec.makeMeasureSpec(resources.displayMetrics.heightPixels, MeasureSpec.AT_MOST)
-            )
-
-            val msWidth = if (toReflect.layoutParams.width == ViewGroup.LayoutParams.MATCH_PARENT) {
-                (toReflect.parent as? View)?.width ?: 0
-            } else {
-                toReflect.measuredWidth
-            }
-            val msHeight = toReflect.measuredHeight
-
-            when {
-                q.width >= 0 -> {
-                    p.width = q.width
-                }
-
-                else -> {
-                    p.width = msWidth
-                }
-            }
-
-            when {
-                q.height >= 0 -> {
-                    p.height = (mRelDepth * q.height + mGap + toReflect.paddingBottom).toInt()
-                }
-
-                else -> {
-                    p.height = (mRelDepth * msHeight).toInt()
-                }
-            }
-
-            this.setMeasuredDimension(toReflect.measuredWidth, (mRelDepth * toReflect.measuredHeight).toInt())
-            layoutParams = p
-
-            /** END */
-            mMode = PorterDuffXfermode(PorterDuff.Mode.DST_IN)
-        }
 
         override fun onDraw(canvas: Canvas) {
             super.onDraw(canvas)

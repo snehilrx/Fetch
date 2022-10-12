@@ -24,4 +24,7 @@ object UiUtils {
             this.toFloat(),
             Resources.getSystem().displayMetrics
         )
+
+    val Number.toPxInt
+        get() = toPx.toInt()
 }
