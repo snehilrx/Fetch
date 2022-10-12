@@ -22,6 +22,7 @@ class EpisodeViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val loadState = MutableLiveData<State>()
+    private val isPlaying = MutableLiveData<Boolean>()
 
     private val maverickki = SingleLiveEvent<Maverickki>()
     private val kaaPlayerVideoLink = SingleLiveEvent<String>()
@@ -67,9 +68,15 @@ class EpisodeViewModel @Inject constructor(
 
     fun getLoadState(): LiveData<State> = loadState
 
+    fun getIsPlaying(): LiveData<Boolean> = isPlaying
+
     fun removeObservers(activity: EpisodeActivity) {
         loadState.removeObservers(activity)
         maverickki.removeObservers(activity)
         kaaPlayerVideoLink.removeObservers(activity)
+    }
+
+    fun setIsPlaying(playing: Boolean) {
+
     }
 }

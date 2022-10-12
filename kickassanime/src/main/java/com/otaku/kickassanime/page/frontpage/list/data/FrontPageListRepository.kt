@@ -24,8 +24,7 @@ class FrontPageListRepository @Inject constructor(
             kickassAnimeService::getFrontPageAnimeList
         ),
     ) {
-        val x = database.frontPageEpisodesDao().getFrontPageEpisodes()
-        x
+        database.frontPageEpisodesDao().getFrontPageEpisodes()
     }
 
     @OptIn(ExperimentalPagingApi::class)
