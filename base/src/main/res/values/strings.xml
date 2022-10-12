@@ -1,3 +1,4 @@
 <resources>
     <string name="thumbnail">thumbnail</string>
+	<string name="group_video">Video</string>
 </resources>

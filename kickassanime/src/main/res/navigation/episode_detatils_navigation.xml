@@ -6,7 +6,7 @@
 
     <fragment
         android:id="@+id/episodeDetailsFragment"
-        android:name="com.otaku.kickassanime.page.episodepage.details.EpisodeDetailsFragment"
+        android:name="com.otaku.kickassanime.page.episodepage.details.EpisodeControlsFragment"
         android:label="EpisodeDetailsFragment" >
         <argument
             android:name="episode"

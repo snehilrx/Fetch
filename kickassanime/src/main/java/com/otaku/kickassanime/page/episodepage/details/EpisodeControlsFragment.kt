@@ -3,35 +3,25 @@ package com.otaku.kickassanime.page.episodepage.details
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
-import androidx.fragment.app.viewModels
 import androidx.navigation.ActivityNavigator
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import androidx.room.ColumnInfo
-import androidx.room.PrimaryKey
 import com.mikepenz.iconics.typeface.library.fontawesome.FontAwesome
 import com.otaku.fetch.base.ui.BindingFragment
 import com.otaku.kickassanime.R
-import com.otaku.kickassanime.databinding.FragmentEpisodeDetailsBinding
-import com.otaku.kickassanime.db.models.entity.EpisodeEntity
+import com.otaku.kickassanime.databinding.FragmentEpisodeControlsBinding
 import com.otaku.kickassanime.page.animepage.AnimeActivity
-import com.otaku.kickassanime.page.animepage.AnimeFragmentDirections
-import com.otaku.kickassanime.utils.LocalDateTimeSerializable
-import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.serialization.Serializable
-import org.threeten.bp.LocalDateTime
-import javax.inject.Inject
 
-class EpisodeDetailsFragment :
-    BindingFragment<FragmentEpisodeDetailsBinding>(R.layout.fragment_episode_details) {
+class EpisodeControlsFragment :
+    BindingFragment<FragmentEpisodeControlsBinding>(R.layout.fragment_episode_controls) {
 
-    private val args: EpisodeDetailsFragmentArgs by navArgs()
+    private val args: EpisodeControlsFragmentArgs by navArgs()
 
     init {
         FontAwesome.Icon.faw_chevron_right
     }
 
-    override fun onBind(binding: FragmentEpisodeDetailsBinding, savedInstanceState: Bundle?) {
+    override fun onBind(binding: FragmentEpisodeControlsBinding, savedInstanceState: Bundle?) {
         binding.anime.setOnClickListener {
             startActivity(AnimeActivity.newInstance(this.requireActivity(), args.anime).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
         }
@@ -55,7 +45,7 @@ class EpisodeDetailsFragment :
 
     private fun openEpisode(episodeId: Int) {
         val actionAnimeFragmentToEpisodeActivity =
-            EpisodeDetailsFragmentDirections.actionEpisodeDetailsFragmentToEpisodeActivity(
+            EpisodeControlsFragmentDirections.actionEpisodeDetailsFragmentToEpisodeActivity(
                 args.anime.getDisplayTitle() ?: "about:blank",
                 episodeSlugId = episodeId,
                 animeSlugId = args.anime.animeSlugId

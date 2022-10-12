@@ -18,6 +18,7 @@ import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.request.RequestListener
 import kotlin.math.roundToInt
 
+
 object UiUtils {
 
     @ColorInt
@@ -38,6 +39,12 @@ object UiUtils {
                 }
             }
         }
+    }
+
+    fun getThemeColor(theme: Resources.Theme, id: Int = android.R.attr.colorPrimary): Int {
+        val typedValue = TypedValue()
+        theme.resolveAttribute(id, typedValue, true)
+        return typedValue.data
     }
 
     fun loadBitmapFromUrl(image: String?, context: Context, vararg  transformation: Transformation<Bitmap>, after: (Bitmap?) -> Unit) {

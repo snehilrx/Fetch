@@ -9,8 +9,8 @@ ext.versions = [
         retrofit            : '2.9.0',
         room                : '2.4.3',
         room_paging         : '2.5.0-alpha01',
-        core_ktx            : '1.8.0',
-        appcompat           : '1.5.0',
+        core_ktx            : '1.9.0',
+        appcompat           : '1.5.1',
         material            : '1.6.1',
         constraintlayout    : '2.1.4',
         junit               : '4.13.2',
@@ -28,12 +28,12 @@ ext.versions = [
         iconics             : '5.3.3',
         sheets              : '2.2.9',
         // test
-        mock_okhttp_server  : '5.0.0-alpha.7',
+        mock_okhttp_server  : '5.0.0-alpha.10',
         composeVersion : "1.1.1"
 ]
 
 ext.env = [
-        compileSdk               : 32,
+        compileSdk               : 33,
         applicationId            : full_app_name,
         minSdk                   : 23,
         targetSdk                : 31,

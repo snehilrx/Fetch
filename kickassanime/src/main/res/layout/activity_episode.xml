@@ -29,24 +29,26 @@
 
 		<com.facebook.shimmer.ShimmerFrameLayout
 			android:id="@+id/shimmerLoading"
-			app:shimmer_auto_start="true"
 			android:layout_width="match_parent"
-			android:layout_height="match_parent">
+			android:layout_height="match_parent"
+			app:shimmer_auto_start="true"
+			tools:visibility="invisible">
+
 			<include layout="@layout/shimmer_episode" />
 		</com.facebook.shimmer.ShimmerFrameLayout>
 
 		<androidx.coordinatorlayout.widget.CoordinatorLayout
 			android:id="@+id/episode"
-			android:visibility="gone"
 			android:layout_width="match_parent"
-			android:layout_height="match_parent">
+			android:layout_height="match_parent"
+			android:visibility="gone"
+			tools:visibility="visible">
 
 			<com.otaku.fetch.base.ui.GradientFromImage
 				android:id="@+id/appbar_image_view"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
 				android:adjustViewBounds="true"
-
 				android:foregroundGravity="top"
 				android:scaleType="centerCrop"
 				app:imageUrl="@{animeDetails.getImageUrl()}"
@@ -66,8 +68,8 @@
 					android:shadowColor="?colorPrimaryVariant"
 					android:shadowDx="1"
 					android:shadowDy="1"
-					app:collapsedTitleGravity="fill_vertical"
 					app:autoSizeTextType="uniform"
+					app:collapsedTitleGravity="fill_vertical"
 					app:collapsedTitleTextColor="?attr/colorSecondary"
 					app:contentScrim="?attr/colorPrimary"
 					app:expandedTitleGravity="top"
@@ -88,14 +90,15 @@
 						android:layout_marginEnd="24dp"
 						android:layout_marginBottom="24dp"
 						android:background="@drawable/black_chip"
+						android:visibility="invisible"
 						app:layout_collapseMode="pin"
-						android:visibility="visible" />
+						tools:visibility="visible" />
 
 					<androidx.appcompat.widget.Toolbar
 						android:id="@+id/toolbar"
-						app:layout_collapseMode="pin"
 						android:layout_width="match_parent"
-						android:layout_height="?attr/actionBarSize" />
+						android:layout_height="?attr/actionBarSize"
+						app:layout_collapseMode="pin" />
 
 				</com.google.android.material.appbar.CollapsingToolbarLayout>
 			</com.google.android.material.appbar.AppBarLayout>
@@ -105,6 +108,7 @@
 				android:layout_width="match_parent"
 				android:layout_height="match_parent"
 				android:background="@drawable/anime_details_background"
+				android:fillViewport="true"
 				android:scrollbars="none"
 				app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
 
@@ -160,32 +164,36 @@
 						android:layout_height="wrap_content"
 						android:tag="episodeDetailsContainer"
 						app:defaultNavHost="false"
-						app:layout_constraintBottom_toBottomOf="parent"
 						app:layout_constraintEnd_toEndOf="parent"
 						app:layout_constraintStart_toStartOf="parent"
-						app:layout_constraintTop_toBottomOf="@+id/videoPlayerContent"
-						tools:layout="@layout/fragment_episode_details" />
+						app:layout_constraintTop_toBottomOf="@+id/aspectRatioFrameLayout"
+						tools:layout="@layout/fragment_episode_controls" />
 
-					<com.google.android.exoplayer2.ui.StyledPlayerView
-						android:id="@+id/videoPlayerContent"
+					<androidx.media3.ui.AspectRatioFrameLayout
+						android:id="@+id/aspectRatioFrameLayout"
 						android:layout_width="match_parent"
-						android:layout_height="240dp"
-						android:layout_marginTop="16dp"
-						android:background="#0000"
+						android:layout_height="300dp"
+						android:layout_marginTop="@dimen/item_spacing"
 						app:layout_constraintEnd_toEndOf="parent"
 						app:layout_constraintStart_toStartOf="parent"
-						app:layout_constraintTop_toBottomOf="@+id/textView3" />
+						app:layout_constraintTop_toBottomOf="@+id/textView2">
+
+						<androidx.media3.ui.PlayerView
+							android:id="@+id/player_view"
+							android:layout_width="match_parent"
+							android:layout_height="match_parent"
+							app:use_artwork="true" />
+					</androidx.media3.ui.AspectRatioFrameLayout>
 
 					<FrameLayout
 						android:id="@+id/frameLayout"
 						android:layout_width="0dp"
 						android:layout_height="0dp"
-						android:background="@color/black"
 						android:visibility="@{progress == 100 ? View.GONE : View.VISIBLE, default=visible}"
 						app:layout_constraintBottom_toTopOf="@+id/episodeDetailsContainer"
-						app:layout_constraintEnd_toEndOf="@+id/videoPlayerContent"
+						app:layout_constraintEnd_toEndOf="parent"
 						app:layout_constraintStart_toStartOf="parent"
-						app:layout_constraintTop_toTopOf="@+id/videoPlayerContent"
+						app:layout_constraintTop_toTopOf="@id/aspectRatioFrameLayout"
 						tools:visibility="visible">
 
 						<ProgressBar
