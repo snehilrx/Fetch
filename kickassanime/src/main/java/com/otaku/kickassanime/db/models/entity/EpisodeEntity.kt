@@ -44,7 +44,7 @@ data class EpisodeEntity(
         get() {
             val date = createdDate ?: return ""
             val relativeTimeSpanString = DateUtils.getRelativeTimeSpanString(
-                date.toEpochSecond(ZoneOffset.UTC),
+                date.toEpochSecond(ZoneOffset.UTC) * 1000,
                 System.currentTimeMillis(),
                 MINUTE_IN_MILLIS
             )

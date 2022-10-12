@@ -2,16 +2,15 @@ package com.otaku.kickassanime.page.frontpage
 
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.GridLayoutManager.SpanSizeLookup
-import com.otaku.fetch.base.databinding.CarouselItemLayoutBinding
 import com.otaku.fetch.base.databinding.TileItemBinding
+import com.otaku.fetch.base.ui.BindingFragment
+import com.otaku.fetch.base.ui.setNullableAdapter
 import com.otaku.kickassanime.R
 import com.otaku.kickassanime.databinding.FragmentFrontPageBinding
 import com.otaku.kickassanime.db.models.AnimeTile
@@ -20,29 +19,15 @@ import com.otaku.kickassanime.page.adapters.CarouselAdapter
 import com.otaku.kickassanime.page.adapters.HeaderAdapter
 import com.otaku.kickassanime.page.frontpage.data.FrontPageViewModel
 import com.otaku.kickassanime.utils.Utils.showError
+import dagger.hilt.android.AndroidEntryPoint
 
-class FrontPageFragment : FrontPageBaseFragment() {
+@AndroidEntryPoint
+class FrontPageFragment : BindingFragment<FragmentFrontPageBinding>(R.layout.fragment_front_page) {
 
-    private lateinit var binding: FragmentFrontPageBinding
+    private lateinit var carouselAdapter: CarouselAdapter
+
     private val frontPageViewModel: FrontPageViewModel by activityViewModels()
 
-
-    private val newAnimeAdapter = AnimeTileAdapterNoPaging<CarouselItemLayoutBinding>(
-        com.otaku.fetch.base.R.layout.carousel_item_layout
-    ) { binding, item ->
-        binding.tileData = item
-        binding.root.setOnClickListener { onItemClick(item) }
-    }
-
-    private fun onItemClick(item: AnimeTile) {
-        navigate(
-            FrontPageFragmentDirections.actionFrontPageFragmentToEpisodeFragment(
-                title = item.title,
-                episodeSlugId = item.episodeSlugId,
-                animeSlugId = item.animeSlugId
-            )
-        )
-    }
 
     private val subbedAnimeAdapter = AnimeTileAdapterNoPaging<TileItemBinding>(
         com.otaku.fetch.base.R.layout.tile_item
@@ -58,37 +43,21 @@ class FrontPageFragment : FrontPageBaseFragment() {
         binding.root.setOnClickListener { onItemClick(item) }
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_front_page, container, false)
-        return binding.root
-    }
+    private val adapter = ConcatAdapter()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        initAppbar(binding.appbar, findNavController())
         initFrontPageList()
         initFlow()
     }
 
     private fun initFrontPageList() {
-        val adapter = ConcatAdapter().apply {
-            addAdapter(HeaderAdapter(getString(R.string.new_anime), getString(R.string.more)) {
-                navigate(FrontPageFragmentDirections.actionFrontPageFragmentToAllListFragment())
-            })
-            addAdapter(CarouselAdapter(newAnimeAdapter))
-            addAdapter(HeaderAdapter(getString(R.string.subbed_anime), getString(R.string.more)) {
-                navigate(FrontPageFragmentDirections.actionFrontPageFragmentToSubListFragment())
-            })
-            addAdapter(subbedAnimeAdapter)
-            addAdapter(HeaderAdapter(getString(R.string.dubbed_anime), getString(R.string.more)) {
-                navigate(FrontPageFragmentDirections.actionFrontPageFragmentToDubListFragment())
-            })
-            addAdapter(dubbedAnimeAdapter)
+        mergeAdapters()
+        binding.container.setNullableAdapter(adapter)
+        binding.container.layoutParams = binding.container.layoutParams.apply {
+            height = (resources.displayMetrics.heightPixels)
         }
-        binding.container.adapter = adapter
         val spanCount = resources.getInteger(com.otaku.fetch.base.R.integer.span_count)
         (binding.container.layoutManager as? GridLayoutManager)?.spanSizeLookup =
             object : SpanSizeLookup() {
@@ -99,15 +68,36 @@ class FrontPageFragment : FrontPageBaseFragment() {
                     }
                 }
             }
+        binding.appbar.appbarLayout.addOnOffsetChangedListener { _, verticalOffset ->
+            binding.refreshLayout.isEnabled = verticalOffset == 0
+        }
         binding.refreshLayout.setOnRefreshListener {
             frontPageViewModel.refreshAllPages()
+        }
+    }
+
+    private fun mergeAdapters() {
+        carouselAdapter = CarouselAdapter()
+        adapter.apply {
+            addAdapter(HeaderAdapter(getString(R.string.more), getString(R.string.more)) {
+                findNavController().navigate(FrontPageFragmentDirections.actionFrontPageFragmentToAllListFragment())
+            })
+            addAdapter(carouselAdapter)
+            addAdapter(HeaderAdapter(getString(R.string.subbed_anime), getString(R.string.more)) {
+                findNavController().navigate(FrontPageFragmentDirections.actionFrontPageFragmentToSubListFragment())
+            })
+            addAdapter(subbedAnimeAdapter)
+            addAdapter(HeaderAdapter(getString(R.string.dubbed_anime), getString(R.string.more)) {
+                findNavController().navigate(FrontPageFragmentDirections.actionFrontPageFragmentToDubListFragment())
+            })
+            addAdapter(dubbedAnimeAdapter)
         }
     }
 
     private fun initFlow() {
         frontPageViewModel.all.observe(viewLifecycleOwner) { data ->
             Log.i(TAG, "for all anime ${data.size} items loaded")
-            newAnimeAdapter.submitList(data)
+            carouselAdapter.submitList(data)
         }
         frontPageViewModel.sub.observe(viewLifecycleOwner) { data ->
             Log.i(TAG, "for sub anime ${data.size} items loaded")
@@ -139,16 +129,34 @@ class FrontPageFragment : FrontPageBaseFragment() {
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        clear()
+    }
+
     override fun onPause() {
         super.onPause()
+        clear()
         binding.refreshLayout.isEnabled = false
-        frontPageViewModel.appbarOffset = appbarController.saveAppbar() ?: 0
     }
 
     override fun onResume() {
         super.onResume()
         binding.refreshLayout.isEnabled = true
-        appbarController.restoreAppbar(frontPageViewModel.appbarOffset)
+    }
+
+    private fun clear() {
+
+    }
+
+    private fun onItemClick(item: AnimeTile) {
+        findNavController().navigate(
+            FrontPageFragmentDirections.actionFrontPageFragmentToEpisodeFragment(
+                title = item.title,
+                episodeSlugId = item.episodeSlugId,
+                animeSlugId = item.animeSlugId
+            )
+        )
     }
 
     companion object {

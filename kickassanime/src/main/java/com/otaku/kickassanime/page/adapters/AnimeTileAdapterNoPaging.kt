@@ -15,6 +15,23 @@ class AnimeTileAdapterNoPaging<T: ViewDataBinding>(
     AnimeTileAdapter.AnimeTileComparator
 ) {
 
+    sealed class Item<T>(val data: T)
+
+    class AnimeItem(val animeTile: AnimeTile) : Item<AnimeTile>(animeTile)
+
+    class HeaderItem(
+        val title: CharSequence,
+        val actionButtonText: CharSequence,
+        val onClick: () -> Unit
+    ) : Item<CharSequence>(title)
+
+    class CaItem(
+        val title: CharSequence,
+        val actionButtonText: CharSequence,
+        val onClick: () -> Unit
+    ) : Item<CharSequence>(title)
+
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
         AnimeTileAdapter.AnimeTileViewHolder(
             DataBindingUtil.inflate(

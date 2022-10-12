@@ -28,7 +28,8 @@ ext.versions = [
         iconics             : '5.3.3',
         sheets              : '2.2.8',
         // test
-        mock_okhttp_server  : '5.0.0-alpha.7'
+        mock_okhttp_server  : '5.0.0-alpha.7',
+        composeVersion : "1.1.1"
 ]
 
 ext.env = [

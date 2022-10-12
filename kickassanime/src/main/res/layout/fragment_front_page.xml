@@ -7,13 +7,26 @@
         android:id="@+id/refreshLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/container"
+
+        <androidx.coordinatorlayout.widget.CoordinatorLayout
+            android:id="@+id/front"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="center_vertical"
-            tools:listitem="@layout/tile_item"
-            app:spanCount="@integer/span_count"
-            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"/>
+            android:layout_height="match_parent">
+
+            <include
+                android:id="@+id/appbar"
+                layout="@layout/appbar_shine" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/container"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center_vertical"
+                android:nestedScrollingEnabled="true"
+                app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior"
+                app:spanCount="@integer/span_count"
+                tools:listitem="@layout/tile_item" />
+        </androidx.coordinatorlayout.widget.CoordinatorLayout>
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 </layout>

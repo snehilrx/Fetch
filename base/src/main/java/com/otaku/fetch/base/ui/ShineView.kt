@@ -3,11 +3,10 @@ package com.otaku.fetch.base.ui
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
+import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.ColorInt
-import androidx.annotation.IdRes
-import androidx.coordinatorlayout.widget.CoordinatorLayout
 import com.google.android.material.appbar.AppBarLayout
 import com.otaku.fetch.base.R
 import java.lang.Math.toRadians
@@ -25,12 +24,20 @@ class ShineView : View, AppBarLayout.OnOffsetChangedListener {
     private var oProgress: Float = -1f
     private var progress: Float = 0f
 
+    @ColorInt
+    private var shineColor: Int = Color.TRANSPARENT
+
+    private var mPaint: Paint = Paint().apply {
+        this.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_OVER)
+    }
+
+
     constructor(context: Context) : super(context) {
-        init(null, 0)
+        init(context, null, 0)
     }
 
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
-        init(attrs, 0)
+        init(context, attrs, 0)
     }
 
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
@@ -38,10 +45,13 @@ class ShineView : View, AppBarLayout.OnOffsetChangedListener {
         attrs,
         defStyleAttr
     ) {
-        init(attrs, defStyleAttr)
+        init(context, attrs, defStyleAttr)
     }
 
-    private fun init(attrs: AttributeSet?, defStyle: Int) {
+    private fun init(context: Context, attrs: AttributeSet?, defStyle: Int) {
+        val typedValue = TypedValue()
+        context.theme.resolveAttribute(androidx.appcompat.R.attr.colorPrimary, typedValue, true)
+        shineColor = typedValue.data
         // Load attributes
         val a = context.obtainStyledAttributes(
             attrs, R.styleable.ShineView, defStyle, 0
@@ -59,16 +69,9 @@ class ShineView : View, AppBarLayout.OnOffsetChangedListener {
         a.recycle()
     }
 
-    @ColorInt
-    var shineColor: Int = Color.TRANSPARENT
-        set(value) {
-            field = value
-            setShader()
-            this.invalidate()
-        }
-
-    private var mPaint: Paint = Paint().apply {
-        this.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_OVER)
+    override fun layout(l: Int, t: Int, r: Int, b: Int) {
+        setShader(r)
+        super.layout(l, t, r, b)
     }
 
     override fun onOffsetChanged(appBarLayout: AppBarLayout, verticalOffset: Int) {
@@ -131,24 +134,9 @@ class ShineView : View, AppBarLayout.OnOffsetChangedListener {
         return Color.argb(alpha, red, green, blue)
     }
 
-    @IdRes
-    var appBarIdRes: Int = -1
-
-    override fun onAttachedToWindow() {
-        super.onAttachedToWindow()
-        val appBar = (parent as? CoordinatorLayout)?.findViewById<AppBarLayout>(appBarIdRes)
-        appBar?.addOnOffsetChangedListener(this)
-    }
-
-    override fun onDetachedFromWindow() {
-        if (appBarIdRes != -1)
-            (parent as? CoordinatorLayout)?.findViewById<AppBarLayout>(appBarIdRes)
-                ?.addOnOffsetChangedListener(this)
-        super.onDetachedFromWindow()
-    }
-
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         canvas.drawRect(0F, 0F, width.toFloat(), height.toFloat() - (scrimHeight * progress), mPaint)
     }
+
 }

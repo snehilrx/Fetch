@@ -3,8 +3,6 @@ package com.otaku.kickassanime.page
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.ui.NavigationUI
-import com.otaku.fetch.AppbarController
 import com.otaku.kickassanime.R
 
 private const val ARG_APP_LINK = "appLink"
@@ -17,8 +15,6 @@ private const val ARG_APP_LINK = "appLink"
 class MainFragment : NavHostFragment() {
     private var link: String? = null
 
-    private val appbarController by lazy { activity as AppbarController }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
@@ -26,10 +22,7 @@ class MainFragment : NavHostFragment() {
         }
         navController.setGraph(R.navigation.navigation_kickassanime)
         navController.enableOnBackPressed(true)
-        NavigationUI.setupWithNavController(appbarController.getCollapsingToolbar(), appbarController.getToolbar(), navController)
     }
-
-
 
     companion object {
         /**

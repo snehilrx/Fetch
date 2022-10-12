@@ -5,38 +5,43 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
-import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.otaku.fetch.base.R
 import com.otaku.fetch.base.databinding.TileItemBinding
+import com.otaku.fetch.base.ui.BindingFragment
+import com.otaku.kickassanime.R
 import com.otaku.kickassanime.databinding.FragmentAnimeListBinding
 import com.otaku.kickassanime.databinding.ListControlsBinding
 import com.otaku.kickassanime.db.models.AnimeTile
 import com.otaku.kickassanime.page.adapters.AnimeTileAdapter
-import com.otaku.kickassanime.page.frontpage.FrontPageBaseFragment
 import com.otaku.kickassanime.page.frontpage.list.data.FrontPageListViewModel
 import com.otaku.kickassanime.utils.Utils.showError
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-
-abstract class FrontPageListFragment : FrontPageBaseFragment() {
+@AndroidEntryPoint
+abstract class FrontPageListFragment :
+    BindingFragment<FragmentAnimeListBinding>(R.layout.fragment_anime_list) {
 
     protected val frontPageListViewModel: FrontPageListViewModel by viewModels()
 
-    private lateinit var binding: FragmentAnimeListBinding
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        super.onCreateView(inflater, container, savedInstanceState)
+        initAppbar(binding.appbar, findNavController())
         val animeAdapter = AnimeTileAdapter<TileItemBinding>(
-            layoutId = R.layout.tile_item
+            layoutId = com.otaku.fetch.base.R.layout.tile_item
         ) { binding, item ->
             binding.tileData = item
             binding.root.setOnClickListener {
@@ -45,33 +50,7 @@ abstract class FrontPageListFragment : FrontPageBaseFragment() {
         }
         initFrontPageList(animeAdapter)
         initFlow(animeAdapter)
-    }
-
-    abstract fun onItemClick(item: AnimeTile)
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        if(savedInstanceState == null)appbarController.restoreAppbar(0)
-        binding = DataBindingUtil.inflate(
-            inflater,
-            com.otaku.kickassanime.R.layout.fragment_anime_list,
-            container,
-            false
-        )
         return binding.root
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        appbarController.saveAppbar()?.let { outState.putInt(getListTag(), it) }
-        super.onSaveInstanceState(outState)
-    }
-
-    override fun onViewStateRestored(savedInstanceState: Bundle?) {
-        savedInstanceState?.getInt(getListTag())?.let { appbarController.restoreAppbar(it) }
-        super.onViewStateRestored(savedInstanceState)
     }
 
     private fun initFrontPageList(animeAdapter: AnimeTileAdapter<TileItemBinding>) {
@@ -119,5 +98,7 @@ abstract class FrontPageListFragment : FrontPageBaseFragment() {
     abstract fun getList(): LiveData<PagingData<AnimeTile>>
 
     abstract fun getListTag(): String
+
+    abstract fun onItemClick(item: AnimeTile)
 }
 

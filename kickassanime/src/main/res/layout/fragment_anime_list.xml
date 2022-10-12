@@ -1,21 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <FrameLayout
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/list"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+
+        <include
+            android:id="@+id/appbar"
+            layout="@layout/appbar_shine" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/animeList"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:nestedScrollingEnabled="true"
-            app:spanCount="@integer/span_count"
             app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+            app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
+            app:spanCount="@integer/span_count"
             tools:context=".page.frontpage.FrontPageFragment" />
 
-        <include layout="@layout/list_controls" android:id="@+id/controls"/>
-    </FrameLayout>
+        <include
+            android:id="@+id/controls"
+            layout="@layout/list_controls" />
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout>

@@ -15,7 +15,6 @@ import com.otaku.kickassanime.db.KickassAnimeDb
 import com.otaku.kickassanime.db.models.entity.FrontPageEpisodes
 import com.otaku.kickassanime.utils.Constraints.patternDate
 import com.otaku.kickassanime.utils.Constraints.patternDateTime
-import org.threeten.bp.LocalDate
 import org.threeten.bp.LocalDateTime
 import org.threeten.bp.format.DateTimeFormatter
 
@@ -27,9 +26,24 @@ object Utils {
     @JvmStatic
     val formatterDate: DateTimeFormatter = DateTimeFormatter.ofPattern(patternDate)
 
-    fun parseDateTime(dateTime: String): LocalDateTime = LocalDateTime.parse(dateTime, formatterDateTime)
 
-    fun parseDate(dateTime: String): LocalDateTime = LocalDate.parse(dateTime, formatterDate).atTime(0, 0)
+    fun parseDateTime(dateTime: String): LocalDateTime {
+        return try {
+            return LocalDateTime.parse(dateTime, formatterDateTime)
+        } catch (e: Exception) {
+            Log.e(TAG, "parseDateTime: ", e)
+            LocalDateTime.now()
+        }
+    }
+
+    fun parseDate(date: String): LocalDateTime {
+        return try {
+            LocalDateTime.parse(date, formatterDate)
+        } catch (e: Exception) {
+            Log.e(TAG, "parseDate: ", e)
+            LocalDateTime.now()
+        }
+    }
 
     @JvmStatic
     suspend fun saveResponse(response: AnimeListFrontPageResponse?, database: KickassAnimeDb) {
@@ -65,7 +79,7 @@ object Utils {
             colorInt = Color.RED
             sizeDp = 24
         }
-        Log.e(TAG, "showError: ", loadingError)
+        Log.e(this.TAG, "showError: ", loadingError)
         InfoSheet().show(activity) {
             title("Oops, we got an error")
             loadingError?.localizedMessage?.let { content(it) }
