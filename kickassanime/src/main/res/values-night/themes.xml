@@ -1,2 +1,13 @@
 <resources>
+
+    <style name="Theme.KickassAnime" parent="Theme.Fetch">
+        <item name="colorPrimary">#463610</item>
+        <item name="android:colorPrimary">#6C5623</item>
+        <item name="colorPrimaryVariant">#FFC107</item>
+        <item name="colorOnPrimary">#fff</item>
+        <!-- Secondary brand color. -->
+        <item name="colorSecondary">#e7dba3</item>
+        <item name="colorSecondaryVariant">#e7dba3</item>
+        <item name="colorOnSecondary">#a0a0a0</item>
+    </style>
 </resources>

@@ -3,31 +3,30 @@ package com.otaku.kickassanime.page.frontpage
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.GridLayoutManager.SpanSizeLookup
+import com.otaku.fetch.base.databinding.CarouselItemLayoutBinding
 import com.otaku.fetch.base.databinding.TileItemBinding
 import com.otaku.fetch.base.ui.BindingFragment
-import com.otaku.fetch.base.ui.setNullableAdapter
 import com.otaku.kickassanime.R
 import com.otaku.kickassanime.databinding.FragmentFrontPageBinding
 import com.otaku.kickassanime.db.models.AnimeTile
 import com.otaku.kickassanime.page.adapters.AnimeTileAdapterNoPaging
-import com.otaku.kickassanime.page.adapters.CarouselAdapter
 import com.otaku.kickassanime.page.adapters.HeaderAdapter
 import com.otaku.kickassanime.page.frontpage.data.FrontPageViewModel
 import com.otaku.kickassanime.utils.Utils.showError
 import dagger.hilt.android.AndroidEntryPoint
+import kotlin.math.abs
+
 
 @AndroidEntryPoint
 class FrontPageFragment : BindingFragment<FragmentFrontPageBinding>(R.layout.fragment_front_page) {
 
-    private lateinit var carouselAdapter: CarouselAdapter
-
     private val frontPageViewModel: FrontPageViewModel by activityViewModels()
-
 
     private val subbedAnimeAdapter = AnimeTileAdapterNoPaging<TileItemBinding>(
         com.otaku.fetch.base.R.layout.tile_item
@@ -43,46 +42,37 @@ class FrontPageFragment : BindingFragment<FragmentFrontPageBinding>(R.layout.fra
         binding.root.setOnClickListener { onItemClick(item) }
     }
 
+    private val newAnimeAdapter = AnimeTileAdapterNoPaging<CarouselItemLayoutBinding>(
+        com.otaku.fetch.base.R.layout.carousel_item_layout
+    ) { binding, item ->
+        binding.tileData = item
+    }
+
     private val adapter = ConcatAdapter()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initAppbar(binding.appbar, findNavController())
+        initAppbar(
+            binding.shineView,
+            binding.toolbar,
+            binding.collapsingToolbar,
+            binding.appbarLayout,
+            findNavController()
+        )
         initFrontPageList()
         initFlow()
     }
 
     private fun initFrontPageList() {
-        mergeAdapters()
-        binding.container.setNullableAdapter(adapter)
-        binding.container.layoutParams = binding.container.layoutParams.apply {
-            height = (resources.displayMetrics.heightPixels)
-        }
-        val spanCount = resources.getInteger(com.otaku.fetch.base.R.integer.span_count)
-        (binding.container.layoutManager as? GridLayoutManager)?.spanSizeLookup =
-            object : SpanSizeLookup() {
-                override fun getSpanSize(position: Int): Int {
-                    return when (position) {
-                        0, 1, 2, subbedAnimeAdapter.itemCount + 3 -> spanCount
-                        else -> 1
-                    }
-                }
-            }
-        binding.appbar.appbarLayout.addOnOffsetChangedListener { _, verticalOffset ->
-            binding.refreshLayout.isEnabled = verticalOffset == 0
-        }
+        initCarousel()
+        initList()
         binding.refreshLayout.setOnRefreshListener {
             frontPageViewModel.refreshAllPages()
         }
     }
 
-    private fun mergeAdapters() {
-        carouselAdapter = CarouselAdapter()
-        adapter.apply {
-            addAdapter(HeaderAdapter(getString(R.string.more), getString(R.string.more)) {
-                findNavController().navigate(FrontPageFragmentDirections.actionFrontPageFragmentToAllListFragment())
-            })
-            addAdapter(carouselAdapter)
+    private fun initList() {
+        if (adapter.adapters.size == 0) adapter.apply {
             addAdapter(HeaderAdapter(getString(R.string.subbed_anime), getString(R.string.more)) {
                 findNavController().navigate(FrontPageFragmentDirections.actionFrontPageFragmentToSubListFragment())
             })
@@ -92,12 +82,36 @@ class FrontPageFragment : BindingFragment<FragmentFrontPageBinding>(R.layout.fra
             })
             addAdapter(dubbedAnimeAdapter)
         }
+        val spanCount = resources.getInteger(com.otaku.fetch.base.R.integer.span_count)
+        (binding.container.layoutManager as? GridLayoutManager)?.spanSizeLookup =
+            object : SpanSizeLookup() {
+                override fun getSpanSize(position: Int): Int {
+                    return when (position) {
+                        0, subbedAnimeAdapter.itemCount + 1 -> spanCount
+                        else -> 1
+                    }
+                }
+            }
+        binding.container.adapter = adapter
+    }
+
+    private fun initCarousel() {
+        binding.carousel.adapter = newAnimeAdapter
+        binding.appbarLayout.addOnOffsetChangedListener { appbarLayout, verticalOffset ->
+            val alpha = 1 - abs(verticalOffset / appbarLayout.height.toFloat())
+            binding.carouselContainer.alpha = alpha
+            binding.refreshLayout.isEnabled = verticalOffset == 0
+            binding.carousel.isVisible = abs(verticalOffset) < appbarLayout.totalScrollRange
+        }
+        binding.carouselHeading.actionButton.setOnClickListener {
+            findNavController().navigate(FrontPageFragmentDirections.actionFrontPageFragmentToAllListFragment())
+        }
     }
 
     private fun initFlow() {
         frontPageViewModel.all.observe(viewLifecycleOwner) { data ->
             Log.i(TAG, "for all anime ${data.size} items loaded")
-            carouselAdapter.submitList(data)
+            newAnimeAdapter.submitList(data)
         }
         frontPageViewModel.sub.observe(viewLifecycleOwner) { data ->
             Log.i(TAG, "for sub anime ${data.size} items loaded")
@@ -129,24 +143,20 @@ class FrontPageFragment : BindingFragment<FragmentFrontPageBinding>(R.layout.fra
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        clear()
+    override fun onDestroyView() {
+        super.onDestroyView()
+        binding.container.adapter = null
+        binding.carousel.adapter = null
     }
 
     override fun onPause() {
         super.onPause()
-        clear()
         binding.refreshLayout.isEnabled = false
     }
 
     override fun onResume() {
         super.onResume()
         binding.refreshLayout.isEnabled = true
-    }
-
-    private fun clear() {
-
     }
 
     private fun onItemClick(item: AnimeTile) {

@@ -32,7 +32,7 @@ class FrontPageListRepository @Inject constructor(
         ),
         remoteMediator = FrontPageListMediator(database, kickassAnimeService::getFrontPageAnimeListDub),
     ) {
-        database.frontPageEpisodesDao().getFrontPageEpisodesSub()
+        database.frontPageEpisodesDao().getFrontPageEpisodesDub()
     }
 
     @OptIn(ExperimentalPagingApi::class)
@@ -43,7 +43,7 @@ class FrontPageListRepository @Inject constructor(
         ),
         remoteMediator = FrontPageListMediator(database, kickassAnimeService::getFrontPageAnimeListSub),
     ) {
-        database.frontPageEpisodesDao().getFrontPageEpisodesDub()
+        database.frontPageEpisodesDao().getFrontPageEpisodesSub()
     }
 
 

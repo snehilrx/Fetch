@@ -3,6 +3,7 @@ package com.otaku.fetch.base.ui
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
+import android.util.Log
 import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
@@ -127,7 +128,8 @@ class ShineView : View, AppBarLayout.OnOffsetChangedListener {
 
     @ColorInt
     fun adjustAlpha(@ColorInt color: Int, factor: Float): Int {
-        val alpha = ((Color.alpha(color) * factor).roundToInt()+50).coerceAtMost(255)
+        val fl = (Color.alpha(color) * factor)
+        val alpha = (if (fl.isNaN()) 0 else fl.roundToInt() + 50).coerceAtMost(255)
         val red = Color.red(color)
         val green = Color.green(color)
         val blue = Color.blue(color)
@@ -136,7 +138,17 @@ class ShineView : View, AppBarLayout.OnOffsetChangedListener {
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        canvas.drawRect(0F, 0F, width.toFloat(), height.toFloat() - (scrimHeight * progress), mPaint)
+        try {
+            canvas.drawRect(
+                0F,
+                0F,
+                width.toFloat(),
+                height.toFloat() - (scrimHeight * progress),
+                mPaint
+            )
+        } catch (e: Exception) {
+            Log.e("ShineView", "onDraw: ", e)
+        }
     }
 
 }

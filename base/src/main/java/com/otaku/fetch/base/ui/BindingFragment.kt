@@ -11,8 +11,6 @@ import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.DefaultLifecycleObserver
-import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.NavController
 import androidx.navigation.ui.NavigationUI
 import androidx.recyclerview.widget.RecyclerView
@@ -28,8 +26,6 @@ open class BindingFragment<T : ViewDataBinding>(@LayoutRes private val layoutRes
 
     private var mStatusBarHeight: Int = 0
 
-    private var appbarLayout: AppBarLayout? = null
-    private var shineView: ShineView? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -61,27 +57,10 @@ open class BindingFragment<T : ViewDataBinding>(@LayoutRes private val layoutRes
         appbarLayout: AppBarLayout,
         navController: NavController
     ) {
-        this.appbarLayout = appbarLayout
-        this.shineView = shineView
         (activity as AppCompatActivity).setSupportActionBar(toolbar)
         NavigationUI.setupWithNavController(collapsingToolbar, toolbar, navController)
         shineView.statusbarHeight = mStatusBarHeight.toFloat()
-        viewLifecycleOwner.lifecycle.addObserver(object : DefaultLifecycleObserver {
-            override fun onPause(owner: LifecycleOwner) {
-                appbarLayout.removeOnOffsetChangedListener(shineView)
-                super.onPause(owner)
-            }
-
-            override fun onResume(owner: LifecycleOwner) {
-                appbarLayout.addOnOffsetChangedListener(shineView)
-                super.onResume(owner)
-            }
-
-            override fun onDestroy(owner: LifecycleOwner) {
-                appbarLayout.removeOnOffsetChangedListener(shineView)
-                super.onDestroy(owner)
-            }
-        })
+        appbarLayout.addOnOffsetChangedListener(shineView)
         setupToolbar(toolbar)
     }
 
@@ -123,7 +102,6 @@ open class BindingFragment<T : ViewDataBinding>(@LayoutRes private val layoutRes
     override fun onDestroyView() {
         super.onDestroyView()
         binding.unbind()
-        appbarLayout?.removeOnOffsetChangedListener(shineView)
     }
 }
 

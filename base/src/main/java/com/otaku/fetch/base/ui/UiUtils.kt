@@ -18,13 +18,13 @@ object UiUtils {
         }
     }
 
-    val Number.toPx
+    inline val Number.toPx
         get() = TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_DIP,
             this.toFloat(),
             Resources.getSystem().displayMetrics
         )
 
-    val Number.toPxInt
+    inline val Number.toPxInt
         get() = toPx.toInt()
 }

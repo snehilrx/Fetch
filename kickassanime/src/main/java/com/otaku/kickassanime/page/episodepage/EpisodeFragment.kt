@@ -1,5 +1,6 @@
 package com.otaku.kickassanime.page.episodepage
 
+import android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,10 +10,6 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import com.mikepenz.iconics.IconicsColor
-import com.mikepenz.iconics.IconicsDrawable
-import com.mikepenz.iconics.typeface.library.fontawesome.FontAwesome
-import com.mikepenz.iconics.utils.color
 import com.otaku.fetch.base.ui.BindingFragment
 import com.otaku.fetch.bindings.ImageViewBindings
 import com.otaku.kickassanime.R
@@ -39,26 +36,22 @@ class EpisodeFragment : BindingFragment<FragmentEpisodeBinding>(R.layout.fragmen
         super.onCreateView(inflater, container, savedInstanceState)
         episodeSlugId = args.episodeSlugId
         animeSlugId = args.animeSlugId
+        if (resources.configuration.orientation == SCREEN_ORIENTATION_PORTRAIT) {
+            initializePortrait()
+        } else {
+            initializeLanding()
+        }
+        return binding.root
+    }
+
+    private fun initializeLanding() {
+
+    }
+
+    private fun initializePortrait() {
         initAppbar(binding.appbar, findNavController())
         fetchRemote()
         initObservers()
-        binding.play.setImageDrawable(
-            IconicsDrawable(
-                requireContext(),
-                FontAwesome.Icon.faw_play
-            ).apply {
-                color = IconicsColor.colorRes(androidx.appcompat.R.color.material_blue_grey_800)
-            })
-        binding.play.setOnClickListener {
-            viewModel.getEpisode().value?.data?.link1?.let { it1 ->
-                findNavController().navigate(
-                    EpisodeFragmentDirections.actionEpisodeFragmentToVideoPlayer(
-                        it1
-                    )
-                )
-            }
-        }
-        return binding.root
     }
 
     private fun setAppbarBackground(image: String?) {

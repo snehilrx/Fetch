@@ -13,9 +13,61 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <include
-                android:id="@+id/appbar"
-                layout="@layout/appbar_shine" />
+            <com.otaku.fetch.base.ui.ShineView
+                android:id="@+id/shineView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:scrimHeight="192dp"
+                app:statusbarHeight="10dp"
+                app:toolbarHeight="?attr/actionBarSize" />
+
+            <com.google.android.material.appbar.AppBarLayout
+                android:id="@+id/appbarLayout"
+                android:layout_width="match_parent"
+                android:layout_height="640dp"
+                android:background="@android:color/transparent">
+
+                <com.google.android.material.appbar.CollapsingToolbarLayout
+                    android:id="@+id/collapsingToolbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    app:collapsedTitleGravity="fill_vertical"
+                    app:collapsedTitleTextColor="?attr/colorSecondary"
+                    app:contentScrim="?attr/colorPrimary"
+                    app:expandedTitleGravity="top"
+                    app:expandedTitleMarginTop="100dp"
+                    app:layout_scrollFlags="scroll|snap|exitUntilCollapsed"
+                    app:statusBarScrim="?attr/colorSecondary"
+                    app:toolbarId="@+id/toolbar">
+
+                    <LinearLayout
+                        android:id="@+id/carousel_container"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="200dp"
+                        android:orientation="vertical"
+                        app:layout_collapseMode="pin">
+
+                        <include
+                            android:id="@+id/carousel_heading"
+                            layout="@layout/heading_item"
+                            app:actionButtonText="@{@string/more}"
+                            app:title="@{@string/new_anime}" />
+
+                        <com.jackandphantom.carouselrecyclerview.CarouselRecyclerview
+                            android:id="@+id/carousel"
+                            android:layout_width="match_parent"
+                            android:layout_height="@dimen/cardview_height_with_reflection"
+                            android:nestedScrollingEnabled="false" />
+                    </LinearLayout>
+
+                    <androidx.appcompat.widget.Toolbar
+                        android:id="@+id/toolbar"
+                        android:layout_width="match_parent"
+                        android:layout_height="?attr/actionBarSize" />
+
+                </com.google.android.material.appbar.CollapsingToolbarLayout>
+            </com.google.android.material.appbar.AppBarLayout>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/container"
@@ -24,8 +76,9 @@
                 android:layout_gravity="center_vertical"
                 android:nestedScrollingEnabled="true"
                 app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-                app:layout_behavior="@string/appbar_scrolling_view_behavior"
+                android:layout_marginTop="-90dp"
                 app:spanCount="@integer/span_count"
+                app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
                 tools:listitem="@layout/tile_item" />
         </androidx.coordinatorlayout.widget.CoordinatorLayout>
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

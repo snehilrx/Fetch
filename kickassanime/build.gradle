@@ -36,7 +36,6 @@ android {
     }
     buildFeatures {
         dataBinding true
-        viewBinding true
     }
     hilt {
         enableTransformForLocalTests = true
@@ -78,8 +77,8 @@ dependencies {
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
     implementation 'androidx.test.espresso:espresso-contrib:3.4.0'
-    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.5.0'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.0'
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.5.1'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1'
     implementation 'androidx.appcompat:appcompat:1.4.2'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     testImplementation "androidx.paging:paging-common:$versions.paging"
@@ -88,6 +87,7 @@ dependencies {
     implementation "com.github.sparrow007:carouselrecyclerview:$versions.carouselrecyclerview"
     implementation "com.mikepenz:iconics-core:5.3.4"
     implementation 'com.mikepenz:fontawesome-typeface:5.13.3.0-kotlin@aar'
+    implementation "com.mikepenz:iconics-views:5.3.4"
     implementation "com.maxkeppeler.sheets:core:$versions.sheets"
     implementation "com.maxkeppeler.sheets:info:$versions.sheets"
     // paging

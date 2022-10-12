@@ -45,6 +45,7 @@
                     android:layout_marginTop="24dp"
                     android:text="@{animeDetails.enTitle}"
                     android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
+                    android:textColor="#5D4037"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     tools:text="Demon Slayer" />
@@ -57,6 +58,7 @@
                     android:text="@{animeDetails.status}"
                     android:textAllCaps="true"
                     android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
+                    android:textColor="#6D4C41"
                     app:layout_constraintStart_toStartOf="@+id/textView"
                     app:layout_constraintTop_toBottomOf="@+id/textView"
                     tools:text="ongoing" />
@@ -70,24 +72,10 @@
                     android:text="@{episodeDetails.timeAgo}"
                     android:textAllCaps="true"
                     android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
+                    android:textColor="#616161"
                     app:layout_constraintStart_toEndOf="@+id/textView2"
                     app:layout_constraintTop_toBottomOf="@+id/textView"
                     tools:text="Uploaded : 0 mins ago" />
-
-                <ImageView
-                    android:id="@+id/play"
-                    android:layout_width="@dimen/item_view_width"
-                    android:layout_height="@dimen/item_view_width"
-                    android:layout_marginStart="64dp"
-                    android:layout_marginTop="16dp"
-                    android:layout_marginEnd="64dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:clickable="true"
-                    android:contentDescription="@string/thumbnail"
-                    android:focusable="true"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/textView3" />
 
                 <TextView
                     android:id="@+id/textView4"
@@ -97,33 +85,26 @@
                     android:text="@{episodeDetails.name}"
                     android:textAllCaps="true"
                     android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
-                    app:layout_constraintBottom_toTopOf="@+id/play"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
-                <Button
+                <com.mikepenz.iconics.view.IconicsButton
                     android:id="@+id/prev"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="24dp"
-                    android:layout_marginTop="16dp"
-                    android:layout_marginEnd="16dp"
-                    android:text="prev"
+                    android:text="@string/prev"
                     app:layout_constraintEnd_toStartOf="@+id/guideline2"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/play" />
+                    app:layout_constraintTop_toBottomOf="@+id/videoPlayer" />
 
-                <Button
+                <com.mikepenz.iconics.view.IconicsButton
                     android:id="@+id/next"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginTop="16dp"
-                    android:layout_marginEnd="24dp"
-                    android:text="next"
+                    android:text="@string/next"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="@+id/guideline2"
-                    app:layout_constraintTop_toBottomOf="@+id/play" />
+                    app:layout_constraintTop_toBottomOf="@+id/videoPlayer" />
 
                 <TextView
                     android:id="@+id/description"
@@ -140,6 +121,15 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     app:layout_constraintGuide_percent="0.5" />
+
+                <ImageView
+                    android:id="@+id/videoPlayer"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/cardview_height"
+                    android:layout_marginTop="16dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/textView3" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.core.widget.NestedScrollView>
