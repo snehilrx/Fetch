@@ -117,7 +117,7 @@ class FrontPageFragment : BindingFragment<FragmentFrontPageBinding>(R.layout.fra
             when (it) {
                 is State.FAILED -> {
                     Log.e(TAG, "NETWORK CALL FAILED")
-                    it.exception?.let { exception -> showError(exception.cause, requireActivity()) }
+                    it.exception?.let { exception -> showError(exception, requireActivity()) }
                     binding.refreshLayout.isRefreshing = false
                 }
 

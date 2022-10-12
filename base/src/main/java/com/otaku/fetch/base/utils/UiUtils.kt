@@ -1,11 +1,13 @@
 package com.otaku.fetch.base.utils
 
+import android.app.Activity
 import android.content.Context
 import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
+import android.util.Log
 import android.util.TypedValue
 import androidx.annotation.ColorInt
 import androidx.core.graphics.drawable.toBitmap
@@ -16,6 +18,12 @@ import com.bumptech.glide.load.Transformation
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.request.RequestListener
+import com.maxkeppeler.sheets.info.InfoSheet
+import com.mikepenz.iconics.IconicsDrawable
+import com.mikepenz.iconics.typeface.library.fontawesome.FontAwesome
+import com.mikepenz.iconics.utils.colorInt
+import com.mikepenz.iconics.utils.sizeDp
+import com.otaku.fetch.base.TAG
 import kotlin.math.roundToInt
 
 
@@ -93,4 +101,24 @@ object UiUtils {
 
     inline val Number.toPxInt
         get() = toPx.toInt()
+
+    fun showError(loadingError: Throwable?, activity: Activity, onPositive: () -> Unit = {activity.finish()}) {
+        showError(loadingError?.message, activity, onPositive)
+    }
+
+    fun showError(message: String?, activity: Activity, onPositive: () -> Unit = {activity.finish()}){
+        val errorIcon = IconicsDrawable(activity, FontAwesome.Icon.faw_bug).apply {
+            colorInt = Color.RED
+            sizeDp = 24
+        }
+        Log.e(TAG, "showError: $message")
+        InfoSheet().show(activity) {
+            title("Oops, we got an error")
+            content(message ?: "Something went wrong")
+            onPositive("ok", errorIcon) {
+                dismiss()
+                onPositive()
+            }
+        }
+    }
 }

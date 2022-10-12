@@ -18,8 +18,12 @@ class AnimeViewModel @Inject constructor(private val animeRepository: AnimeRepos
     fun fetchAnime(animeSlug: String) {
         state.postValue(State.LOADING())
         viewModelScope.launch(Dispatchers.IO) {
-            animeRepository.invalidateAnime(animeSlug)
-            state.postValue(State.SUCCESS())
+            try {
+                animeRepository.invalidateAnime(animeSlug)
+                state.postValue(State.SUCCESS())
+            } catch (e: Exception) {
+                state.postValue(State.FAILED(e))
+            }
         }
     }
 

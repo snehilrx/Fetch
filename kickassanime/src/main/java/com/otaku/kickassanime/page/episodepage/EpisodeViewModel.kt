@@ -7,7 +7,6 @@ import com.otaku.fetch.base.livedata.State
 import com.otaku.kickassanime.api.model.Maverickki
 import com.otaku.kickassanime.db.models.entity.AnimeEntity
 import com.otaku.kickassanime.db.models.entity.EpisodeEntity
-import com.otaku.kickassanime.utils.model.Response
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.launch
@@ -30,8 +29,12 @@ class EpisodeViewModel @Inject constructor(
     fun fetchEpisode(animeSlugId: Int, episodeSlugId: Int) {
         viewModelScope.launch(dispatcher) {
             loadState.postValue(State.LOADING())
-            episodeRepository.fetchRemote(animeSlugId, episodeSlugId)
-            loadState.postValue(State.SUCCESS())
+            try {
+                episodeRepository.fetchRemote(animeSlugId, episodeSlugId)
+                loadState.postValue(State.SUCCESS())
+            } catch (e: Exception){
+                loadState.postValue(State.FAILED(e))
+            }
         }
     }
 
@@ -54,6 +57,7 @@ class EpisodeViewModel @Inject constructor(
                     val fromJson = gson.fromJson(it.toUrl().readText(), Maverickki::class.java)
                     maverickki.postValue(fromJson)
                 }catch (e: Exception){
+                    loadState.postValue(State.FAILED(e, false))
                 }
             }
         }

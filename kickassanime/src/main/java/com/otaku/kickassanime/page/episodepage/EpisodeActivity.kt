@@ -38,6 +38,7 @@ import androidx.navigation.navArgs
 import com.otaku.fetch.base.livedata.State
 import com.otaku.fetch.base.ui.BindingActivity
 import com.otaku.fetch.base.utils.UiUtils.loadBitmapFromUrl
+import com.otaku.fetch.base.utils.UiUtils.showError
 import com.otaku.kickassanime.R
 import com.otaku.kickassanime.api.model.Maverickki
 import com.otaku.kickassanime.databinding.ActivityEpisodeBinding
@@ -248,7 +249,13 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
         fetchRemote()
         viewModel.getLoadState().observe(this) {
             when (it) {
-                is State.FAILED -> TODO()
+                is State.FAILED -> {
+                    if(it.shouldTerminateActivity) {
+                        showError(it.exception, this)
+                    } else {
+                        showError(it.exception, this) {/* no-op */}
+                    }
+                }
                 is State.LOADING -> showLoading()
                 is State.SUCCESS -> {
                     hideLoading()

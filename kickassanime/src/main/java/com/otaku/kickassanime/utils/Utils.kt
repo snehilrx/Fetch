@@ -3,6 +3,7 @@ package com.otaku.kickassanime.utils
 import android.app.Activity
 import android.graphics.Color
 import android.util.Log
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.paging.LoadState
@@ -13,6 +14,7 @@ import com.mikepenz.iconics.typeface.library.fontawesome.FontAwesome
 import com.mikepenz.iconics.utils.colorInt
 import com.mikepenz.iconics.utils.sizeDp
 import com.otaku.fetch.base.TAG
+import com.otaku.fetch.base.utils.UiUtils
 import com.otaku.kickassanime.api.model.AnimeListFrontPageResponse
 import com.otaku.kickassanime.db.KickassAnimeDb
 import com.otaku.kickassanime.db.models.entity.FrontPageEpisodes
@@ -73,24 +75,13 @@ object Utils {
         }
     }
 
-
     fun showError(loadingError: LoadState.Error, activity: Activity) {
         showError(loadingError.error, activity)
     }
 
-    fun showError(loadingError: Throwable?, activity: Activity, onPositive: () -> Unit = {activity.finish()}) {
-        val errorIcon = IconicsDrawable(activity, FontAwesome.Icon.faw_bug).apply {
-            colorInt = Color.RED
-            sizeDp = 24
-        }
-        Log.e(TAG, "showError: ", loadingError)
-        InfoSheet().show(activity) {
-            title("Oops, we got an error")
-            loadingError?.localizedMessage?.let { content(it) }
-            onPositive("ok", errorIcon) {
-                dismiss()
-                onPositive()
-            }
-        }
+
+    fun showError(loadingError: Throwable?, activity: Activity) {
+        UiUtils.showError(loadingError, activity)
     }
+
 }
