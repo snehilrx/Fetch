@@ -1,11 +1,13 @@
 package com.otaku.kickassanime.page.episodepage.details
 
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.ClickableSpan
+import android.text.style.RelativeSizeSpan
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
@@ -14,9 +16,12 @@ import androidx.navigation.ActivityNavigator
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.maxkeppeler.sheets.info.InfoSheet
+import com.maxkeppeler.sheets.input.InputSheet
+import com.maxkeppeler.sheets.input.type.InputRadioButtons
 import com.mikepenz.iconics.typeface.library.fontawesome.FontAwesome
 import com.otaku.fetch.base.ui.BindingFragment
 import com.otaku.kickassanime.R
+import com.otaku.kickassanime.api.model.Maverickki
 import com.otaku.kickassanime.databinding.FragmentEpisodeControlsBinding
 import com.otaku.kickassanime.page.animepage.AnimeActivity
 import com.otaku.kickassanime.page.episodepage.EpisodeViewModel
@@ -62,32 +67,22 @@ class EpisodeControlsFragment :
             )
         }
         binding.links.setOnClickListener {
-            val link0 = "KAA Player" to viewModel.getKaaPlayerVideoLink().value
-            val link1 = "Maverickki Video" to viewModel.getMaverickkiVideo().value?.hls
-            val ss = SpannableString("${link0.first}\n${link1.first}")
-            for (link in arrayOf(link0, link1)) {
-                ss.setSpan(object : ClickableSpan() {
-                    override fun onClick(textView: View) {
-                        link.second?.let { safeLink ->
-                            openLink(safeLink)
-                        }
-                    }
-                }, 0, link.first.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-            }
-
-            InfoSheet().show(this.requireActivity()) {
-                customView(TextView(this.requireContext()).apply { text = ss })
-                title("Download Links")
-                onPositive("OK") {
-                    dismiss()
-                }
+            val link = viewModel.getMaverickkiVideo().value?.link() ?: viewModel.getKaaPlayerVideoLink().value
+            if(link != null) {
+                openLink(link)
+            } else {
+                Toast.makeText(requireContext(),"No Link was found", Toast.LENGTH_SHORT).show()
             }
         }
     }
 
     private fun openLink(link: String) {
         val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(link))
-        startActivity(browserIntent)
+        try {
+            startActivity(browserIntent)
+        } catch (e: ActivityNotFoundException){
+            Toast.makeText(context, "No activity found to open link $link", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun openEpisode(episodeId: Int) {

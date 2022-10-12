@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.util.Log
 import android.view.*
 import android.widget.TextView
-import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.MenuProvider
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
@@ -25,7 +24,6 @@ import com.otaku.fetch.base.databinding.TileItemBinding
 import com.otaku.fetch.base.livedata.State
 import com.otaku.fetch.base.ui.BindingFragment
 import com.otaku.fetch.base.ui.searchInterface
-import com.otaku.fetch.base.utils.UiUtils.toPxInt
 import com.otaku.kickassanime.R
 import com.otaku.kickassanime.api.model.AnimeSearchResponse
 import com.otaku.kickassanime.databinding.FragmentFrontPageBinding
@@ -95,6 +93,7 @@ class FrontPageFragment : BindingFragment<FragmentFrontPageBinding>(R.layout.fra
             binding.appbarLayout,
             findNavController()
         )
+
         initSearchBar()
         initFrontPageList()
         initFlow()
@@ -149,7 +148,7 @@ class FrontPageFragment : BindingFragment<FragmentFrontPageBinding>(R.layout.fra
     private fun initSearchBar() {
         val stringAdapter = StringAdapter {
             val data = it.second
-            if(data is AnimeSearchResponse) {
+            if (data is AnimeSearchResponse) {
                 searchInterface?.closeSearch()
                 startActivity(
                     AnimeActivity.newInstance(
@@ -157,8 +156,7 @@ class FrontPageFragment : BindingFragment<FragmentFrontPageBinding>(R.layout.fra
                         data
                     )
                 )
-            }
-            else if(data is String) {
+            } else if (data is String) {
                 openSearchResultFragment(data)
             }
         }
@@ -169,6 +167,8 @@ class FrontPageFragment : BindingFragment<FragmentFrontPageBinding>(R.layout.fra
             setHint(getString(R.string.search_anime))
             setOnClickListener {
                 searchInterface?.openSearch()
+                stringAdapter.submitList(
+                    frontPageViewModel.getSearchHistory().map { it to it })
             }
         }
 
@@ -196,15 +196,17 @@ class FrontPageFragment : BindingFragment<FragmentFrontPageBinding>(R.layout.fra
         searchInterface?.setQueryListener(
             object : MaterialSearchView.OnQueryTextListener {
                 override fun onQueryTextChange(newText: CharSequence) {
-                    if (newText.length > 3)
+                    if (newText.length > 2)
                         frontPageViewModel.querySearchSuggestions(newText.toString())
                     else {
-                        stringAdapter.submitList(frontPageViewModel.getSearchHistory().map { it to it })
+                        stringAdapter.submitList(
+                            frontPageViewModel.getSearchHistory().map { it to it })
                     }
                 }
 
                 override fun onQueryTextSubmit(query: CharSequence) {
                     openSearchResultFragment(query.toString())
+                    stringAdapter.submitList(emptyList())
                 }
             }
         )
@@ -221,17 +223,17 @@ class FrontPageFragment : BindingFragment<FragmentFrontPageBinding>(R.layout.fra
     private fun initFrontPageList() {
         binding.appbarLayout.addOnOffsetChangedListener { appBarLayout, verticalOffset ->
             if (abs(verticalOffset) == appBarLayout.totalScrollRange) {
-                binding.carousel.isVisible = false
-                binding.carouselHeading.root.isVisible = false
-                binding.searchBar.isVisible = false
+                binding.carousel.visibility = View.INVISIBLE
+                binding.carouselHeading.root.visibility = View.INVISIBLE
+                binding.searchBar.visibility = View.INVISIBLE
             } else if (verticalOffset == 0) {
-                binding.carousel.isVisible = true
-                binding.carouselHeading.root.isVisible = true
-                binding.searchBar.isVisible = true
+                binding.carousel.visibility = View.VISIBLE
+                binding.carouselHeading.root.visibility = View.VISIBLE
+                binding.searchBar.visibility = View.VISIBLE
             } else {
-                binding.carousel.isVisible = true
-                binding.carouselHeading.root.isVisible = true
-                binding.searchBar.isVisible = true
+                binding.carousel.visibility = View.VISIBLE
+                binding.carouselHeading.root.visibility = View.VISIBLE
+                binding.searchBar.visibility = View.VISIBLE
             }
         }
         initCarousel()
@@ -242,16 +244,25 @@ class FrontPageFragment : BindingFragment<FragmentFrontPageBinding>(R.layout.fra
     }
 
     private fun initList() {
-        if (adapter.adapters.size == 0) adapter.apply {
-            addAdapter(HeaderAdapter(getString(R.string.subbed_anime), getString(R.string.more)) {
-                findNavController().navigate(FrontPageFragmentDirections.actionFrontPageFragmentToSubListFragment())
-            })
-            addAdapter(subbedAnimeAdapter)
-            addAdapter(HeaderAdapter(getString(R.string.dubbed_anime), getString(R.string.more)) {
-                findNavController().navigate(FrontPageFragmentDirections.actionFrontPageFragmentToDubListFragment())
-            })
-            addAdapter(dubbedAnimeAdapter)
-        }
+        if (adapter.adapters.size == 0)
+            adapter.apply {
+                addAdapter(
+                    HeaderAdapter(
+                        getString(R.string.subbed_anime),
+                        getString(R.string.more)
+                    ) {
+                        findNavController().navigate(FrontPageFragmentDirections.actionFrontPageFragmentToSubListFragment())
+                    })
+                addAdapter(subbedAnimeAdapter)
+                addAdapter(
+                    HeaderAdapter(
+                        getString(R.string.dubbed_anime),
+                        getString(R.string.more)
+                    ) {
+                        findNavController().navigate(FrontPageFragmentDirections.actionFrontPageFragmentToDubListFragment())
+                    })
+                addAdapter(dubbedAnimeAdapter)
+            }
         binding.container.adapter = adapter
     }
 

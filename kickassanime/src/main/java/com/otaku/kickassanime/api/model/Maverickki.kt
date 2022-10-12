@@ -13,6 +13,10 @@ data class Maverickki (
     @SerializedName("subtitles"           ) var subtitles           : ArrayList<String> = arrayListOf()
 ){
     companion object{
-        const val BASE_URL = "https://maverickki.com"
+        private const val BASE_URL = "https://maverickki.com"
+    }
+
+    fun link(): String? {
+        return if(hls != null) BASE_URL + hls else null
     }
 }

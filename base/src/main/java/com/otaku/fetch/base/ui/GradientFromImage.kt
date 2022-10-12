@@ -117,10 +117,4 @@ class GradientFromImage : ShapeableImageView {
             }
         }
     }
-
-    @Suppress("deprecation")
-    override fun onDetachedFromWindow() {
-        super.onDetachedFromWindow()
-        task?.cancel(true)
-    }
 }

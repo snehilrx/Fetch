@@ -93,6 +93,7 @@ dependencies {
     implementation 'com.mikepenz:fontawesome-typeface:5.13.3.0-kotlin@aar'
     implementation "com.maxkeppeler.sheets:core:$versions.sheets"
     implementation "com.maxkeppeler.sheets:info:$versions.sheets"
+    implementation "com.maxkeppeler.sheets:input:$versions.sheets"
     implementation 'com.mikepenz:iconics-views:5.4.0'
     // paging
     implementation "androidx.paging:paging-runtime:$versions.paging"

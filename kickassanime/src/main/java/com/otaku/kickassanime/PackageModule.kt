@@ -62,13 +62,11 @@ class PackageModule @Inject constructor(
         val oldHash = context.getSharedPreferences(context.packageName, Context.MODE_PRIVATE)
             .getLong(PREF_KEY, -1)
         if(oldHash != newHash){
-            val dbEpisode =
-                kickassAnimeDb.frontPageEpisodesDao().getFirstFrontPageEpisodes()
+            val dbEpisode = kickassAnimeDb.frontPageEpisodesDao().getFirstFrontPageEpisodes()
                     .first()
             val dbSet = dbEpisode.map { it.episodeSlug }.toHashSet()
-            val filtered = AnimeListFrontPageResponse(newEpisodes.anime.filterIndexed { index, it ->
-                !dbSet.contains(it.slug) && kickassAnimeDb.favouritesDao()
-                    .isFavourite(it.asAnimeEntity().animeSlugId)
+            val filtered = AnimeListFrontPageResponse(newEpisodes.anime.filterIndexed { _, it ->
+                !dbSet.contains(it.slug)
             }, newEpisodes.page)
             Utils.saveResponse(filtered, kickassAnimeDb)
             createNotificationChannel(context)

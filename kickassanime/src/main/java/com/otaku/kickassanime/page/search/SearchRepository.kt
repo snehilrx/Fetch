@@ -21,7 +21,13 @@ class SearchRepository @Inject constructor(
 ) {
 
     private val searchHistoryPref = context.getSharedPreferences("search_history", Context.MODE_PRIVATE)
-    private val searches = LinkedHashSet(searchHistoryPref.getStringSet(PREF_SEARCH, emptySet()))
+
+    init {
+        searchHistoryPref.getString(PREF_SEARCH, "")?.let { list ->
+            val stringList = list.split("\n").filter { it.isNotBlank() }
+            searches.addAll(stringList)
+        }
+    }
 
     suspend fun search(query: String): List<AnimeSearchResponse> {
         val search = kickassAnimeService.search(query)
@@ -30,12 +36,22 @@ class SearchRepository @Inject constructor(
     }
 
     fun addToSearchHistory(query: String){
-        searches.remove(query)
-        searches.add(query)
-        searchHistoryPref.edit().putStringSet(PREF_SEARCH, searches).apply()
+        val trimmed = query.trim()
+        searches.remove(trimmed)
+        searches.add(trimmed)
+        var save = ""
+        searches.forEach {
+            save += it + "\n";
+        }
+        searchHistoryPref.edit().putString(PREF_SEARCH, save).apply()
     }
 
     fun getSearchHistory(): List<String> {
-        return searches.toList()
+        return searches.toList().reversed()
+    }
+
+    companion object{
+        @JvmStatic
+        private val searches = LinkedHashSet<String>()
     }
 }

@@ -199,6 +199,7 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
                 if(playbackState == ExoPlayer.STATE_ENDED) {
                     binding.episodeDetails?.episodeSlugId?.let { viewModel.addToFavourites(it) }
                 }
+                binding.playerView.keepScreenOn = !(playbackState == Player.STATE_IDLE || playbackState == Player.STATE_ENDED)
             }
         })
     }
@@ -367,9 +368,9 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
             addLink(it)
         }
         viewModel.getMaverickkiVideo().observe(this) {
-            addLink(
-                Maverickki.BASE_URL + it.hls
-            )
+            it.link()?.let { it1 ->
+                addLink(it1)
+            }
         }
     }
 

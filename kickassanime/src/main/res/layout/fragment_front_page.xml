@@ -39,14 +39,15 @@
 				<com.google.android.material.appbar.AppBarLayout
 					android:id="@+id/appbarLayout"
 					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
+					android:layout_height="680dp"
 					android:background="@android:color/transparent"
+					app:layout_behavior="com.otaku.fetch.base.ui.FlingBehavior"
 					android:fitsSystemWindows="true">
 
 					<com.google.android.material.appbar.CollapsingToolbarLayout
 						android:id="@+id/collapsingToolbar"
 						android:layout_width="match_parent"
-						android:layout_height="wrap_content"
+						android:layout_height="match_parent"
 						app:titleCollapseMode="scale"
 						app:collapsedTitleGravity="fill_vertical"
 						app:contentScrim="?attr/colorPrimary"
@@ -101,9 +102,9 @@
 					android:layout_width="match_parent"
 					android:layout_height="match_parent"
 					android:layout_gravity="fill_vertical"
-					android:nestedScrollingEnabled="true"
 					android:clipToPadding="false"
 					android:paddingBottom="150dp"
+					android:background="@android:color/transparent"
 					app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
 					app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
 					app:spanCount="@integer/span_count"

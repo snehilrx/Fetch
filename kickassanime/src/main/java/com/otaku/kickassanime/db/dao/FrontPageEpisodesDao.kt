@@ -11,7 +11,7 @@ import org.threeten.bp.LocalDateTime
 @Dao
 interface FrontPageEpisodesDao : BaseDao<FrontPageEpisodes> {
 
-    @Query("select image, episode.name as episodeNumber, anime.name as title, fpe.pageNo, fpe.animeSlugId, fpe.episodeSlugId, animeslug, episodeSlug, anime.type,sector  from front_page_episodes as fpe join anime on anime.animeSlugId = fpe.animeSlugId  join episode on episode.episodeSlugId = fpe.episodeSlugId order by episode.createdDate desc")
+    @Query("select image, episode.name as episodeNumber, anime.name as title, fpe.pageNo, fpe.animeSlugId, fpe.episodeSlugId, animeslug, episodeSlug, anime.type,sector  from front_page_episodes as fpe join anime on anime.animeSlugId = fpe.animeSlugId  join episode on episode.episodeSlugId = fpe.episodeSlugId order by episode.createdDate desc ")
     fun getFrontPageEpisodes(): PagingSource<Int, AnimeTile>
 
     @Query("select image, episode.name as episodeNumber, anime.name as title, fpe.pageNo, fpe.animeSlugId, fpe.episodeSlugId, animeslug, episodeSlug, anime.type,sector  from front_page_episodes as fpe join anime on anime.animeSlugId = fpe.animeSlugId  join episode on episode.episodeSlugId = fpe.episodeSlugId and episode.sector LIKE 'DUB' order by episode.createdDate desc ")

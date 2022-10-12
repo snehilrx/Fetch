@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools">
+
+	<FrameLayout
+		android:layout_width="match_parent"
+		android:layout_height="match_parent">
+
+		<com.facebook.shimmer.ShimmerFrameLayout
+			android:id="@+id/shimmerLoading"
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			app:shimmer_auto_start="true"
+			tools:visibility="gone">
+
+			<include layout="@layout/shimmer_front_page" />
+		</com.facebook.shimmer.ShimmerFrameLayout>
+
+		<androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+			android:id="@+id/refreshLayout"
+			android:layout_width="match_parent"
+			android:layout_height="match_parent">
+
+			<androidx.coordinatorlayout.widget.CoordinatorLayout
+				android:id="@+id/front"
+				android:layout_width="match_parent"
+				android:layout_height="match_parent">
+
+				<com.otaku.fetch.base.ui.ShineView
+					android:id="@+id/shineView"
+					android:layout_width="match_parent"
+					android:layout_height="match_parent"
+					android:fitsSystemWindows="true"
+					app:scrimHeight="192dp"
+					app:statusbarHeight="10dp"
+					app:toolbarHeight="?attr/actionBarSize" />
+
+				<com.google.android.material.appbar.AppBarLayout
+					android:id="@+id/appbarLayout"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:background="@android:color/transparent"
+					android:fitsSystemWindows="true"
+					app:toolbarId="@+id/toolbar">
+
+					<com.google.android.material.appbar.MaterialToolbar
+						app:layout_collapseMode="pin"
+						android:id="@+id/toolbar"
+						android:elevation="10dp"
+						android:layout_width="match_parent"
+						android:layout_height="?attr/actionBarSize" />
+
+					<com.google.android.material.appbar.CollapsingToolbarLayout
+						android:id="@+id/collapsingToolbar"
+						android:layout_width="match_parent"
+						android:layout_height="match_parent"
+						app:titleCollapseMode="scale"
+						app:collapsedTitleGravity="fill_vertical"
+						app:contentScrim="?attr/colorPrimary"
+						app:layout_scrollFlags="scroll|snap|exitUntilCollapsed"
+						app:statusBarScrim="?attr/colorSecondary"
+						android:visibility="gone">
+					</com.google.android.material.appbar.CollapsingToolbarLayout>
+				</com.google.android.material.appbar.AppBarLayout>
+
+				<androidx.constraintlayout.widget.ConstraintLayout
+					app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
+					android:layout_width="match_parent"
+					android:layout_height="match_parent">
+
+					<androidx.constraintlayout.widget.Guideline
+						android:id="@+id/guideline6"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						app:layout_constraintGuide_percent="0.5"
+						android:orientation="vertical" />
+
+					<LinearLayout
+						android:id="@+id/carousel_container"
+						android:layout_width="0dp"
+						android:layout_height="0dp"
+						android:orientation="vertical"
+						app:layout_collapseMode="parallax"
+						app:layout_constraintBottom_toBottomOf="parent"
+						app:layout_constraintEnd_toStartOf="@+id/guideline6"
+						app:layout_constraintStart_toStartOf="parent"
+						app:layout_constraintTop_toTopOf="parent">
+
+						<com.lapism.search.widget.MaterialSearchBar
+							android:id="@+id/search_bar"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:hint="@string/search_anime"
+							app:search_navigationContentDescription="@string/search_anime"
+							app:search_navigationElevation="4dp"
+							app:search_navigationIconCompat="search"
+							app:search_radius="10dp" />
+
+						<include
+							android:id="@+id/carousel_heading"
+							layout="@layout/heading_item"
+							app:actionButtonText="@{@string/more}"
+							app:title="@{@string/new_anime}" />
+
+						<com.carouselrecyclerview.CarouselRecyclerview
+							android:id="@+id/carousel"
+							android:layout_width="match_parent"
+							android:layout_height="@dimen/cardview_height_with_reflection"
+							android:nestedScrollingEnabled="false" />
+					</LinearLayout>
+
+					<androidx.recyclerview.widget.RecyclerView
+						android:id="@+id/container"
+						android:layout_width="0dp"
+						android:layout_height="0dp"
+						android:layout_gravity="fill_vertical"
+						android:background="@android:color/transparent"
+						android:clipToPadding="false"
+						android:paddingBottom="150dp"
+						app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+						app:layout_constraintBottom_toBottomOf="parent"
+						app:layout_constraintEnd_toEndOf="parent"
+						app:layout_constraintStart_toStartOf="@+id/guideline6"
+						app:layout_constraintTop_toTopOf="parent"
+						app:spanCount="@integer/span_count"
+						tools:listitem="@layout/tile_item" />
+				</androidx.constraintlayout.widget.ConstraintLayout>
+			</androidx.coordinatorlayout.widget.CoordinatorLayout>
+		</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+	</FrameLayout>
+</layout>
