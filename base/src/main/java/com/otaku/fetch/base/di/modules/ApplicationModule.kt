@@ -7,6 +7,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import okhttp3.logging.HttpLoggingInterceptor
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Module
@@ -30,5 +31,10 @@ object ApplicationModule {
         }
 
     }).okHttpClient.addInterceptor(logger).build()
+
+    @Provides
+    @Singleton
+    @Named("Fuck")
+    fun get() = "Hello"
 
 }

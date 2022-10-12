@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <import type="android.view.View"/>
+        <variable
+            name="fav"
+            type="com.otaku.kickassanime.db.models.AnimeFavorite" />
+    </data>
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="250dp"
+        android:layout_marginEnd="@dimen/item_spacing"
+        android:layout_marginStart="@dimen/item_spacing"
+        android:layout_marginBottom="@dimen/item_spacing"
+        android:clickable="true"
+        android:focusable="true"
+        app:cardCornerRadius="16dp"
+        app:elevation="2dp"
+        app:shapeAppearance="@style/ShapeAppearanceOverlay.Fetch.CardView">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="bottom">
+
+            <com.mikepenz.iconics.view.IconicsCheckBox
+                android:id="@+id/favorite"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="12dp"
+                android:layout_marginTop="12dp"
+                android:checked="true"
+                app:iiv_checked_color="#ff1a40"
+                app:iiv_checked_icon="faw_heart"
+                app:iiv_checked_size="36dp"
+                app:iiv_unchecked_color="?attr/colorOnPrimary"
+                app:iiv_unchecked_icon="faw_heart"
+                app:iiv_unchecked_size="36dp"
+                app:layout_collapseMode="pin"
+                app:layout_constraintEnd_toEndOf="@+id/image"
+                app:layout_constraintTop_toTopOf="parent" />
+
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/image"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_gravity="center"
+                android:contentDescription="@string/thumbnail"
+                android:scaleType="centerCrop"
+                app:imageUrl="@{fav.imageUrl}"
+                app:layout_constraintBottom_toTopOf="@+id/title"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.Fetch.CardView.Thumbnail"
+                tools:src="@tools:sample/avatars" />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:gravity="center|bottom"
+                android:lineSpacingExtra="2sp"
+                android:padding="8dp"
+                android:text="@{fav.title}"
+                android:textAlignment="center"
+                android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                tools:text="The Rising of the Shield Hero Season 2" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+</layout>

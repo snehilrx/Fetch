@@ -47,6 +47,7 @@ class MarginTextView : FrameLayout {
     private fun init(context: Context, attrs: AttributeSet?, defStyle: Int) {
         imageView = ShapeableImageView(context, attrs, defStyle)
         textView = MaterialTextView(context, attrs, defStyle)
+        imageView.maxHeight = resources.getDimension(R.dimen.item_view_width).toInt()
         imageView.layoutParams = LayoutParams(resources.getDimension(R.dimen.item_view_width).toInt(), LayoutParams.WRAP_CONTENT)
         addView(imageView)
         addView(textView)

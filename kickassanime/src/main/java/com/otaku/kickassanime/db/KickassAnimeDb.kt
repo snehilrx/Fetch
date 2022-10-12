@@ -10,7 +10,7 @@ import com.otaku.kickassanime.db.models.entity.*
 import org.jetbrains.annotations.NotNull
 
 @Database(
-    entities = [AnimeEntity::class, EpisodeEntity::class, AnimeFilter::class, AnimeGenre::class, FrontPageEpisodes::class],
+    entities = [AnimeEntity::class, EpisodeEntity::class, AnimeFilter::class, AnimeGenre::class, FrontPageEpisodes::class, VideoHistory::class],
     version = 1,
     exportSchema = true
 )
@@ -22,6 +22,8 @@ abstract class KickassAnimeDb : RoomDatabase() {
     abstract fun animeFilterDao(): AnimeFilterDao
     abstract fun animeGenreDao(): AnimeGenreDao
     abstract fun frontPageEpisodesDao(): FrontPageEpisodesDao
+    abstract fun historyDao(): HistoryDao
+    abstract fun favouritesDao(): FavouriteDao
 
     companion object {
         @JvmStatic

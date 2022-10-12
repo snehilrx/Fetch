@@ -39,7 +39,16 @@
 	    <action
 		    android:id="@+id/action_frontPageFragment_to_episodeFragment"
 		    app:destination="@id/episodeActivity" />
-    </fragment>
+	    <action
+		    android:id="@+id/action_frontPageFragment_to_searchFragment"
+		    app:destination="@id/searchFragment" />
+	    <action
+		    android:id="@+id/action_frontPageFragment_to_favouritesFragment"
+		    app:destination="@id/favouritesFragment" />
+		<action
+			android:id="@+id/action_frontPageFragment_to_historyFragment"
+			app:destination="@id/historyFragment" />
+	</fragment>
     <fragment
         android:id="@+id/allListFragment"
         android:name="com.otaku.kickassanime.page.frontpage.list.AllListFragment"
@@ -82,4 +91,37 @@
             android:name="animeSlugId"
             app:argType="integer" />
     </activity>
+	<fragment
+		android:id="@+id/searchFragment"
+		android:name="com.otaku.kickassanime.page.search.SearchFragment"
+		android:label="{query}" >
+		<argument
+			android:name="query"
+			app:argType="string" />
+	</fragment>
+	<fragment
+		android:id="@+id/favouritesFragment"
+		android:name="com.otaku.kickassanime.page.favourtites.FavouritesFragment"
+		android:label="Favourites"
+		tools:layout="@layout/fragment_favourites" >
+		<action
+			android:id="@+id/action_favouritesFragment_to_animeActivity"
+			app:destination="@id/animeActivity" />
+	</fragment>
+	<activity
+		android:id="@+id/animeActivity"
+		android:name="com.otaku.kickassanime.page.animepage.AnimeActivity"
+		android:label="AnimeActivity" >
+		<argument
+			android:name="anime_args"
+			app:argType="com.otaku.kickassanime.db.models.entity.AnimeEntity" />
+	</activity>
+	<fragment
+		android:id="@+id/historyFragment"
+		android:name="com.otaku.kickassanime.page.history.HistoryFragment"
+		android:label="Recents">
+		<action
+			android:id="@+id/action_historyFragment_to_episodeActivity"
+			app:destination="@id/episodeActivity" />
+	</fragment>
 </navigation>

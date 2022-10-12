@@ -2,7 +2,6 @@ package com.otaku.kickassanime.page
 
 import androidx.lifecycle.Lifecycle
 import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.contrib.RecyclerViewActions
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import com.otaku.kickassanime.R
@@ -39,7 +38,6 @@ class MainFragmentTest {
         launchFragmentInContainer<MainFragment> {
             it.moveToState(Lifecycle.State.RESUMED)
             onView(withId(R.id.container))
-                .perform(RecyclerViewActions.scrollTo<HeaderAdapter.HeadingViewHolder>(withText(R.string.dubbed_anime)))
         }
     }
 }

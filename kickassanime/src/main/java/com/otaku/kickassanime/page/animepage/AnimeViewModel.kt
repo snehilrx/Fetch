@@ -35,4 +35,10 @@ class AnimeViewModel @Inject constructor(private val animeRepository: AnimeRepos
         return animeRepository.getEpisodeList(animeId).asLiveData(viewModelScope.coroutineContext)
     }
 
+    fun setFavourite(animeId: Int, checked: Boolean) {
+        viewModelScope.launch {
+            animeRepository.setFavourite(animeId, checked)
+        }
+    }
+
 }

@@ -1,7 +1,9 @@
 package com.otaku.kickassanime.page.frontpage.data
 
 import android.util.Log
+import androidx.room.withTransaction
 import com.otaku.kickassanime.api.KickassAnimeService
+import com.otaku.kickassanime.api.model.AnimeListFrontPageResponse
 import com.otaku.kickassanime.db.KickassAnimeDb
 import com.otaku.kickassanime.utils.Constraints.cacheTimeoutInHours
 import com.otaku.kickassanime.utils.Utils.saveResponse
@@ -13,28 +15,19 @@ class FrontPageRepository @Inject constructor(
     private val kickassAnimeService: KickassAnimeService
 ) {
 
-    fun getFrontAllPage() = database.frontPageEpisodesDao().getFrontPageEpisodesUpto(20)
-    fun getFrontSubPage() = database.frontPageEpisodesDao().getFrontPageEpisodesSubUpto(20)
-    fun getFrontDubPage() = database.frontPageEpisodesDao().getFrontPageEpisodesDubUpto(20)
+    fun getFrontAllPage() = database.frontPageEpisodesDao().getFirstFrontPageEpisodes()
+    fun getFrontSubPage() = database.frontPageEpisodesDao().getFirstFrontPageEpisodesSub()
+    fun getFrontDubPage() = database.frontPageEpisodesDao().getFirstFrontPageEpisodesDub()
 
     suspend fun fetchAll() {
-        val response = kickassAnimeService.getFrontPageAnimeList(1)
+        val sub = kickassAnimeService.getFrontPageAnimeListSub(1)
+        val dub = kickassAnimeService.getFrontPageAnimeListDub(1)
+        val response = AnimeListFrontPageResponse(sub.anime + dub.anime, 1)
+        database.frontPageEpisodesDao().removePage(1)
+
         Log.i(TAG, "fetchAll: ${response.anime.size} anime fetched")
         saveResponse(response, database)
     }
-
-    suspend fun fetchDub() {
-        val response = kickassAnimeService.getFrontPageAnimeListSub(1)
-        Log.i(TAG, "fetchDub: ${response.anime.size} anime fetched")
-        saveResponse(response, database)
-    }
-
-    suspend fun fetchSub() {
-        val response = kickassAnimeService.getFrontPageAnimeListDub(1)
-        Log.i(TAG, "fetchSub: ${response.anime.size} anime fetched")
-        saveResponse(response, database)
-    }
-
 
     suspend fun lastUpdate(): LocalDateTime? {
         return database.frontPageEpisodesDao().lastUpdate()?.minusHours(cacheTimeoutInHours)

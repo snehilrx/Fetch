@@ -5,7 +5,7 @@ ext.versions = [
         arch                : '2.1.0',
         coordinator_layout  : '1.2.0',
         appsearch           : '1.0.0-alpha04',
-        hilt                : '2.43.2',
+        hilt                : '2.44',
         retrofit            : '2.9.0',
         room                : '2.4.3',
         room_paging         : '2.5.0-alpha01',
@@ -22,11 +22,11 @@ ext.versions = [
         swipe_refresh_layout: '1.2.0-alpha01',
         okhttp              : '5.0.0-alpha.7',
         gson_conveter       : '2.9.0',
-        threetenbp          : '1.6.1',
+        threetenbp          : '1.6.2',
         carouselrecyclerview: '1.2.5',
         palette             : '1.0.0',
         iconics             : '5.3.3',
-        sheets              : '2.2.9',
+        sheets              : '2.3.0',
         // test
         mock_okhttp_server  : '5.0.0-alpha.10',
         composeVersion : "1.1.1"

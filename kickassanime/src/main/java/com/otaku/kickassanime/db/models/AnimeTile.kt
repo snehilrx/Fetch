@@ -14,6 +14,14 @@ data class AnimeTile(
     val episodeNumber: String,
     val pageNo: Int
 ) : ITileData {
+    override fun areItemsTheSame(newItem: ITileData): Boolean {
+        return newItem is AnimeTile && episodeSlugId == newItem.episodeSlugId
+    }
+
+    override fun areContentsTheSame(newItem: ITileData): Boolean {
+        return newItem is AnimeTile && this == newItem
+    }
+
     override val imageUrl: String
         get() = "${Strings.KICKASSANIME_URL}/uploads/$image"
     override val tags: List<String>

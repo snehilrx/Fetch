@@ -35,7 +35,8 @@ data class AnimeEntity(
     var infoLink: String? = null,
     var createddate: String? = null,
     var type: String? = null,
-    var rating: Boolean? = null
+    var rating: Boolean? = null,
+    var favourite: Boolean = false
 ) : Parcelable {
     fun getImageUrl(): String {
         return "${KICKASSANIME_URL}uploads/$image"

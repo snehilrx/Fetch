@@ -50,8 +50,8 @@ class DatabaseTest {
         runBlocking {
             val result = kickassAnimeService.getAllAnimeEntries() ?: return@runBlocking
             db.runInTransaction {
-                db.animeEntityDao().insertAll(result.map { it.asAnimeEntity() })
-                db.animeEntityDao().getAll()
+//                db.animeEntityDao().insertAll(result.map { it.asAnimeEntity() })
+//                db.animeEntityDao().getAll()
             }
         }
     }

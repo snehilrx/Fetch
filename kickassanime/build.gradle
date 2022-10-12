@@ -89,11 +89,11 @@ dependencies {
     testImplementation "androidx.paging:paging-common:$versions.paging"
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:$versions.swipe_refresh_layout"
     implementation "com.squareup.retrofit2:converter-gson:$versions.gson_conveter"
-    implementation "com.mikepenz:iconics-core:5.3.4"
+    implementation 'com.mikepenz:iconics-core:5.4.0'
     implementation 'com.mikepenz:fontawesome-typeface:5.13.3.0-kotlin@aar'
     implementation "com.maxkeppeler.sheets:core:$versions.sheets"
     implementation "com.maxkeppeler.sheets:info:$versions.sheets"
-    implementation "com.mikepenz:iconics-views:5.3.4"
+    implementation 'com.mikepenz:iconics-views:5.4.0'
     // paging
     implementation "androidx.paging:paging-runtime:$versions.paging"
 
@@ -130,6 +130,8 @@ dependencies {
 
     androidTestImplementation("com.squareup.okhttp3:mockwebserver:5.0.0-alpha.7")
 
+    implementation 'io.github.lapism:search:1.2.1'
+
 
     def media3_version = "1.0.0-beta02"
 
@@ -144,4 +146,10 @@ dependencies {
     implementation "androidx.media3:media3-exoplayer-hls:$media3_version"
 
     implementation 'com.facebook.shimmer:shimmer:0.5.0'
+    def work_version = "2.7.1"
+    implementation "androidx.work:work-runtime-ktx:$work_version"
+
+    implementation("androidx.hilt:hilt-work:1.0.0")
+    // When using Kotlin.
+    kapt("androidx.hilt:hilt-compiler:1.0.0")
 }

@@ -1,12 +1,10 @@
 package com.otaku.kickassanime.page.episodepage
 
-import android.util.Log
 import com.otaku.kickassanime.api.KickassAnimeService
 import com.otaku.kickassanime.db.KickassAnimeDb
 import com.otaku.kickassanime.db.models.entity.AnimeEntity
 import com.otaku.kickassanime.db.models.entity.EpisodeEntity
 import com.otaku.kickassanime.utils.asAnimeEntity
-import com.otaku.kickassanime.utils.asEpisodeEntities
 import com.otaku.kickassanime.utils.asEpisodeEntity
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -28,13 +26,13 @@ class EpisodeRepository @Inject constructor(
         val episode = kickassAnimeDb.episodeEntityDao().getEpisode(episodeSlugId) ?: return
         val episodeSlug = episode.episodeSlug ?: return
         val animeEpisode = kickassAnimeService.getAnimeEpisode(episodeSlug)
-        animeEpisode.asEpisodeEntities()
+        animeEpisode.asEpisodeEntity()
         val anime = kickassAnimeDb.animeEntityDao().getAnime(animeSlugId)
         val animeEntity = animeEpisode.anime?.asAnimeEntity(anime)
         animeEntity?.let { kickassAnimeDb.animeEntityDao().updateAll(it) }
         val episodeEntity = animeEpisode.asEpisodeEntity(episode)
         episodeEntity?.let { kickassAnimeDb.episodeEntityDao().insert(it) }
-        val episodes = animeEpisode.asEpisodeEntities().filter { it.episodeSlug != episodeSlug }
+        val episodes = animeEpisode.asEpisodeEntity().filter { it.episodeSlug != episodeSlug }
         kickassAnimeDb.episodeEntityDao().insertAll(episodes)
         if (animeEntity != null) {
             kickassAnimeDb.animeEntityDao().updateAll(animeEntity)

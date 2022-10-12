@@ -8,7 +8,6 @@ import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
-import android.widget.LinearLayout
 import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toDrawable
@@ -23,9 +22,9 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.database.StandaloneDatabaseProvider
 import androidx.media3.datasource.DataSource
 import androidx.media3.datasource.DefaultDataSource
-import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.datasource.FileDataSource
 import androidx.media3.datasource.cache.*
+import androidx.media3.datasource.okhttp.OkHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.hls.HlsMediaSource
 import androidx.media3.exoplayer.source.ConcatenatingMediaSource
@@ -34,8 +33,6 @@ import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import androidx.media3.ui.PlayerView
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.navArgs
-import com.mikepenz.iconics.IconicsDrawable
-import com.mikepenz.iconics.typeface.library.fontawesome.FontAwesome
 import com.otaku.fetch.base.livedata.State
 import com.otaku.fetch.base.ui.BindingActivity
 import com.otaku.fetch.base.utils.UiUtils.loadBitmapFromUrl
@@ -47,10 +44,13 @@ import com.otaku.kickassanime.db.models.entity.AnimeEntity
 import com.otaku.kickassanime.db.models.entity.EpisodeEntity
 import com.otaku.kickassanime.utils.TrackSelectionDialog
 import dagger.hilt.android.AndroidEntryPoint
+import okhttp3.OkHttpClient
 import java.io.File
+import javax.inject.Inject
 
 
-@UnstableApi @AndroidEntryPoint
+@UnstableApi
+@AndroidEntryPoint
 class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activity_episode) {
 
     private lateinit var mFullScreenDialog: Dialog
@@ -68,6 +68,9 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
         DefaultTrackSelector(this, AdaptiveTrackSelection.Factory())
     }
 
+    @Inject
+    lateinit var okhttp: OkHttpClient
+
     override fun onBind(binding: ActivityEpisodeBinding, savedInstanceState: Bundle?) {
         args = navArgs<EpisodeActivityArgs>().value
         mFullScreenDialog = Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
@@ -83,6 +86,7 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
         initializeWebView()
         setTransparentStatusBar()
         showBackButton()
+        binding.appbarLayout.setPaddingRelative(0, _statusBarHeight, 0, 0)
     }
 
     private fun exitFullScreen() {
@@ -105,7 +109,8 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
         mFullScreenDialog.window?.decorView?.let {
             WindowInsetsControllerCompat(window, it).let { controller ->
                 controller.hide(WindowInsetsCompat.Type.systemBars())
-                controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                controller.systemBarsBehavior =
+                    WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
             }
         }
     }
@@ -133,12 +138,13 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
         )
-        binding.playerView.findViewById<ImageButton>(androidx.media3.ui.R.id.exo_fullscreen)?.setImageDrawable(
-            ContextCompat.getDrawable(
-                this,
-                androidx.media3.ui.R.drawable.exo_ic_fullscreen_exit
+        binding.playerView.findViewById<ImageButton>(androidx.media3.ui.R.id.exo_fullscreen)
+            ?.setImageDrawable(
+                ContextCompat.getDrawable(
+                    this,
+                    androidx.media3.ui.R.drawable.exo_ic_fullscreen_exit
+                )
             )
-        )
         mFullScreenDialog.show()
         hideSystemUI()
     }
@@ -150,7 +156,9 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
         trackSelector.setParameters(
             trackSelector
                 .buildUponParameters()
-                .setAllowVideoMixedMimeTypeAdaptiveness(true))
+                .setAllowVideoMixedMimeTypeAdaptiveness(true)
+        )
+        player.repeatMode = ExoPlayer.REPEAT_MODE_OFF
         binding.playerView.player = player
         binding.playerView.setShowBuffering(PlayerView.SHOW_BUFFERING_ALWAYS)
         binding.playerView.setKeepContentOnPlayerReset(true)
@@ -162,31 +170,52 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
             }
         }
         binding.playerView.useArtwork = true
-        initPlayerControls()
-        player.addListener(object : Player.Listener{
-            override fun onIsPlayingChanged(isPlaying: Boolean) {
-                viewModel.setIsPlaying(isPlaying)
+        viewModel.getPlaybackTime().observe(this){
+            if(it != null) {
+                binding.playerView.player?.seekTo(it)
             }
-        })
+        }
+        initPlayerControls()
         player.addListener(object : Player.Listener {
             override fun onTracksChanged(tracks: Tracks) {
                 tracks.groups.forEach {
                     it.getTrackFormat(0)
                 }
             }
+
+            override fun onPlayerError(error: PlaybackException) {
+                super.onPlayerError(error)
+                showError(error, this@EpisodeActivity, "retry") {
+                    player.prepare()
+                }
+            }
+
+            override fun onIsPlayingChanged(isPlaying: Boolean) {
+                viewModel.setIsPlaying(isPlaying)
+            }
+
+            override fun onPlaybackStateChanged(playbackState: Int) {
+                super.onPlaybackStateChanged(playbackState)
+                if(playbackState == ExoPlayer.STATE_ENDED) {
+                    binding.episodeDetails?.episodeSlugId?.let { viewModel.addToFavourites(it) }
+                }
+            }
         })
     }
 
     private fun initPlayerControls() {
-        val settingButton = binding.playerView.findViewById<ImageButton>(androidx.media3.ui.R.id.exo_settings)
+        val settingButton =
+            binding.playerView.findViewById<ImageButton>(androidx.media3.ui.R.id.exo_settings)
         settingButton.setOnClickListener {
-            binding.playerView.player?.let { it1 -> TrackSelectionDialog.createForPlayer(it1){}.show(this) };
+            binding.playerView.player?.let { it1 ->
+                TrackSelectionDialog.createForPlayer(it1) {}.show(this)
+            }
         }
         val fullscreen =
             binding.playerView.findViewById<View>(androidx.media3.ui.R.id.exo_fullscreen)
         fullscreen.isVisible = true
         binding.playerView.setFullscreenButtonClickListener {
-            if(it)
+            if (it)
                 enterFullScreen()
             else
                 exitFullScreen()
@@ -195,6 +224,14 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
 
     override fun onPause() {
         super.onPause()
+        binding.playerView.player?.currentPosition?.let {
+            binding.episodeDetails?.episodeSlugId?.let { episodeSlugId ->
+                viewModel.updatePlayBackTime(
+                    episodeSlugId,
+                    it
+                )
+            }
+        }
         binding.playerView.player?.stop()
     }
 
@@ -219,7 +256,7 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
         mediaSources.addMediaSource(mediaSource)
         binding.progress = 100
         (binding.playerView.player as? ExoPlayer)?.let { player ->
-            if(mediaSources.size == 1) {
+            if (mediaSources.size == 1) {
                 player.playWhenReady = true
                 player.addMediaSource(mediaSources)
                 player.prepare()
@@ -232,7 +269,7 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
         val cache = getDownloadCache()
         val cacheSink = CacheDataSink.Factory()
             .setCache(cache)
-        val upstreamFactory = DefaultDataSource.Factory(this, DefaultHttpDataSource.Factory())
+        val upstreamFactory = DefaultDataSource.Factory(this, OkHttpDataSource.Factory(okhttp))
         return CacheDataSource.Factory()
             .setCache(cache)
             .setCacheWriteDataSinkFactory(cacheSink)
@@ -263,15 +300,15 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
         initPlayer()
         fetchRemote()
         viewModel.getIsPlaying().observe(this) {
-            if(it)binding.playerView.player?.play()
+            if (it) binding.playerView.player?.play()
         }
         viewModel.getLoadState().observe(this) {
             when (it) {
                 is State.FAILED -> {
-                    if(it.shouldTerminateActivity) {
+                    if (it.shouldTerminateActivity) {
                         showError(it.exception, this)
                     } else {
-                        showError(it.exception, this) {/* no-op */}
+                        showError(it.exception, this) {/* no-op */ }
                     }
                 }
                 is State.LOADING -> showLoading()
@@ -310,6 +347,8 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
         episodeLiveData.observe(this) { episode ->
             if (episode != null) {
                 setAppbarEpisodeNumber(binding, "EP: ${episode.name}")
+                binding.episodeDetails = episode
+                viewModel.addToHistory(episode)
                 val url = episode.link1 ?: episode.link2 ?: episode.link3 ?: episode.link4
                 if (url != null) {
                     if (savedInstanceState == null) binding.webView.loadUrl(url)

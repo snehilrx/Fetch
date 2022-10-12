@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout>
+
+    <merge xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools">
+
+    <Button
+            android:id="@+id/retryBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center"
+            android:text="@string/retry" />
+
+        <com.google.android.material.progressindicator.LinearProgressIndicator
+            android:id="@+id/progressBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:indeterminate="true" />
+
+        <TextView
+            android:id="@+id/emptyList"
+            android:text="NOTHING\nFOUND"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMaxTextSize="64sp"
+            android:autoSizeStepGranularity="0.5sp"
+            android:textStyle="bold"
+            android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="@string/empty_list_icon"
+            tools:src="@tools:sample/avatars" />
+    </merge>
+</layout>

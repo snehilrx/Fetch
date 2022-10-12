@@ -1,9 +1,11 @@
 package com.otaku.kickassanime.page.animepage
 
 import android.content.Intent
+import android.graphics.Paint
 import android.os.Bundle
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
+import androidx.core.view.marginEnd
 import androidx.databinding.BindingAdapter
 import androidx.fragment.app.FragmentContainerView
 import androidx.fragment.app.viewModels
@@ -13,8 +15,19 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.GridLayoutManager
+import com.mikepenz.iconics.IconicsColor
+import com.mikepenz.iconics.IconicsDrawable
+import com.mikepenz.iconics.IconicsSize
+import com.mikepenz.iconics.typeface.library.fontawesome.FontAwesome
+import com.mikepenz.iconics.utils.backgroundColor
+import com.mikepenz.iconics.utils.color
+import com.mikepenz.iconics.utils.padding
+import com.mikepenz.iconics.utils.size
 import com.otaku.fetch.base.livedata.State
 import com.otaku.fetch.base.ui.BindingFragment
+import com.otaku.fetch.base.utils.UiUtils
+import com.otaku.fetch.base.utils.UiUtils.getThemeColor
+import com.otaku.fetch.base.utils.UiUtils.showError
 import com.otaku.fetch.base.utils.UiUtils.toPxInt
 import com.otaku.kickassanime.R
 import com.otaku.kickassanime.databinding.FragmentAnimeBinding
@@ -42,6 +55,37 @@ class AnimeFragment : BindingFragment<FragmentAnimeBinding>(R.layout.fragment_an
         animeViewModel.fetchAnime(args.animeSlug)
         initObserver(args.animeSlugId)
         initRecyclerView()
+        setUpFavourite()
+    }
+
+    private fun setUpFavourite() {
+        binding.favorite.apply {
+            checkedIcon = IconicsDrawable(requireContext()).apply {
+                icon = FontAwesome.Icon.faw_heart
+                color = IconicsColor.parse("#ff1a40")
+                size = IconicsSize.TOOLBAR_ICON_SIZE
+                style = Paint.Style.FILL_AND_STROKE
+                padding = IconicsSize.TOOLBAR_ICON_PADDING
+            }
+            uncheckedIcon = IconicsDrawable(requireContext()).apply {
+                icon = FontAwesome.Icon.faw_heart
+                color = IconicsColor.colorInt(
+                    getThemeColor(
+                        requireContext().theme, com.lapism.search.R.attr.colorOnPrimary
+                    )
+                )
+                size = IconicsSize.TOOLBAR_ICON_SIZE
+                style = Paint.Style.STROKE
+                padding = IconicsSize.TOOLBAR_ICON_PADDING
+            }
+            setOnClickListener {
+                binding.anime?.animeSlugId?.let { animeSlugId ->
+                    animeViewModel.setFavourite(
+                        animeSlugId, binding.favorite.isChecked
+                    )
+                }
+            }
+        }
     }
 
     private fun initRecyclerView() {
@@ -57,6 +101,7 @@ class AnimeFragment : BindingFragment<FragmentAnimeBinding>(R.layout.fragment_an
         animeViewModel.getAnime(animeSlugId).observe(this) { animeEntityNullable ->
             animeEntityNullable?.let { animeEntity ->
                 binding.anime = animeEntity
+                binding.favorite.isChecked = animeEntity.favourite
                 binding.episodeList.adapter = getEpisodeAdapter(animeEntity)
                 val animeId = animeEntity.animeId
                 if (animeId != null) {
@@ -75,12 +120,11 @@ class AnimeFragment : BindingFragment<FragmentAnimeBinding>(R.layout.fragment_an
                 }
                 is State.FAILED -> {
                     hideLoading()
-                    TODO("Handle error")
+                    showError(it.exception, this.requireActivity())
                 }
                 is State.SUCCESS -> {
                     hideLoading()
                 }
-                else -> {}
             }
         }
     }
@@ -103,13 +147,11 @@ class AnimeFragment : BindingFragment<FragmentAnimeBinding>(R.layout.fragment_an
         val episodeSlugId = it.id
         val actionAnimeFragmentToEpisodeActivity =
             AnimeFragmentDirections.actionAnimeFragmentToEpisodeActivity(
-                title,
-                episodeSlugId,
-                animeSlugId
+                title, episodeSlugId, animeSlugId
             )
-        val extras = ActivityNavigator.Extras.Builder()
-            .addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
-            .build()
+        val extras =
+            ActivityNavigator.Extras.Builder().addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+                .build()
         findNavController().navigate(actionAnimeFragmentToEpisodeActivity, extras)
     }
 
@@ -118,8 +160,11 @@ class AnimeFragment : BindingFragment<FragmentAnimeBinding>(R.layout.fragment_an
         @JvmStatic
         fun setGraph(view: FragmentContainerView, args: AnimeEntity, navGraphId: Int) {
             view.getFragment<NavHostFragment>().navController.setGraph(
-                navGraphId,
-                bundleOf("animeSlugId" to args.animeSlugId, "animeSlug" to (args.animeslug ?: ""),"title" to args.getDisplayTitle())
+                navGraphId, bundleOf(
+                    "animeSlugId" to args.animeSlugId,
+                    "animeSlug" to (args.animeslug ?: ""),
+                    "title" to args.getDisplayTitle()
+                )
             )
         }
     }

@@ -1,21 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:tools="http://schemas.android.com/tools"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission
-        android:name="android.permission.INTERNET"
-        android:required="true" />
+	<uses-permission
+		android:name="android.permission.INTERNET"
+		android:required="true" />
 
-    <application>
-        <activity
-            android:name=".page.animepage.AnimeActivity"
-            android:exported="false" />
-        <activity
-            android:name=".page.episodepage.EpisodeActivity"
-	        android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|screenLayout|smallestScreenSize|uiMode"
-	        android:supportsPictureInPicture="true"
-	        android:exported="true"
-	        tools:targetApi="n" />
-    </application>
+	<uses-sdk tools:overrideLibrary="com.lapism.search" />
+
+	<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+	<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+	<application>
+		<provider android:name=".page.search.AnimeSuggestionProvider"
+			android:authorities="com.otaku.kickassanime.page.search.AnimeSuggestionProvider"
+			android:exported="false" />
+
+		<activity
+			android:name=".page.animepage.AnimeActivity"
+			android:exported="false" />
+		<activity
+			android:name=".page.episodepage.EpisodeActivity"
+			android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|screenLayout|smallestScreenSize|uiMode"
+			android:exported="true"
+			android:supportsPictureInPicture="true"
+			tools:targetApi="n" />
+	</application>
 
 </manifest>

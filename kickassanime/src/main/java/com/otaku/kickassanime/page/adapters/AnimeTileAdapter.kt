@@ -8,12 +8,13 @@ import androidx.databinding.ViewDataBinding
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.otaku.fetch.data.ITileData
 import com.otaku.kickassanime.db.models.AnimeTile
 
 class AnimeTileAdapter<T : ViewDataBinding>(
     @LayoutRes private val layoutId: Int,
-    private val onBind: (T, AnimeTile) -> Unit,
-) : PagingDataAdapter<AnimeTile, AnimeTileAdapter.AnimeTileViewHolder<T>>(AnimeTileComparator) {
+    private val onBind: (T, ITileData) -> Unit,
+) : PagingDataAdapter<ITileData, AnimeTileAdapter.AnimeTileViewHolder<T>>(AnimeTileComparator) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
         AnimeTileViewHolder(
@@ -25,21 +26,21 @@ class AnimeTileAdapter<T : ViewDataBinding>(
 
     class AnimeTileViewHolder<T : ViewDataBinding>(
         private val binding: T,
-        private val onBind: (T, AnimeTile) -> Unit
+        private val onBind: (T, ITileData) -> Unit
     ) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(item: AnimeTile) = with(binding) {
+        fun bind(item: ITileData) = with(binding) {
             onBind(this, item)
         }
     }
 
-    object AnimeTileComparator : DiffUtil.ItemCallback<AnimeTile>() {
-        override fun areItemsTheSame(oldItem: AnimeTile, newItem: AnimeTile) =
-            oldItem.episodeSlugId == newItem.episodeSlugId
+    object AnimeTileComparator : DiffUtil.ItemCallback<ITileData>() {
+        override fun areItemsTheSame(oldItem: ITileData, newItem: ITileData) =
+            oldItem.areItemsTheSame(newItem)
 
-        override fun areContentsTheSame(oldItem: AnimeTile, newItem: AnimeTile) =
-            oldItem == newItem
+        override fun areContentsTheSame(oldItem: ITileData, newItem: ITileData) =
+            oldItem.areContentsTheSame(newItem)
     }
 
     override fun onBindViewHolder(holder: AnimeTileViewHolder<T>, position: Int) {

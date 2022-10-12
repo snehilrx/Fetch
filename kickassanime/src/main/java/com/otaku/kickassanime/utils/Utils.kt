@@ -1,18 +1,9 @@
 package com.otaku.kickassanime.utils
 
 import android.app.Activity
-import android.graphics.Color
 import android.util.Log
-import androidx.fragment.app.FragmentActivity
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
 import androidx.paging.LoadState
 import androidx.room.withTransaction
-import com.maxkeppeler.sheets.info.InfoSheet
-import com.mikepenz.iconics.IconicsDrawable
-import com.mikepenz.iconics.typeface.library.fontawesome.FontAwesome
-import com.mikepenz.iconics.utils.colorInt
-import com.mikepenz.iconics.utils.sizeDp
 import com.otaku.fetch.base.TAG
 import com.otaku.fetch.base.utils.UiUtils
 import com.otaku.kickassanime.api.model.AnimeListFrontPageResponse
@@ -53,23 +44,21 @@ object Utils {
 
     @JvmStatic
     suspend fun saveResponse(response: AnimeListFrontPageResponse?, database: KickassAnimeDb) {
+        val anime = response?.anime?.map { it.asAnimeEntity() }
+        val episode = response?.anime?.map { it.asEpisodeEntity() }
+        val fpe = anime?.mapIndexed { index, animeEntity ->
+            episode?.get(index)?.let {
+                FrontPageEpisodes(
+                    animeSlugId = animeEntity.animeSlugId,
+                    episodeSlugId = it.episodeSlugId,
+                    pageNo = response.page
+                )
+            }
+        }?.filterNotNull()
         database.withTransaction {
-            val anime = response?.anime?.map { it.asAnimeEntity() }
-            val episode = response?.anime?.map { it.asEpisodeEntities() }
-            val fpe = anime?.mapIndexed { index, animeEntity ->
-                episode?.get(index)?.let {
-                    FrontPageEpisodes(
-                        animeSlugId = animeEntity.animeSlugId,
-                        episodeSlugId = it.episodeSlugId,
-                        pageNo = response.page
-                    )
-                }
-            }?.filterNotNull()
-            if (anime != null && episode != null) {
+            if (anime != null && episode != null && fpe != null) {
                 database.animeEntityDao().insertAll(anime)
                 database.episodeEntityDao().insertAll(episode)
-            }
-            if (fpe != null) {
                 database.frontPageEpisodesDao().insertAll(fpe)
             }
         }

@@ -1,8 +1,57 @@
 <resources>
     <!-- Base application theme. -->
-    <style name="Theme.Fetch" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+
+	<style name="Theme.Fetch.CollapsingToolbar" parent="Widget.Material3.CollapsingToolbar.Medium">
+		<item name="statusBarScrim">?attr/colorPrimary</item>
+		<item name="collapsedTitleTextAppearance">@style/Theme.Fetch.CollapsingToolbar.CollapseText</item>
+		<item name="collapsedTitleTextColor">?attr/colorSecondary</item>
+		<item name="expandedTitleTextAppearance">@style/Theme.Fetch.CollapsingToolbar.ExpandedText</item>
+	</style>
+
+
+	<style name="Theme.Fetch.CollapsingToolbar.Large" parent="Theme.Fetch.CollapsingToolbar">
+		<item name="scrimVisibleHeightTrigger">@dimen/m3_appbar_scrim_height_trigger</item>
+	</style>
+
+	<style name="Theme.Fetch.CollapsingToolbar.CollapseText" parent="TextAppearance.Material3.HeadlineSmall">
+		<item name="fontFamily">@font/sohne_fett</item>
+	</style>
+
+	<style name="Theme.Fetch.CollapsingToolbar.ExpandedText" parent="TextAppearance.Material3.HeadlineLarge">
+		<item name="fontFamily">@font/sohne_fett</item>
+	</style>
+    <style name="Theme.Fetch" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="fontFamily">@font/sohne</item>
+	    <item name="actionBarSize">64dp</item>
+	    <item name="tabSelectedTextColor">?attr/colorPrimaryVariant</item>
+	    <item name="sheetsButtonColor">?attr/colorPrimaryVariant</item>
+	    <item name="android:windowTranslucentStatus">true</item>
+	    <item name="android:windowTranslucentNavigation">true</item>
+	    <item name="collapsingToolbarLayoutStyle">@style/Theme.Fetch.CollapsingToolbar</item>
+	    <item name="collapsingToolbarLayoutMediumSize">@style/Theme.Fetch.CollapsingToolbar</item>
+	    <item name="collapsingToolbarLayoutLargeStyle">@style/Theme.Fetch.CollapsingToolbar.Large</item>
+	    <item name="contentScrim">?attr/colorPrimary</item>
+	    <item name="actionBarTheme">@style/ActionBar</item>
     </style>
+
+	<style name="ActionBar" parent="Base.ThemeOverlay.AppCompat.ActionBar">
+		<item name="searchViewStyle">@style/SearchViewStyle</item>
+	</style>
+
+	<style name="SearchViewStyle" parent="Widget.AppCompat.SearchView.ActionBar">
+		<!--search view customization-->
+		<item name="layout">@layout/abc_search_view</item>
+		<item name="queryBackground">@drawable/abc_textfield_search_material</item>
+		<item name="submitBackground">@drawable/abc_textfield_search_material</item>
+		<item name="closeIcon">@drawable/abc_ic_clear_material</item>
+		<item name="searchIcon">@drawable/abc_ic_search_api_material</item>
+		<item name="searchHintIcon">@drawable/abc_ic_search_api_material</item>
+		<item name="goIcon">@drawable/abc_ic_go_search_api_material</item>
+		<item name="voiceIcon">@drawable/abc_ic_voice_search_api_material</item>
+		<item name="commitIcon">@drawable/abc_ic_commit_search_api_mtrl_alpha</item>
+		<item name="suggestionRowLayout">@layout/abc_search_dropdown_item_icons_2line</item>
+	</style>
+
 
     <style name="Theme.Fetch.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 

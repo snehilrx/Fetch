@@ -6,12 +6,13 @@ import androidx.annotation.LayoutRes
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.recyclerview.widget.ListAdapter
+import com.otaku.fetch.data.ITileData
 import com.otaku.kickassanime.db.models.AnimeTile
 
 class AnimeTileAdapterNoPaging<T : ViewDataBinding>(
     @LayoutRes private val layoutId: Int,
-    private val onBind: (T, AnimeTile) -> Unit
-) : ListAdapter<AnimeTile, AnimeTileAdapter.AnimeTileViewHolder<T>>(
+    private val onBind: (T, ITileData) -> Unit
+) : ListAdapter<ITileData, AnimeTileAdapter.AnimeTileViewHolder<T>>(
     AnimeTileAdapter.AnimeTileComparator
 ) {
 

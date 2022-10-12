@@ -11,9 +11,6 @@
         <item name="colorOnSecondary">#fff</item>
         <item name="colorOnSurface">#fff</item>
         <item name="colorOutline">#2fff</item>
-
-	    <item name="tabSelectedTextColor">?attr/colorPrimaryVariant</item>
-	    <item name="sheetsButtonColor">?attr/colorPrimaryVariant</item>
     </style>
 
 </resources>

@@ -2,6 +2,9 @@ package com.otaku.kickassanime.api
 
 import com.otaku.kickassanime.api.conveter.JsonInText
 import com.otaku.kickassanime.api.model.*
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.http.*
 
 
@@ -32,9 +35,9 @@ interface KickassAnimeService {
     @JsonInText("animes")
     suspend fun getNewSeasonAnimeEntries(): List<AnimeResponse>
 
-    @FormUrlEncoded
-    @POST("/api/anime_search")
-    suspend fun search(@Field("keyword") query: String): List<AnimeSearchResponse>
+    @POST("/search")
+    @JsonInText("animes")
+    suspend fun search(@Query("q") query: String): List<AnimeSearchResponse>
 
     @GET("{slug}")
     @JsonInText

@@ -3,6 +3,8 @@ package com.otaku.kickassanime.utils
 import com.otaku.kickassanime.api.model.*
 import com.otaku.kickassanime.db.models.entity.AnimeEntity
 import com.otaku.kickassanime.db.models.entity.EpisodeEntity
+import com.otaku.kickassanime.db.models.entity.VideoHistory
+import org.threeten.bp.LocalDateTime
 
 fun AnimeResponse.asAnimeEntity(): AnimeEntity {
     return AnimeEntity(
@@ -24,7 +26,7 @@ fun Anime.asAnimeEntity(): AnimeEntity {
     )
 }
 
-fun Anime.asEpisodeEntities(): EpisodeEntity {
+fun Anime.asEpisodeEntity(): EpisodeEntity {
     return EpisodeEntity(
         episodeSlug = this.slug,
         episodeSlugId = this.slug?.substringAfterLast("-")?.toInt() ?: 0,
@@ -80,7 +82,7 @@ fun AnimeInformation.asAnimeEntity(animeEntity: AnimeEntity?): AnimeEntity {
     }
 }
 
-fun EpisodeInformation.asEpisodeEntities(e: EpisodeEntity): EpisodeEntity {
+fun EpisodeInformation.asEpisodeEntity(e: EpisodeEntity): EpisodeEntity {
     val response = this
     return e.apply {
         episodeId = response.epId?.toIntOrNull() ?: 0
@@ -100,10 +102,10 @@ fun EpisodeInformation.asEpisodeEntities(e: EpisodeEntity): EpisodeEntity {
 
 fun AnimeAndEpisodeInformation.asEpisodeEntity(e: EpisodeEntity): EpisodeEntity? {
     val response = this.episodeInformation ?: return null
-    return response.asEpisodeEntities(e)
+    return response.asEpisodeEntity(e)
 }
 
-fun AnimeAndEpisodeInformation.asEpisodeEntities(): List<EpisodeEntity> {
+fun AnimeAndEpisodeInformation.asEpisodeEntity(): List<EpisodeEntity> {
     return this.episodes.map {
         EpisodeEntity(
             episodeSlug = it.slug,
@@ -115,7 +117,7 @@ fun AnimeAndEpisodeInformation.asEpisodeEntities(): List<EpisodeEntity> {
     }.toList()
 }
 
-fun AnimeInformation.asEpisodeEntities(): List<EpisodeEntity> {
+fun AnimeInformation.asEpisodeEntity(): List<EpisodeEntity> {
     return this.episodes.map {
         EpisodeEntity(
             episodeSlug = it.slug,
@@ -125,6 +127,18 @@ fun AnimeInformation.asEpisodeEntities(): List<EpisodeEntity> {
             animeId = this.aid,
         )
     }.toList()
+}
+
+fun EpisodeEntity.asVideoHistory(): VideoHistory {
+    return VideoHistory(
+        episodeSlugId,
+        lastPlayed = LocalDateTime.now(),
+        timestamp = 0
+    )
+}
+
+fun AnimeSearchResponse.asAnimeEntity(): AnimeEntity {
+    return AnimeEntity(image = image, name = name, animeslug = slug, animeSlugId = slugId?.toIntOrNull() ?: 0)
 }
 
 private object Constants {

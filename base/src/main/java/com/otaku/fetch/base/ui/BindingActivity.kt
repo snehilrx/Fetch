@@ -21,7 +21,7 @@ import java.lang.ref.WeakReference
 open class BindingActivity<T : ViewDataBinding>(@LayoutRes private val layoutRes: Int) :
     AppCompatActivity() {
 
-    private var mStatusBarHeight: Int = 0
+    var _statusBarHeight: Int = 0
     lateinit var weakReference: WeakReference<T>
     val binding: T get() = weakReference.get() ?: throw IllegalStateException("Binding is null")
 
@@ -29,7 +29,7 @@ open class BindingActivity<T : ViewDataBinding>(@LayoutRes private val layoutRes
         super.onCreate(savedInstanceState)
         weakReference =
             WeakReference(DataBindingUtil.setContentView(this, layoutRes))
-        mStatusBarHeight = getStatusBarHeight()
+        _statusBarHeight = getStatusBarHeight()
         onBind(binding, savedInstanceState)
     }
 
@@ -48,7 +48,7 @@ open class BindingActivity<T : ViewDataBinding>(@LayoutRes private val layoutRes
     }
 
     protected fun initShineView(shineView: ShineView, appbarLayout: AppBarLayout) {
-        shineView.statusbarHeight = mStatusBarHeight.toFloat()
+        shineView.statusbarHeight = _statusBarHeight.toFloat()
         appbarLayout.addOnOffsetChangedListener(shineView)
     }
 
@@ -84,15 +84,6 @@ open class BindingActivity<T : ViewDataBinding>(@LayoutRes private val layoutRes
         )
     }
 
-    private fun setupToolbar(toolbar: Toolbar) {
-        toolbar.layoutParams = toolbar.layoutParams?.apply {
-            height += mStatusBarHeight
-        }
-        toolbar.apply {
-            setPadding(paddingLeft, paddingTop + mStatusBarHeight, paddingRight, paddingBottom)
-        }
-    }
-
     private fun getStatusBarHeight(): Int {
         var result = 0
         val resourceId = resources.getIdentifier("status_bar_height", "dimen", "android")
@@ -114,9 +105,6 @@ open class BindingActivity<T : ViewDataBinding>(@LayoutRes private val layoutRes
         toolbar: Toolbar?
     ) {
         setSupportActionBar(toolbar)
-        if (toolbar != null) {
-            setupToolbar(toolbar)
-        }
     }
 
     fun setTransparentStatusBar() {

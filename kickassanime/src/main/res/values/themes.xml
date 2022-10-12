@@ -12,6 +12,18 @@
         <item name="colorOutline">#2000</item>
     </style>
 
+
+
+	<style name="TextAppearance.KickassAnime.TitleLarge" parent="TextAppearance.Material3.TitleLarge">
+		<item name="fontWeight">700</item>
+	</style>
+
+	<style name="TextAppearance.KickassAnime.TitleMedium" parent="TextAppearance.Material3.TitleMedium">
+	</style>
+
+	<style name="TextAppearance.KickassAnime.TitleSmall" parent="TextAppearance.Material3.TitleSmall">
+	</style>
+
     <style name="Theme.KickassAnime.VideoMenuBottomSheet" parent="Theme.MaterialComponents.BottomSheetDialog">
         <item name="background">@android:color/transparent</item>
         <item name="contentPaddingBottom">24dp</item>

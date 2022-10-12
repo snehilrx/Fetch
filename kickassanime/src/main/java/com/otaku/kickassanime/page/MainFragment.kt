@@ -1,7 +1,11 @@
 package com.otaku.kickassanime.page
 
+import android.content.Context
 import android.os.Bundle
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavHostController
 import androidx.navigation.fragment.NavHostFragment
 import com.otaku.kickassanime.R
 

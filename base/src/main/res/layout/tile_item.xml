@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-
+		<import type="android.view.View"/>
         <variable
             name="tileData"
             type="com.otaku.fetch.data.ITileData" />
@@ -52,7 +52,8 @@
                 android:layout_marginBottom="8dp"
                 android:background="@drawable/black_chip"
                 android:gravity="center"
-                android:text="@{tileData.tags.get(0)}"
+	            android:visibility="@{tileData.tags.size() > 0 ? View.VISIBLE : View.GONE}"
+                android:text="@{tileData.tags.size() > 0 ? tileData.tags.get(0) : ``}"
                 android:textAppearance="@style/Fetch.ChipText"
                 app:layout_constraintBottom_toTopOf="@+id/title"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -67,7 +68,8 @@
                 android:layout_marginBottom="8dp"
                 android:background="@drawable/black_chip"
                 android:gravity="center"
-                android:text="@{tileData.tags.get(1)}"
+	            android:visibility="@{tileData.tags.size() > 0 ? View.VISIBLE : View.GONE}"
+	            android:text="@{tileData.tags.size() > 0 ? tileData.tags.get(1) : ``}"
                 android:textAppearance="@style/Fetch.ChipText"
                 app:layout_constraintBottom_toTopOf="@+id/title"
                 app:layout_constraintStart_toStartOf="parent"

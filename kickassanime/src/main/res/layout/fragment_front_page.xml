@@ -11,7 +11,8 @@
 			android:id="@+id/shimmerLoading"
 			android:layout_width="match_parent"
 			android:layout_height="match_parent"
-			app:shimmer_auto_start="true">
+			app:shimmer_auto_start="true"
+			tools:visibility="gone">
 
 			<include layout="@layout/shimmer_front_page" />
 		</com.facebook.shimmer.ShimmerFrameLayout>
@@ -19,8 +20,7 @@
 		<androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 			android:id="@+id/refreshLayout"
 			android:layout_width="match_parent"
-			android:layout_height="match_parent"
-			android:visibility="gone">
+			android:layout_height="match_parent">
 
 			<androidx.coordinatorlayout.widget.CoordinatorLayout
 				android:id="@+id/front"
@@ -31,6 +31,7 @@
 					android:id="@+id/shineView"
 					android:layout_width="match_parent"
 					android:layout_height="match_parent"
+					android:fitsSystemWindows="true"
 					app:scrimHeight="192dp"
 					app:statusbarHeight="10dp"
 					app:toolbarHeight="?attr/actionBarSize" />
@@ -38,21 +39,29 @@
 				<com.google.android.material.appbar.AppBarLayout
 					android:id="@+id/appbarLayout"
 					android:layout_width="match_parent"
-					android:layout_height="640dp"
-					android:background="@android:color/transparent">
+					android:layout_height="wrap_content"
+					android:background="@android:color/transparent"
+					android:fitsSystemWindows="true">
 
 					<com.google.android.material.appbar.CollapsingToolbarLayout
 						android:id="@+id/collapsingToolbar"
 						android:layout_width="match_parent"
-						android:layout_height="match_parent"
+						android:layout_height="wrap_content"
+						app:titleCollapseMode="scale"
 						app:collapsedTitleGravity="fill_vertical"
-						app:collapsedTitleTextColor="?attr/colorSecondary"
 						app:contentScrim="?attr/colorPrimary"
-						app:expandedTitleGravity="top"
-						app:expandedTitleMarginTop="100dp"
 						app:layout_scrollFlags="scroll|snap|exitUntilCollapsed"
+						app:expandedTitleGravity="top"
 						app:statusBarScrim="?attr/colorSecondary"
+						app:expandedTitleMarginTop="100dp"
 						app:toolbarId="@+id/toolbar">
+
+						<com.google.android.material.appbar.MaterialToolbar
+							app:layout_collapseMode="pin"
+							android:id="@+id/toolbar"
+							android:elevation="10dp"
+							android:layout_width="match_parent"
+							android:layout_height="?attr/actionBarSize" />
 
 						<LinearLayout
 							android:id="@+id/carousel_container"
@@ -60,7 +69,17 @@
 							android:layout_height="wrap_content"
 							android:layout_marginTop="200dp"
 							android:orientation="vertical"
-							app:layout_collapseMode="pin">
+							app:layout_collapseMode="parallax">
+
+							<com.lapism.search.widget.MaterialSearchBar
+								android:id="@+id/search_bar"
+								app:search_navigationElevation="4dp"
+								app:search_radius="10dp"
+								android:hint="@string/search_anime"
+								app:search_navigationContentDescription="@string/search_anime"
+								app:search_navigationIconCompat="search"
+								android:layout_width="match_parent"
+								android:layout_height="wrap_content" />
 
 							<include
 								android:id="@+id/carousel_heading"
@@ -74,12 +93,6 @@
 								android:layout_height="@dimen/cardview_height_with_reflection"
 								android:nestedScrollingEnabled="false" />
 						</LinearLayout>
-
-						<androidx.appcompat.widget.Toolbar
-							android:id="@+id/toolbar"
-							android:layout_width="match_parent"
-							android:layout_height="?attr/actionBarSize" />
-
 					</com.google.android.material.appbar.CollapsingToolbarLayout>
 				</com.google.android.material.appbar.AppBarLayout>
 
@@ -88,8 +101,9 @@
 					android:layout_width="match_parent"
 					android:layout_height="match_parent"
 					android:layout_gravity="fill_vertical"
-					android:paddingBottom="150dp"
+					android:nestedScrollingEnabled="true"
 					android:clipToPadding="false"
+					android:paddingBottom="150dp"
 					app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
 					app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
 					app:spanCount="@integer/span_count"

@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "532e006871be6ed675914f7d7a4896d9",
+    "identityHash": "f14e6e0c0980a4a47bbf6e557a4f23b5",
     "entities": [
       {
         "tableName": "anime",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`animeId` INTEGER, `malId` INTEGER, `simklId` INTEGER, `animeSlugId` INTEGER NOT NULL, `name` TEXT, `enTitle` TEXT, `animeslug` TEXT, `description` TEXT, `status` TEXT, `image` TEXT, `startdate` TEXT, `enddate` TEXT, `broadcastDay` TEXT, `broadcastTime` TEXT, `source` TEXT, `duration` TEXT, `site` TEXT, `infoLink` TEXT, `createddate` TEXT, `type` TEXT, `rating` INTEGER, PRIMARY KEY(`animeSlugId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`animeId` INTEGER, `malId` INTEGER, `simklId` INTEGER, `animeSlugId` INTEGER NOT NULL, `name` TEXT, `enTitle` TEXT, `animeslug` TEXT, `description` TEXT, `status` TEXT, `image` TEXT, `startdate` TEXT, `enddate` TEXT, `broadcastDay` TEXT, `broadcastTime` TEXT, `source` TEXT, `duration` TEXT, `site` TEXT, `infoLink` TEXT, `createddate` TEXT, `type` TEXT, `rating` INTEGER, `favourite` INTEGER NOT NULL, PRIMARY KEY(`animeSlugId`))",
         "fields": [
           {
             "fieldPath": "animeId",
@@ -133,6 +133,12 @@
             "columnName": "rating",
             "affinity": "INTEGER",
             "notNull": false
+          },
+          {
+            "fieldPath": "favourite",
+            "columnName": "favourite",
+            "affinity": "INTEGER",
+            "notNull": true
           }
         ],
         "primaryKey": {
@@ -384,12 +390,56 @@
         },
         "indices": [],
         "foreignKeys": []
+      },
+      {
+        "tableName": "video_history",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`episodeSlugId` INTEGER NOT NULL, `timestamp` INTEGER NOT NULL, `lastPlayed` TEXT NOT NULL, PRIMARY KEY(`episodeSlugId`), FOREIGN KEY(`episodeSlugId`) REFERENCES `episode`(`episodeSlugId`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "episodeSlugId",
+            "columnName": "episodeSlugId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timestamp",
+            "columnName": "timestamp",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastPlayed",
+            "columnName": "lastPlayed",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "episodeSlugId"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [],
+        "foreignKeys": [
+          {
+            "table": "episode",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "episodeSlugId"
+            ],
+            "referencedColumns": [
+              "episodeSlugId"
+            ]
+          }
+        ]
       }
     ],
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '532e006871be6ed675914f7d7a4896d9')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f14e6e0c0980a4a47bbf6e557a4f23b5')"
     ]
   }
 }

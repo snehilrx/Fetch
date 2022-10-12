@@ -57,23 +57,20 @@
 			<com.google.android.material.appbar.AppBarLayout
 				android:id="@+id/appbarLayout"
 				android:layout_width="match_parent"
-				android:layout_height="250dp"
+				android:layout_height="wrap_content"
 				android:background="@android:color/transparent"
-				android:elevation="0dp">
+				android:elevation="0dp"
+				android:fitsSystemWindows="true">
 
 				<com.google.android.material.appbar.CollapsingToolbarLayout
 					android:id="@+id/collapsingToolbar"
 					android:layout_width="match_parent"
-					android:layout_height="match_parent"
+					android:layout_height="?attr/collapsingToolbarLayoutLargeSize"
 					android:shadowColor="?colorPrimaryVariant"
 					android:shadowDx="1"
 					android:shadowDy="1"
 					app:autoSizeTextType="uniform"
-					app:collapsedTitleGravity="fill_vertical"
-					app:collapsedTitleTextColor="?attr/colorSecondary"
 					app:contentScrim="?attr/colorPrimary"
-					app:expandedTitleGravity="top"
-					app:expandedTitleMarginTop="100dp"
 					app:expandedTitleTextColor="?colorPrimaryVariant"
 					app:layout_scrollFlags="scroll|snap|exitUntilCollapsed"
 					app:maxLines="2"
@@ -94,10 +91,11 @@
 						app:layout_collapseMode="pin"
 						tools:visibility="visible" />
 
-					<androidx.appcompat.widget.Toolbar
+					<com.google.android.material.appbar.MaterialToolbar
 						android:id="@+id/toolbar"
 						android:layout_width="match_parent"
 						android:layout_height="?attr/actionBarSize"
+						android:elevation="10dp"
 						app:layout_collapseMode="pin" />
 
 				</com.google.android.material.appbar.CollapsingToolbarLayout>

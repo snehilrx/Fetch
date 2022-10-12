@@ -1,29 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools">
 
-    <data>
-        <variable
-            name="anime"
-            type="com.otaku.kickassanime.db.models.entity.AnimeEntity" />
-    </data>
+	<data>
+
+		<variable
+			name="anime"
+			type="com.otaku.kickassanime.db.models.entity.AnimeEntity" />
+	</data>
 
 	<FrameLayout
 		android:layout_width="match_parent"
 		android:layout_height="match_parent">
+
 		<com.facebook.shimmer.ShimmerFrameLayout
 			android:id="@+id/shimmerLoading"
 			android:layout_width="match_parent"
-			app:shimmer_auto_start="true"
-			android:layout_height="match_parent">
+			android:layout_height="match_parent"
+			android:visibility="invisible"
+			app:shimmer_auto_start="true">
+
 			<include layout="@layout/shimmer_anime" />
 		</com.facebook.shimmer.ShimmerFrameLayout>
+
 		<androidx.coordinatorlayout.widget.CoordinatorLayout
-			android:visibility="gone"
 			android:id="@+id/list"
 			android:layout_width="match_parent"
-			android:layout_height="match_parent">
+			android:layout_height="match_parent"
+			tools:visibility="visible">
 
 			<com.otaku.fetch.base.ui.ShineView
 				android:id="@+id/shineView"
@@ -36,33 +41,66 @@
 			<com.google.android.material.appbar.AppBarLayout
 				android:id="@+id/appbarLayout"
 				android:layout_width="match_parent"
-				android:layout_height="250dp"
+				android:layout_height="wrap_content"
 				android:background="@android:color/transparent"
-				android:elevation="0dp">
+				android:elevation="0dp"
+				android:fitsSystemWindows="true">
 
 				<com.google.android.material.appbar.CollapsingToolbarLayout
 					android:id="@+id/collapsingToolbar"
 					android:layout_width="match_parent"
-					android:layout_height="match_parent"
-					app:collapsedTitleGravity="fill_vertical"
-					app:collapsedTitleTextColor="?attr/colorSecondary"
-					app:contentScrim="?attr/colorPrimary"
-					app:layout_scrollFlags="scroll|snap|exitUntilCollapsed"
-					app:expandedTitleGravity="top"
+					android:layout_height="?attr/collapsingToolbarLayoutLargeSize"
+					android:shadowColor="?colorPrimaryVariant"
+					android:shadowDx="1"
+					android:shadowDy="1"
 					app:autoSizeTextType="uniform"
-					app:maxLines="2"
-					app:expandedTitleMarginTop="100dp"
+					app:expandedTitleMarginEnd="64dp"
+					app:contentScrim="?attr/colorPrimary"
+					app:expandedTitleTextColor="?colorPrimaryVariant"
+					app:layout_scrollFlags="scroll|snap|exitUntilCollapsed"
+					app:maxLines="10"
 					app:statusBarScrim="?attr/colorSecondary"
-					app:toolbarId="@+id/toolbar">
+					app:toolbarId="@+id/toolbar"
+					tools:title="hello">
+
 
 					<androidx.appcompat.widget.Toolbar
 						android:id="@+id/toolbar"
-						app:layout_collapseMode="pin"
 						android:layout_width="match_parent"
-						android:layout_height="?attr/actionBarSize" />
+						android:layout_height="?attr/actionBarSize"
+						android:elevation="10dp"
+						app:layout_collapseMode="pin" >
+
+					</androidx.appcompat.widget.Toolbar>
+
 
 				</com.google.android.material.appbar.CollapsingToolbarLayout>
 			</com.google.android.material.appbar.AppBarLayout>
+
+			<FrameLayout
+				android:id="@+id/favoriteTouchArea"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_gravity="bottom|end"
+				android:elevation="10dp"
+				android:layout_marginEnd="24dp"
+				android:layout_marginBottom="32dp">
+
+				<com.google.android.material.floatingactionbutton.FloatingActionButton
+					android:layout_width="match_parent"
+					android:layout_height="match_parent"
+					android:contentDescription="@string/all_episodes"/>
+
+				<com.mikepenz.iconics.view.IconicsCheckBox
+					android:id="@+id/favorite"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:checked="@{anime.favourite}"
+					android:layout_margin="0dp"
+					android:padding="0dp"
+					android:elevation="10dp"
+					android:layout_gravity="center"/>
+			</FrameLayout>
 
 			<androidx.core.widget.NestedScrollView
 				android:id="@+id/container"
@@ -71,7 +109,7 @@
 				android:fillViewport="true"
 				app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
 
-				<LinearLayout
+				<androidx.constraintlayout.widget.ConstraintLayout
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
 					android:orientation="vertical">
@@ -81,45 +119,66 @@
 						android:id="@+id/description"
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
-						android:layout_marginStart="24dp"
-						android:layout_marginTop="24dp"
-						android:layout_marginEnd="24dp"
-						android:layout_marginBottom="24dp"
+						android:layout_marginStart="16dp"
+						android:layout_marginEnd="16dp"
 						android:adjustViewBounds="true"
-						android:scaleType="fitCenter"
 						android:justificationMode="inter_word"
+						android:scaleType="fitCenter"
 						android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+						app:layout_constraintEnd_toEndOf="parent"
+						app:layout_constraintStart_toStartOf="parent"
+						app:layout_constraintTop_toTopOf="parent"
 						app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.Fetch.CardView"
 						app:src="@{anime.imageUrl}"
 						app:text="@{anime.description}"
 						tools:ignore="ImageContrastCheck"
 						tools:src="@android:drawable/gallery_thumb"
-						tools:text="@tools:sample/lorem/random">
+						tools:text="@tools:sample/lorem">
 
 					</com.otaku.fetch.base.ui.MarginTextView>
 
-					<com.google.android.material.textview.MaterialTextView
+					<com.google.android.material.button.MaterialButton
+						android:id="@+id/mal"
+						android:text="@string/view_on_mal"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
-						android:layout_marginStart="24dp"
+						android:layout_marginEnd="16dp"
+						app:backgroundTint="@null"
+						android:textColor="#fff"
+						android:background="@drawable/gradient_two"
+						app:layout_constraintBottom_toBottomOf="@+id/materialTextView"
+						app:layout_constraintEnd_toEndOf="parent"
+						app:layout_constraintTop_toTopOf="@+id/materialTextView" />
+
+					<com.google.android.material.textview.MaterialTextView
+						android:id="@+id/materialTextView"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:layout_marginStart="16dp"
+						android:layout_marginTop="16dp"
 						android:text="@string/all_episodes"
-						android:textAppearance="@style/TextAppearance.Material3.HeadlineMedium" />
+						android:textAppearance="@style/TextAppearance.Material3.HeadlineMedium"
+						app:layout_constraintStart_toStartOf="parent"
+						app:layout_constraintTop_toBottomOf="@+id/description" />
 
 					<androidx.recyclerview.widget.RecyclerView
 						android:id="@+id/episodeList"
 						android:layout_width="match_parent"
 						android:layout_height="match_parent"
 						android:layout_gravity="center_horizontal"
-						android:layout_marginTop="12dp"
+						android:layout_marginTop="8dp"
 						android:nestedScrollingEnabled="false"
 						android:orientation="horizontal"
 						app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+						app:layout_constraintTop_toBottomOf="@+id/materialTextView"
 						app:spanCount="9"
 						tools:itemCount="100"
+						android:layout_marginBottom="32dp"
 						tools:listitem="@layout/item_episode" />
 
-				</LinearLayout>
+				</androidx.constraintlayout.widget.ConstraintLayout>
 			</androidx.core.widget.NestedScrollView>
+
 
 		</androidx.coordinatorlayout.widget.CoordinatorLayout>
 	</FrameLayout>

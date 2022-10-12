@@ -2,6 +2,7 @@ package com.otaku.kickassanime.di
 
 import android.annotation.SuppressLint
 import android.content.Context
+import androidx.media3.common.util.UnstableApi
 import androidx.room.Room
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
@@ -26,7 +27,8 @@ object KickassAnimeModule {
     @Provides
     @Singleton
     @Named("kickassanime")
-    fun kickassAnime(): AppModule = PackageModule()
+    @UnstableApi
+    fun kickassAnime(kickassAnimeDb: KickassAnimeDb, kickassAnimeService: KickassAnimeService): AppModule = PackageModule(kickassAnimeService, kickassAnimeDb)
 
     @Provides
     @Singleton
@@ -35,7 +37,7 @@ object KickassAnimeModule {
 
     @Provides
     @Singleton
-    fun gson(): Gson = GsonBuilder().serializeNulls().create()
+    fun gson(): Gson = GsonBuilder().setLenient().serializeNulls().create()
 
     @SuppressLint("UnsafeOptInUsageError")
     @Provides

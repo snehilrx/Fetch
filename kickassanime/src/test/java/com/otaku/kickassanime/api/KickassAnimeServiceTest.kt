@@ -1,10 +1,14 @@
 package com.otaku.kickassanime.api
 
+import com.fetch.cloudflarebypass.CloudflareHTTPClient
+import com.fetch.cloudflarebypass.Log
 import com.google.gson.GsonBuilder
 import com.otaku.kickassanime.Strings
 import com.otaku.kickassanime.api.conveter.FindJsonInTextConverterFactory
 import kotlinx.coroutines.runBlocking
-import okhttp3.OkHttpClient
+import okhttp3.*
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody.Companion.toRequestBody
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -12,16 +16,28 @@ import org.junit.Test
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
+
 class KickassAnimeServiceUnitTest {
 
+    private lateinit var okHttpClient: OkHttpClient
     private lateinit var kickassAnimeService: KickassAnimeService
 
     @Before
     fun setup() {
+        okHttpClient = CloudflareHTTPClient(object : Log {
+            override fun i(tag: String, s: String) {
+                println(s);
+            }
+
+            override fun e(tag: String, s: String) {
+                println(s);
+            }
+
+        }).okHttpClient.build()
         kickassAnimeService = Retrofit.Builder()
-            .addConverterFactory(FindJsonInTextConverterFactory.create(GsonBuilder().serializeNulls().create()))
-            .addConverterFactory(GsonConverterFactory.create(GsonBuilder().serializeNulls().create()))
-            .client(OkHttpClient())
+            .addConverterFactory(FindJsonInTextConverterFactory.create(GsonBuilder().setLenient().serializeNulls().create()))
+            .addConverterFactory(GsonConverterFactory.create(GsonBuilder().setLenient().serializeNulls().create()))
+            .client(okHttpClient)
             .baseUrl(Strings.KICKASSANIME_URL)
             .build()
             .create(KickassAnimeService::class.java)
@@ -52,7 +68,7 @@ class KickassAnimeServiceUnitTest {
     @Test
     fun testGetFrontPageAnimeList() {
         runBlocking {
-            val result = kickassAnimeService.getFrontPageAnimeList(0).anime
+            val result = kickassAnimeService.getFrontPageAnimeList(1).anime
             assertTrue(
                 "No anime found in  ${Strings.KICKASSANIME_URL}/anime-list",
                 result.isNotEmpty()

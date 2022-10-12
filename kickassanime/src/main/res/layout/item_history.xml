@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <import type="android.view.View"/>
+        <variable
+            name="history"
+            type="com.otaku.fetch.data.ITileData" />
+    </data>
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_marginEnd="@dimen/item_spacing"
+        android:layout_marginStart="@dimen/item_spacing"
+        android:layout_marginBottom="@dimen/item_spacing"
+        android:clickable="true"
+        android:focusable="true"
+        app:cardCornerRadius="16dp"
+        app:elevation="2dp"
+        app:shapeAppearance="@style/ShapeAppearanceOverlay.Fetch.CardView">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="bottom">
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/image"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_gravity="center"
+                android:contentDescription="@string/thumbnail"
+                android:scaleType="centerCrop"
+                android:maxWidth="@dimen/item_view_width"
+                app:imageUrl="@{history.imageUrl}"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/guideline7"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.Fetch.CardView.Thumbnail"
+                tools:src="@tools:sample/avatars" />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:lineSpacingExtra="2sp"
+                android:padding="8dp"
+                android:text="@{history.title}"
+                android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
+                app:layout_constraintBottom_toTopOf="@+id/guideline8"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/image"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="The Rising of the Shield Hero Season 2" />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/subtitle0"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:lineSpacingExtra="2sp"
+                android:padding="8dp"
+                android:text="@{history.tags.get(0)}"
+                android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/guideline9"
+                app:layout_constraintStart_toEndOf="@+id/image"
+                app:layout_constraintTop_toTopOf="@+id/guideline8"
+                tools:text="The Rising of the Shield Hero Season 2" />
+
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/subtitle1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:lineSpacingExtra="2sp"
+                android:padding="8dp"
+                android:text="@{history.tags.get(1)}"
+                android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/subtitle2"
+                app:layout_constraintStart_toEndOf="@+id/subtitle0"
+                app:layout_constraintTop_toTopOf="@+id/guideline8"
+                tools:text="The Rising of the Shield Hero Season 2" />
+
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/subtitle2"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:lineSpacingExtra="2sp"
+                android:padding="8dp"
+                android:text="@{history.tags.get(2)}"
+                android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@+id/guideline10"
+                app:layout_constraintTop_toTopOf="@+id/guideline8"
+                tools:text="The Rising of the Shield Hero Season 2" />
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guideline7"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent="0.25"/>
+
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guideline9"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent="0.5"/>
+
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guideline10"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent="0.75"/>
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guideline8"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layout_constraintGuide_begin="50dp" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+</layout>

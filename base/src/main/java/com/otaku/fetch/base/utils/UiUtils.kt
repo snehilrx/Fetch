@@ -102,11 +102,11 @@ object UiUtils {
     inline val Number.toPxInt
         get() = toPx.toInt()
 
-    fun showError(loadingError: Throwable?, activity: Activity, onPositive: () -> Unit = {activity.finish()}) {
-        showError(loadingError?.message, activity, onPositive)
+    fun showError(loadingError: Throwable?, activity: Activity, text: String = "ok", onPositive: () -> Unit = {activity.finish()}) {
+        showError(loadingError?.message, activity, onPositive, text)
     }
 
-    fun showError(message: String?, activity: Activity, onPositive: () -> Unit = {activity.finish()}){
+    fun showError(message: String?, activity: Activity, onPositive: () -> Unit = {activity.finish()}, text: String = "ok"){
         val errorIcon = IconicsDrawable(activity, FontAwesome.Icon.faw_bug).apply {
             colorInt = Color.RED
             sizeDp = 24
@@ -115,7 +115,7 @@ object UiUtils {
         InfoSheet().show(activity) {
             title("Oops, we got an error")
             content(message ?: "Something went wrong")
-            onPositive("ok", errorIcon) {
+            onPositive(text, errorIcon) {
                 dismiss()
                 onPositive()
             }

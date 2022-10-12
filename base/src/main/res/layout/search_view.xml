@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.lapism.search.widget.MaterialSearchView xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/searchView"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent">
+</com.lapism.search.widget.MaterialSearchView>

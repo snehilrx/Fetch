@@ -4,10 +4,13 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import androidx.core.os.bundleOf
+import androidx.fragment.app.FragmentActivity
 import com.otaku.fetch.base.ui.BindingActivity
 import com.otaku.kickassanime.R
+import com.otaku.kickassanime.api.model.AnimeSearchResponse
 import com.otaku.kickassanime.databinding.ActivityAnimeBinding
 import com.otaku.kickassanime.db.models.entity.AnimeEntity
+import com.otaku.kickassanime.utils.asAnimeEntity
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -39,10 +42,18 @@ class AnimeActivity : BindingActivity<ActivityAnimeBinding>(R.layout.activity_an
     }
 
     companion object {
-        fun newInstance(activity: Activity, anime: AnimeEntity) : Intent {
+        fun newInstance(activity: Activity, anime: AnimeEntity): Intent {
             return Intent(activity, AnimeActivity::class.java).apply {
                 putExtras(AnimeActivityArgs.toBundle(anime))
             }
+        }
+
+        fun newInstance(activity: Activity, anime: AnimeSearchResponse): Intent {
+            return newInstance(
+                activity,
+                anime.asAnimeEntity()
+            )
+
         }
     }
 
