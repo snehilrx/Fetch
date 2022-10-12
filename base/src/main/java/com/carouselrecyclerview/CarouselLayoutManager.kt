@@ -389,19 +389,19 @@ class CarouselLayoutManager constructor(
             layoutItems(recycler, state, direction)
         }
         animator?.addListener(object : Animator.AnimatorListener {
-            override fun onAnimationStart(animation: Animator?) {
+            override fun onAnimationStart(animation: Animator) {
                 //do nothing
             }
 
-            override fun onAnimationEnd(animation: Animator?) {
+            override fun onAnimationEnd(animation: Animator) {
                 onSelectedCallback()
             }
 
-            override fun onAnimationCancel(animation: Animator?) {
+            override fun onAnimationCancel(animation: Animator) {
                 //do nothing
             }
 
-            override fun onAnimationRepeat(animation: Animator?) {
+            override fun onAnimationRepeat(animation: Animator) {
                 //do nothing
             }
 
@@ -486,7 +486,9 @@ class CarouselLayoutManager constructor(
     /**
      * Check the child tag if it's not the [TAG] throw an error
      */
-    @Throws(IllegalArgumentException::class)
+    @Throws(
+        IllegalArgumentException::class
+    )
     private fun checkTAG(tag: Any?): TAG? {
         return if (tag != null) {
             if (tag is TAG) {
@@ -758,8 +760,8 @@ class CarouselLayoutManager constructor(
             return 0
         }
 
-        override fun writeToParcel(dest: Parcel?, flags: Int) {
-            dest?.writeInt(scrollPosition)
+        override fun writeToParcel(dest: Parcel, flags: Int) {
+            dest.writeInt(scrollPosition)
         }
 
         companion object CREATOR : Parcelable.Creator<SaveState> {
