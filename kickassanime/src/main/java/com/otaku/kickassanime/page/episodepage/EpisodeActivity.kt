@@ -193,7 +193,7 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
 
     override fun onDestroy() {
         destroyWebView()
-        trackSelector.release()
+        binding.playerView.player?.release()
         super.onDestroy()
     }
 
