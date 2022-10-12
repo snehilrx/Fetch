@@ -4,6 +4,7 @@ plugins {
     id 'dagger.hilt.android.plugin'
     id "androidx.navigation.safeargs.kotlin"
     id "kotlin-kapt"
+    id 'kotlin-parcelize'
 }
 
 import java.nio.file.Paths
@@ -30,12 +31,13 @@ android {
     }
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
     buildFeatures {
         dataBinding true
+        viewBinding true
     }
     hilt {
         enableTransformForLocalTests = true
@@ -52,13 +54,17 @@ android {
             void afterExecute(Task task, TaskState taskState) {
                 if("generateSafeArgsDebug" <=> task.name){
                     def builds = new File("${projectDir.path}/build/generated/source/navigation-args")
-                    builds.eachFileRecurse(groovy.io.FileType.FILES) { file ->
-                        if (file.name.matches('.*Directions\\.kt$')) {
-                            def fPath = Paths.get(file.absolutePath)
-                            List<String> lines = Files.readAllLines(fPath, StandardCharsets.UTF_8)
-                            lines.set(3 - 1, "import com.otaku.kickassanime.R")
-                            Files.write(fPath, lines, StandardCharsets.UTF_8)
-                            println file.path
+                    if(builds.exists()){
+                        builds.eachFileRecurse(groovy.io.FileType.FILES) { file ->
+                            if (file.name.matches('.*Directions\\.kt$')) {
+                                def fPath = Paths.get(file.absolutePath)
+                                List<String> lines = Files.readAllLines(fPath, StandardCharsets.UTF_8)
+                                if(lines.size >= 2) {
+                                    lines.set(2, "import com.otaku.kickassanime.R")
+                                    Files.write(fPath, lines, StandardCharsets.UTF_8)
+                                    println file.path
+                                }
+                            }
                         }
                     }
                 }
@@ -68,28 +74,28 @@ android {
     namespace 'com.otaku.kickassanime'
 }
 
+ext.JWPlayerVersion = '4.6.0'
 dependencies {
     implementation project(path: ":base")
     implementation "androidx.core:core-ktx:$versions.core_ktx"
     implementation "com.google.android.material:material:$versions.material"
-    implementation 'androidx.navigation:navigation-fragment-ktx:2.5.0'
-    implementation 'androidx.navigation:navigation-ui-ktx:2.5.0'
+    implementation 'androidx.navigation:navigation-fragment-ktx:2.5.1'
+    implementation 'androidx.navigation:navigation-ui-ktx:2.5.1'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
     implementation 'androidx.test.espresso:espresso-contrib:3.4.0'
     implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.5.1'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1'
-    implementation 'androidx.appcompat:appcompat:1.4.2'
+    implementation 'androidx.appcompat:appcompat:1.5.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     testImplementation "androidx.paging:paging-common:$versions.paging"
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:$versions.swipe_refresh_layout"
     implementation "com.squareup.retrofit2:converter-gson:$versions.gson_conveter"
-    implementation "com.github.sparrow007:carouselrecyclerview:$versions.carouselrecyclerview"
     implementation "com.mikepenz:iconics-core:5.3.4"
     implementation 'com.mikepenz:fontawesome-typeface:5.13.3.0-kotlin@aar'
-    implementation "com.mikepenz:iconics-views:5.3.4"
     implementation "com.maxkeppeler.sheets:core:$versions.sheets"
     implementation "com.maxkeppeler.sheets:info:$versions.sheets"
+    implementation "com.mikepenz:iconics-views:5.3.4"
     // paging
     implementation "androidx.paging:paging-runtime:$versions.paging"
 
@@ -110,6 +116,8 @@ dependencies {
     implementation "com.google.dagger:hilt-android:$versions.hilt"
     kapt "com.google.dagger:hilt-compiler:$versions.hilt"
 
+    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0'
+
     /* tests dependencies */
     androidTestImplementation "androidx.test.espresso:espresso-core:$versions.espresso_core"
     testImplementation "junit:junit:$versions.junit"
@@ -124,4 +132,10 @@ dependencies {
 
     androidTestImplementation("com.squareup.okhttp3:mockwebserver:5.0.0-alpha.7")
 
+
+    implementation 'com.google.android.exoplayer:exoplayer-core:2.18.1'
+    implementation 'com.google.android.exoplayer:exoplayer-dash:2.18.1'
+    implementation 'com.google.android.exoplayer:exoplayer-ui:2.18.1'
+
+    implementation 'com.facebook.shimmer:shimmer:0.5.0'
 }

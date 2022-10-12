@@ -6,51 +6,42 @@ import com.otaku.kickassanime.db.KickassAnimeDb
 import com.otaku.kickassanime.db.models.entity.AnimeEntity
 import com.otaku.kickassanime.db.models.entity.EpisodeEntity
 import com.otaku.kickassanime.utils.asAnimeEntity
+import com.otaku.kickassanime.utils.asEpisodeEntities
 import com.otaku.kickassanime.utils.asEpisodeEntity
+import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class EpisodeRepository @Inject constructor(
     private val kickassAnimeDb: KickassAnimeDb,
     private val kickassAnimeService: KickassAnimeService
-    ) {
+) {
 
-    suspend fun getAnime(slugId: Int): AnimeEntity? {
-        val animeEntity = kickassAnimeDb.animeEntityDao().getAnime(slugId) ?: return null
-        if(animeEntity.description.isNullOrEmpty()) {
-            Log.i(TAG, "getAnimeFromEpisodeSlug: episode is not fully fetched")
-            val animeSlug = animeEntity.animeslug
-            if(animeSlug == null) {
-                Log.i(TAG, "getAnimeFromEpisodeSlug: anime slug is null")
-                return null
-            }
-            val response = kickassAnimeService.getAnimeInformation(animeSlug).asAnimeEntity(animeEntity)
-            Log.d(TAG, "getAnimeFromEpisodeSlug: response: $response")
-            kickassAnimeDb.animeEntityDao().insert(response)
-            return response
+    fun getAnime(slugId: Int): Flow<AnimeEntity?> {
+        return kickassAnimeDb.animeEntityDao().getAnimeFlowable(slugId)
+    }
+
+    fun getEpisode(episodeSlugId: Int): Flow<EpisodeEntity?> {
+        return kickassAnimeDb.episodeEntityDao().getEpisodeFlow(episodeSlugId)
+    }
+
+    suspend fun fetchRemote(animeSlugId: Int, episodeSlugId: Int) {
+        val episode = kickassAnimeDb.episodeEntityDao().getEpisode(episodeSlugId) ?: return
+        val episodeSlug = episode.episodeSlug ?: return
+        val animeEpisode = kickassAnimeService.getAnimeEpisode(episodeSlug)
+        animeEpisode.asEpisodeEntities()
+        val anime = kickassAnimeDb.animeEntityDao().getAnime(animeSlugId)
+        val animeEntity = animeEpisode.anime?.asAnimeEntity(anime)
+        animeEntity?.let { kickassAnimeDb.animeEntityDao().updateAll(it) }
+        val episodeEntity = animeEpisode.asEpisodeEntity(episode)
+        episodeEntity?.let { kickassAnimeDb.episodeEntityDao().insert(it) }
+        val episodes = animeEpisode.asEpisodeEntities().filter { it.episodeSlug != episodeSlug }
+        kickassAnimeDb.episodeEntityDao().insertAll(episodes)
+        if (animeEntity != null) {
+            kickassAnimeDb.animeEntityDao().updateAll(animeEntity)
         }
-        return animeEntity
-    }
-
-    suspend fun getEpisode(id: Int, animeId: Int): EpisodeEntity? {
-        val episode = kickassAnimeDb.episodeEntityDao().getEpisode(id) ?: return null
-        val anime = getAnime(animeId) ?: return null
-        if(episode.link1.isNullOrEmpty()) {
-            Log.i(TAG, "getEpisode: episode is null")
-            if (episode.episodeSlug == null) {
-                Log.i(TAG, "getEpisode: episode slug is null")
-                return null
-            }
-            val animeEpisode = kickassAnimeService.getAnimeEpisode(episode.episodeSlug)
-            val animeEntity = animeEpisode.anime?.asAnimeEntity(anime)
-            animeEntity?.let { kickassAnimeDb.animeEntityDao().updateAll(it) }
-            val episodeEntity = animeEpisode.asEpisodeEntity(episode)
-            episodeEntity?.let { kickassAnimeDb.episodeEntityDao().insert(it) }
-            return episodeEntity
+        if (episodeEntity != null) {
+            kickassAnimeDb.episodeEntityDao().updateAll(episodeEntity)
         }
-        return episode
     }
 
-    companion object {
-        private const val TAG = "EpisodeRepository"
-    }
 }

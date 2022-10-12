@@ -22,7 +22,11 @@ class AnimeTileAdapter<T : ViewDataBinding>(
             ),
             onBind
         )
-    class AnimeTileViewHolder<T: ViewDataBinding>(private val binding: T, private val onBind: (T, AnimeTile) -> Unit) :
+
+    class AnimeTileViewHolder<T : ViewDataBinding>(
+        private val binding: T,
+        private val onBind: (T, AnimeTile) -> Unit
+    ) :
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(item: AnimeTile) = with(binding) {
@@ -44,7 +48,7 @@ class AnimeTileAdapter<T : ViewDataBinding>(
         }
     }
 
-    companion object{
-        const val TAG ="ANIME_TILE_ADAPTER"
+    companion object {
+        const val TAG = "ANIME_TILE_ADAPTER"
     }
 }

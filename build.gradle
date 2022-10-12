@@ -7,7 +7,6 @@ buildscript {
         classpath "androidx.navigation:navigation-safe-args-gradle-plugin:$versions.nav"
     }
     repositories {
-
         google()
     }
 }

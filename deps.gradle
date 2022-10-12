@@ -5,12 +5,12 @@ ext.versions = [
         arch                : '2.1.0',
         coordinator_layout  : '1.2.0',
         appsearch           : '1.0.0-alpha04',
-        hilt                : '2.42',
+        hilt                : '2.43.2',
         retrofit            : '2.9.0',
-        room                : '2.4.2',
+        room                : '2.4.3',
         room_paging         : '2.5.0-alpha01',
         core_ktx            : '1.8.0',
-        appcompat           : '1.4.2',
+        appcompat           : '1.5.0',
         material            : '1.6.1',
         constraintlayout    : '2.1.4',
         junit               : '4.13.2',
@@ -22,18 +22,18 @@ ext.versions = [
         swipe_refresh_layout: '1.2.0-alpha01',
         okhttp              : '5.0.0-alpha.7',
         gson_conveter       : '2.9.0',
-        threetenbp          : '1.6.0',
+        threetenbp          : '1.6.1',
         carouselrecyclerview: '1.2.5',
         palette             : '1.0.0',
         iconics             : '5.3.3',
-        sheets              : '2.2.8',
+        sheets              : '2.2.9',
         // test
         mock_okhttp_server  : '5.0.0-alpha.7',
         composeVersion : "1.1.1"
 ]
 
 ext.env = [
-        compileSdk               : 31,
+        compileSdk               : 32,
         applicationId            : full_app_name,
         minSdk                   : 23,
         targetSdk                : 31,

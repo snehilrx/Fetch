@@ -10,8 +10,6 @@
             type="com.otaku.fetch.data.ITileData" />
 
         <import type="com.otaku.fetch.base.ui.GradientFromImage" />
-
-        <import type="com.otaku.fetch.base.ui.UiUtils" />
     </data>
 
 

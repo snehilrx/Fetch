@@ -24,7 +24,7 @@ fun Anime.asAnimeEntity(): AnimeEntity {
     )
 }
 
-fun Anime.asEpisodeEntity(): EpisodeEntity {
+fun Anime.asEpisodeEntities(): EpisodeEntity {
     return EpisodeEntity(
         episodeSlug = this.slug,
         episodeSlugId = this.slug?.substringAfterLast("-")?.toInt() ?: 0,
@@ -35,10 +35,32 @@ fun Anime.asEpisodeEntity(): EpisodeEntity {
 }
 
 @Suppress("unused")
-fun AnimeInformation.asAnimeEntity(animeEntity: AnimeEntity): AnimeEntity {
+fun AnimeInformation.asAnimeEntity(animeEntity: AnimeEntity?): AnimeEntity {
     val anime = this
+    if (animeEntity == null) {
+        return AnimeEntity(
+            animeId = anime.aid?.toIntOrNull() ?: 0,
+            animeSlugId = anime.slugId?.toIntOrNull() ?: 0,
+            rating = anime.rating,
+            broadcastDay = anime.broadcastDay,
+            startdate = anime.startdate?.let { Utils.parseDate(it) },
+            enTitle = anime.enTitle,
+            broadcastTime = anime.broadcastTime,
+            source = anime.source,
+            duration = anime.duration,
+            enddate = anime.enddate?.let { Utils.parseDate(it) },
+            status = anime.status,
+            description =anime.description,
+            site =anime.site,
+            infoLink = anime.infoLink,
+            createddate = anime.createddate,
+            malId = anime.malId?.toIntOrNull(),
+            simklId = anime.simklId?.toIntOrNull(),
+            type = type ?: anime.type
+        )
+    }
     return animeEntity.apply {
-        animeId = animeId ?: aid?.toInt()
+        animeId = animeId ?: anime.aid?.toInt() ?: anime.animeId?.toInt() ?: 0
         rating = rating ?: anime.rating
         broadcastDay = broadcastDay ?: anime.broadcastDay
         startdate = startdate ?: anime.startdate?.let { Utils.parseDate(it) }
@@ -58,7 +80,7 @@ fun AnimeInformation.asAnimeEntity(animeEntity: AnimeEntity): AnimeEntity {
     }
 }
 
-fun EpisodeInformation.asEpisodeEntity(e: EpisodeEntity): EpisodeEntity {
+fun EpisodeInformation.asEpisodeEntities(e: EpisodeEntity): EpisodeEntity {
     val response = this
     return e.apply {
         episodeId = response.epId?.toIntOrNull() ?: 0
@@ -70,18 +92,42 @@ fun EpisodeInformation.asEpisodeEntity(e: EpisodeEntity): EpisodeEntity {
         votes = response.votes
         link4 = response.link4
         rating = response.rating
-        prev = response.next?.slug?.substringAfterLast("-")?.toInt()
+        prev = response.prev?.slug?.substringAfterLast("-")?.toInt()
         link3 = response.link3
         favourite = response.favourite
     }
 }
+
 fun AnimeAndEpisodeInformation.asEpisodeEntity(e: EpisodeEntity): EpisodeEntity? {
     val response = this.episodeInformation ?: return null
-    return response.asEpisodeEntity(e)
+    return response.asEpisodeEntities(e)
 }
 
-//fun Episodes.asEpisodeEntity(): EpisodeEntity {
-//    return EpisodeEntity(
-//
-//    )
-//}
+fun AnimeAndEpisodeInformation.asEpisodeEntities(): List<EpisodeEntity> {
+    return this.episodes.map {
+        EpisodeEntity(
+            episodeSlug = it.slug,
+            episodeSlugId = it.slug?.substringAfterLast("-")?.toInt() ?: 0,
+            name = if (it.num?.length == 1) "0${it.num}" else it.num,
+            createdDate = it.createddate?.let { date -> Utils.parseDateTime(date) },
+            animeId = this.anime?.animeId,
+        )
+    }.toList()
+}
+
+fun AnimeInformation.asEpisodeEntities(): List<EpisodeEntity> {
+    return this.episodes.map {
+        EpisodeEntity(
+            episodeSlug = it.slug,
+            episodeSlugId = it.slug?.substringAfterLast("-")?.toInt() ?: 0,
+            name = if (it.num?.length == 1) "0${it.num}" else it.num,
+            createdDate = it.createddate?.let { date -> Utils.parseDateTime(date) },
+            animeId = this.aid,
+        )
+    }.toList()
+}
+
+private object Constants {
+    @JvmStatic
+    val regex = Regex("Dub", RegexOption.IGNORE_CASE)
+}

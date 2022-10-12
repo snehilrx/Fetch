@@ -6,7 +6,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.otaku.kickassanime.databinding.HeadingItemBinding
 import com.otaku.kickassanime.utils.Constraints
 
-class HeaderAdapter(private val title: CharSequence, private val actionButtonText: CharSequence, private val onClick: () -> Unit) :
+class HeaderAdapter(
+    private val title: CharSequence,
+    private val actionButtonText: CharSequence,
+    private val onClick: () -> Unit
+) :
     RecyclerView.Adapter<HeaderAdapter.HeadingViewHolder>() {
 
     class HeadingViewHolder(

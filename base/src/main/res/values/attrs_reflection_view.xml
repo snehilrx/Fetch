@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<attr format="dimension" name="reflect_gap"/>
+	<attr format="reference" name="reflect_reflectionLayoutStyle"/>
+	<attr format="float" name="reflect_relativeDepth"/>
+	<declare-styleable name="ReflectionViewContainer">
+		<attr name="reflect_relativeDepth"/>
+		<attr name="reflect_gap"/>
+	</declare-styleable>
+	<declare-styleable name="ReflectionViewContainer_Layout">
+		<attr name="reflect_relativeDepth"/>
+		<attr name="reflect_gap"/>
+	</declare-styleable>
+</resources>

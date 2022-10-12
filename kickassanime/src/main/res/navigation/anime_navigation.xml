@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/anime_navigation"
+    app:startDestination="@id/animeFragment">
+
+    <fragment
+        android:id="@+id/animeFragment"
+        android:name="com.otaku.kickassanime.page.animepage.AnimeFragment"
+        android:label="{title}">
+        <argument
+            android:name="animeSlug"
+            app:argType="string" />
+	    <argument
+		    android:name="animeSlugId"
+		    app:argType="integer" />
+	    <argument
+		    android:name="title"
+		    app:argType="string" />
+	    <action
+		    android:id="@+id/action_animeFragment_to_episodeActivity"
+		    app:destination="@id/episodeActivity" />
+    </fragment>
+	<activity
+		android:id="@+id/episodeActivity"
+		android:name="com.otaku.kickassanime.page.episodepage.EpisodeActivity"
+		android:label="{title}">
+		<argument
+			android:name="title"
+			app:argType="string" />
+		<argument
+			android:name="episodeSlugId"
+			app:argType="integer" />
+		<argument
+			android:name="animeSlugId"
+			app:argType="integer" />
+	</activity>
+</navigation>

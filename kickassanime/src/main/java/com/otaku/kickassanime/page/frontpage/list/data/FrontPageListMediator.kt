@@ -5,6 +5,7 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
+import com.otaku.fetch.base.TAG
 import com.otaku.kickassanime.api.model.AnimeListFrontPageResponse
 import com.otaku.kickassanime.db.KickassAnimeDb
 import com.otaku.kickassanime.db.models.AnimeTile
@@ -18,7 +19,7 @@ import java.io.IOException
 class FrontPageListMediator(
     private val database: KickassAnimeDb,
     private val networkFetch: suspend (Int) -> AnimeListFrontPageResponse?
-    ) : RemoteMediator<Int, AnimeTile>() {
+) : RemoteMediator<Int, AnimeTile>() {
 
     override suspend fun load(
         loadType: LoadType,
@@ -30,14 +31,19 @@ class FrontPageListMediator(
                 LoadType.REFRESH -> 1
                 LoadType.PREPEND -> return endPaging
                 LoadType.APPEND -> {
-                    val lastItem = state.lastItemOrNull() ?: return endPaging
-                    lastItem.pageNo + 1
+                    val lastItem = state.lastItemOrNull()
+                    if (lastItem == null) {
+                        Log.i(TAG, "Page End")
+                        return endPaging
+                    }
+                    lastItem.pageNo.plus(1)
                 }
             }
+            Log.i(TAG, "Page No, Load Key: $loadKey")
 
             val response = networkFetch(loadKey)
 
-            Log.i(TAG, "Fetch ${response?.anime?.size} anime tiles")
+            Log.i(TAG, "Fetch ${response?.anime?.size} anime tiles, ${loadType.name}")
             Utils.saveResponse(response, database)
             MediatorResult.Success(
                 endOfPaginationReached = response?.anime?.isEmpty() ?: true
@@ -52,15 +58,12 @@ class FrontPageListMediator(
     }
 
     override suspend fun initialize(): InitializeAction {
-        val lastUpdate = database.frontPageEpisodesDao().lastUpdate()?.minusHours(cacheTimeoutInHours)
+        val lastUpdate =
+            database.frontPageEpisodesDao().lastUpdate()?.minusHours(cacheTimeoutInHours)
         return if (lastUpdate?.isAfter(LocalDateTime.now()) == true) {
             InitializeAction.SKIP_INITIAL_REFRESH
         } else {
             InitializeAction.LAUNCH_INITIAL_REFRESH
         }
-    }
-
-    private companion object{
-        private const val TAG = "FrontPageListMediator"
     }
 }

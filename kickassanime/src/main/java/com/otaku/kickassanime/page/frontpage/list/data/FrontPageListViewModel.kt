@@ -14,8 +14,11 @@ import javax.inject.Inject
 class FrontPageListViewModel @Inject constructor(
     repository: FrontPageListRepository
 ) : ViewModel() {
-    val all: LiveData<PagingData<AnimeTile>> = repository.getFrontPageAllPager().liveData.cachedIn(viewModelScope)
-    val sub: LiveData<PagingData<AnimeTile>> = repository.getFrontPageSubPager().liveData.cachedIn(viewModelScope)
-    val dub: LiveData<PagingData<AnimeTile>> = repository.getFrontPageDubPager().liveData.cachedIn(viewModelScope)
+    val all: LiveData<PagingData<AnimeTile>> =
+        repository.getFrontPageAllPager().liveData.cachedIn(viewModelScope)
+    val sub: LiveData<PagingData<AnimeTile>> =
+        repository.getFrontPageSubPager().liveData.cachedIn(viewModelScope)
+    val dub: LiveData<PagingData<AnimeTile>> =
+        repository.getFrontPageDubPager().liveData.cachedIn(viewModelScope)
 
 }

@@ -3,7 +3,7 @@ package com.otaku.kickassanime.page.adapters
 import android.graphics.Rect
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
-import com.otaku.fetch.base.ui.UiUtils.toPxInt
+import com.otaku.fetch.base.utils.UiUtils.toPxInt
 
 class GridSpacingItemDecoration(
     private val itemWidth: Int,

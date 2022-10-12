@@ -38,7 +38,12 @@ interface KickassAnimeService {
 
     @GET("{slug}")
     @JsonInText
-    suspend fun getAnimeEpisode(@Path("slug", encoded = true) path: String): AnimeAndEpisodeInformation
+    suspend fun getAnimeEpisode(
+        @Path(
+            "slug",
+            encoded = true
+        ) path: String
+    ): AnimeAndEpisodeInformation
 
     @GET("{slug}")
     @JsonInText("anime")

@@ -1,16 +1,19 @@
 package com.otaku.kickassanime.page.frontpage
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.view.View
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.ActivityNavigator
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.GridLayoutManager.SpanSizeLookup
+import com.otaku.fetch.base.TAG
 import com.otaku.fetch.base.databinding.CarouselItemLayoutBinding
 import com.otaku.fetch.base.databinding.TileItemBinding
+import com.otaku.fetch.base.livedata.State
 import com.otaku.fetch.base.ui.BindingFragment
 import com.otaku.kickassanime.R
 import com.otaku.kickassanime.databinding.FragmentFrontPageBinding
@@ -46,12 +49,12 @@ class FrontPageFragment : BindingFragment<FragmentFrontPageBinding>(R.layout.fra
         com.otaku.fetch.base.R.layout.carousel_item_layout
     ) { binding, item ->
         binding.tileData = item
+        binding.card.setOnClickListener { onItemClick(item) }
     }
 
     private val adapter = ConcatAdapter()
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    override fun onBind(binding: FragmentFrontPageBinding, savedInstanceState: Bundle?) {
         initAppbar(
             binding.shineView,
             binding.toolbar,
@@ -82,20 +85,11 @@ class FrontPageFragment : BindingFragment<FragmentFrontPageBinding>(R.layout.fra
             })
             addAdapter(dubbedAnimeAdapter)
         }
-        val spanCount = resources.getInteger(com.otaku.fetch.base.R.integer.span_count)
-        (binding.container.layoutManager as? GridLayoutManager)?.spanSizeLookup =
-            object : SpanSizeLookup() {
-                override fun getSpanSize(position: Int): Int {
-                    return when (position) {
-                        0, subbedAnimeAdapter.itemCount + 1 -> spanCount
-                        else -> 1
-                    }
-                }
-            }
         binding.container.adapter = adapter
     }
 
     private fun initCarousel() {
+        binding.carousel.set3DItem(true)
         binding.carousel.adapter = newAnimeAdapter
         binding.appbarLayout.addOnOffsetChangedListener { appbarLayout, verticalOffset ->
             val alpha = 1 - abs(verticalOffset / appbarLayout.height.toFloat())
@@ -109,33 +103,30 @@ class FrontPageFragment : BindingFragment<FragmentFrontPageBinding>(R.layout.fra
     }
 
     private fun initFlow() {
-        frontPageViewModel.all.observe(viewLifecycleOwner) { data ->
-            Log.i(TAG, "for all anime ${data.size} items loaded")
-            newAnimeAdapter.submitList(data)
-        }
-        frontPageViewModel.sub.observe(viewLifecycleOwner) { data ->
-            Log.i(TAG, "for sub anime ${data.size} items loaded")
-            subbedAnimeAdapter.submitList(data)
-        }
-        frontPageViewModel.dub.observe(viewLifecycleOwner) { data ->
-            Log.i(TAG, "for dub anime ${data.size} items loaded")
-            dubbedAnimeAdapter.submitList(data)
+        frontPageViewModel.zipped.observe(viewLifecycleOwner) { data ->
+            Log.i(TAG, "for all anime ${data.all.size} items loaded")
+            newAnimeAdapter.submitList(data.all)
+            Log.i(TAG, "for sub anime ${data.sub.size} items loaded")
+            subbedAnimeAdapter.submitList(data.sub)
+            Log.i(TAG, "for dub anime ${data.dub.size} items loaded")
+            dubbedAnimeAdapter.submitList(data.dub)
+            showContent()
         }
 
         frontPageViewModel.isLoading().observe(viewLifecycleOwner) {
             when (it) {
-                is FrontPageViewModel.State.FAILED -> {
+                is State.FAILED -> {
                     Log.e(TAG, "NETWORK CALL FAILED")
                     it.exception?.let { exception -> showError(exception.cause, requireActivity()) }
                     binding.refreshLayout.isRefreshing = false
                 }
 
-                is FrontPageViewModel.State.LOADING -> {
+                is State.LOADING -> {
                     Log.i(TAG, "NETWORK CALL REQUESTED")
                     binding.refreshLayout.isRefreshing = true
                 }
 
-                is FrontPageViewModel.State.SUCCESS -> {
+                is State.SUCCESS -> {
                     Log.i(TAG, "NETWORK CALL SUCCESS")
                     binding.refreshLayout.isRefreshing = false
                 }
@@ -143,36 +134,46 @@ class FrontPageFragment : BindingFragment<FragmentFrontPageBinding>(R.layout.fra
         }
     }
 
+    private fun showContent() {
+        binding.shimmerLoading.stopShimmer()
+        binding.shimmerLoading.isVisible = false
+        binding.refreshLayout.isVisible = true
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         binding.container.adapter = null
         binding.carousel.adapter = null
-    }
-
-    override fun onPause() {
-        super.onPause()
-        binding.refreshLayout.isEnabled = false
+        (binding.container.layoutManager as? GridLayoutManager)?.spanSizeLookup = null
     }
 
     override fun onResume() {
         super.onResume()
-        binding.refreshLayout.isEnabled = true
+        val spanCount = resources.getInteger(com.otaku.fetch.base.R.integer.span_count)
+        (binding.container.layoutManager as? GridLayoutManager)?.spanSizeLookup =
+            object : SpanSizeLookup() {
+                override fun getSpanSize(position: Int): Int {
+                    return when (position) {
+                        0, subbedAnimeAdapter.itemCount + 1 -> spanCount
+                        else -> 1
+                    }
+                }
+            }
     }
 
     private fun onItemClick(item: AnimeTile) {
+        val extras = ActivityNavigator.Extras.Builder()
+            .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+            .build()
         findNavController().navigate(
             FrontPageFragmentDirections.actionFrontPageFragmentToEpisodeFragment(
                 title = item.title,
                 episodeSlugId = item.episodeSlugId,
                 animeSlugId = item.animeSlugId
-            )
+            ),
+            extras
         )
     }
-
-    companion object {
-        private const val TAG = "FrontPageFragment"
-    }
-
 }
 
 

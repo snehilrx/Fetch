@@ -4,4 +4,7 @@
         <attr name="scrimHeight" format="dimension" />
         <attr name="toolbarHeight" format="dimension" />
     </declare-styleable>
+    <declare-styleable name="GridLayoutExtras">
+        <attr name="itemWidth" format="dimension" />
+    </declare-styleable>
 </resources>

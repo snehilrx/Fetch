@@ -13,7 +13,9 @@
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="250dp"
-        android:layout_margin="@dimen/item_spacing"
+        android:layout_marginEnd="@dimen/item_spacing"
+        android:layout_marginStart="@dimen/item_spacing"
+        android:layout_marginBottom="@dimen/item_spacing"
         android:clickable="true"
         android:focusable="true"
         app:cardCornerRadius="16dp"

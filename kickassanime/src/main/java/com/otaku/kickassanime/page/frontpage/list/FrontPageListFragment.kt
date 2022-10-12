@@ -1,9 +1,6 @@
 package com.otaku.kickassanime.page.frontpage.list
 
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.LiveData
@@ -33,31 +30,29 @@ abstract class FrontPageListFragment :
 
     protected val frontPageListViewModel: FrontPageListViewModel by viewModels()
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        super.onCreateView(inflater, container, savedInstanceState)
+    override fun onBind(binding: FragmentAnimeListBinding, savedInstanceState: Bundle?) {
         initAppbar(binding.appbar, findNavController())
         val animeAdapter = AnimeTileAdapter<TileItemBinding>(
             layoutId = com.otaku.fetch.base.R.layout.tile_item
-        ) { binding, item ->
-            binding.tileData = item
-            binding.root.setOnClickListener {
+        ) { adapterBinding, item ->
+            adapterBinding.tileData = item
+            adapterBinding.root.setOnClickListener {
                 onItemClick(item)
             }
         }
         initFrontPageList(animeAdapter)
         initFlow(animeAdapter)
-        return binding.root
     }
 
-    private fun initFrontPageList(animeAdapter: AnimeTileAdapter<TileItemBinding>) {
+    private fun initFrontPageList(
+        animeAdapter: AnimeTileAdapter<TileItemBinding>
+    ) {
         binding.animeList.adapter = animeAdapter
     }
 
-    private fun initFlow(animeAdapter: AnimeTileAdapter<TileItemBinding>) {
+    private fun initFlow(
+        animeAdapter: AnimeTileAdapter<TileItemBinding>
+    ) {
         getList().observe(viewLifecycleOwner) { data ->
             animeAdapter.submitData(lifecycle, data)
         }

@@ -25,8 +25,8 @@ object KickassAnimeModule {
 
     @Provides
     @Singleton
-    @Named("kissanime")
-    fun kickassAnime() : AppModule = PackageModule()
+    @Named("kickassanime")
+    fun kickassAnime(): AppModule = PackageModule()
 
     @Provides
     @Singleton
@@ -40,7 +40,8 @@ object KickassAnimeModule {
     @SuppressLint("UnsafeOptInUsageError")
     @Provides
     @Singleton
-    fun kickassDatabase(@ApplicationContext context: Context): KickassAnimeDb = Room.databaseBuilder(
-        context, KickassAnimeDb::class.java, "kick.db"
-    ).setAutoCloseTimeout(10000, TimeUnit.DAYS).build()
+    fun kickassDatabase(@ApplicationContext context: Context): KickassAnimeDb =
+        Room.databaseBuilder(
+            context, KickassAnimeDb::class.java, "kick.db"
+        ).setAutoCloseTimeout(10000, TimeUnit.DAYS).build()
 }

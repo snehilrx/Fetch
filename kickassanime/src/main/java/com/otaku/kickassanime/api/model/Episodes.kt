@@ -4,7 +4,7 @@ import androidx.annotation.Keep
 import com.google.gson.annotations.SerializedName
 
 @Keep
-data class Episodes (
+data class Episodes(
     @SerializedName("epnum") val epnum: String? = null,
     @SerializedName("name") val name: String? = null,
     @SerializedName("slug") val slug: String? = null,

@@ -1,49 +1,71 @@
 package com.otaku.kickassanime.page.episodepage
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
+import com.google.gson.Gson
+import com.otaku.fetch.base.livedata.SingleLiveEvent
+import com.otaku.fetch.base.livedata.State
+import com.otaku.kickassanime.api.model.Maverickki
 import com.otaku.kickassanime.db.models.entity.AnimeEntity
 import com.otaku.kickassanime.db.models.entity.EpisodeEntity
 import com.otaku.kickassanime.utils.model.Response
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.launch
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import javax.inject.Inject
 import javax.inject.Named
 
 @HiltViewModel
 class EpisodeViewModel @Inject constructor(
     private val episodeRepository: EpisodeRepository,
-    @Named("io") private val dispatcher: CoroutineDispatcher
-) :
-    ViewModel() {
+    @Named("io") private val dispatcher: CoroutineDispatcher,
+    private val gson: Gson
+) : ViewModel() {
 
-    private val episode = MutableLiveData<Response<EpisodeEntity>>()
-    private val anime = MutableLiveData<Response<AnimeEntity>>()
+    private val loadState = MutableLiveData<State>()
 
-    fun fetchAnime(id: Int) {
+    private val maverickki = SingleLiveEvent<Maverickki>()
+    private val kaaPlayerVideoLink = SingleLiveEvent<String>()
+
+    fun fetchEpisode(animeSlugId: Int, episodeSlugId: Int) {
         viewModelScope.launch(dispatcher) {
-            val animeFromEpisodeSlug = episodeRepository.getAnime(id)
-            if (animeFromEpisodeSlug != null)
-                anime.postValue(Response.Success(animeFromEpisodeSlug))
-            else
-                anime.postValue(Response.Error(Throwable("Anime not found")))
+            loadState.postValue(State.LOADING())
+            episodeRepository.fetchRemote(animeSlugId, episodeSlugId)
+            loadState.postValue(State.SUCCESS())
         }
     }
 
-    fun fetchEpisode(id: Int, animeId: Int) {
+    fun getEpisode(episodeSlugId: Int): LiveData<EpisodeEntity?> = episodeRepository.getEpisode(episodeSlugId).asLiveData(viewModelScope.coroutineContext)
+    fun getAnime(animeSlugId: Int): LiveData<AnimeEntity?> = episodeRepository.getAnime(animeSlugId).asLiveData(viewModelScope.coroutineContext)
+
+    fun getKaaPlayerVideoLink(): LiveData<String> = kaaPlayerVideoLink
+
+    fun addKaaPlayer(url: String) {
         viewModelScope.launch(dispatcher) {
-            val episodeEntity = episodeRepository.getEpisode(id, animeId)
-            if (episodeEntity != null)
-                episode.postValue(Response.Success(episodeEntity))
-            else
-                episode.postValue(Response.Error(Throwable("Episode not found")))
+            kaaPlayerVideoLink.postValue(url)
         }
     }
 
-    fun getEpisode(): LiveData<Response<EpisodeEntity>> = episode
-    fun getAnime(): LiveData<Response<AnimeEntity>> = anime
+    fun addMaverickki(link: String) {
+        viewModelScope.launch(dispatcher) {
+            link.toHttpUrlOrNull()?.let {
+                // read text from url
+                try{
+                    val fromJson = gson.fromJson(it.toUrl().readText(), Maverickki::class.java)
+                    maverickki.postValue(fromJson)
+                }catch (e: Exception){
+                }
+            }
+        }
+    }
 
+    fun getMaverickkiVideo(): LiveData<Maverickki> = maverickki
+
+    fun getLoadState(): LiveData<State> = loadState
+
+    fun removeObservers(activity: EpisodeActivity) {
+        loadState.removeObservers(activity)
+        maverickki.removeObservers(activity)
+        kaaPlayerVideoLink.removeObservers(activity)
+    }
 }

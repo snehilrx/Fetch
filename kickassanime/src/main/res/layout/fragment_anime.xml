@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+            name="anime"
+            type="com.otaku.kickassanime.db.models.entity.AnimeEntity" />
+    </data>
+
+	<FrameLayout
+		android:layout_width="match_parent"
+		android:layout_height="match_parent">
+		<com.facebook.shimmer.ShimmerFrameLayout
+			android:id="@+id/shimmerLoading"
+			android:layout_width="match_parent"
+			app:shimmer_auto_start="true"
+			android:layout_height="match_parent">
+			<include layout="@layout/shimmer_anime" />
+		</com.facebook.shimmer.ShimmerFrameLayout>
+		<androidx.coordinatorlayout.widget.CoordinatorLayout
+			android:visibility="gone"
+			android:id="@+id/list"
+			android:layout_width="match_parent"
+			android:layout_height="match_parent">
+
+			<com.otaku.fetch.base.ui.ShineView
+				android:id="@+id/shineView"
+				android:layout_width="match_parent"
+				android:layout_height="match_parent"
+				app:scrimHeight="192dp"
+				app:statusbarHeight="10dp"
+				app:toolbarHeight="?attr/actionBarSize" />
+
+			<com.google.android.material.appbar.AppBarLayout
+				android:id="@+id/appbarLayout"
+				android:layout_width="match_parent"
+				android:layout_height="250dp"
+				android:background="@android:color/transparent"
+				android:elevation="0dp">
+
+				<com.google.android.material.appbar.CollapsingToolbarLayout
+					android:id="@+id/collapsingToolbar"
+					android:layout_width="match_parent"
+					android:layout_height="match_parent"
+					app:collapsedTitleGravity="fill_vertical"
+					app:collapsedTitleTextColor="?attr/colorSecondary"
+					app:contentScrim="?attr/colorPrimary"
+					app:layout_scrollFlags="scroll|snap|exitUntilCollapsed"
+					app:expandedTitleGravity="top"
+					app:autoSizeTextType="uniform"
+					app:maxLines="2"
+					app:expandedTitleMarginTop="100dp"
+					app:statusBarScrim="?attr/colorSecondary"
+					app:toolbarId="@+id/toolbar">
+
+					<androidx.appcompat.widget.Toolbar
+						android:id="@+id/toolbar"
+						app:layout_collapseMode="pin"
+						android:layout_width="match_parent"
+						android:layout_height="?attr/actionBarSize" />
+
+				</com.google.android.material.appbar.CollapsingToolbarLayout>
+			</com.google.android.material.appbar.AppBarLayout>
+
+			<androidx.core.widget.NestedScrollView
+				android:id="@+id/container"
+				android:layout_width="match_parent"
+				android:layout_height="match_parent"
+				android:fillViewport="true"
+				app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
+
+				<LinearLayout
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:orientation="vertical">
+
+
+					<com.otaku.fetch.base.ui.MarginTextView
+						android:id="@+id/description"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginStart="24dp"
+						android:layout_marginTop="24dp"
+						android:layout_marginEnd="24dp"
+						android:layout_marginBottom="24dp"
+						android:adjustViewBounds="true"
+						android:scaleType="fitCenter"
+						android:justificationMode="inter_word"
+						android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+						app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.Fetch.CardView"
+						app:src="@{anime.imageUrl}"
+						app:text="@{anime.description}"
+						tools:ignore="ImageContrastCheck"
+						tools:src="@android:drawable/gallery_thumb"
+						tools:text="@tools:sample/lorem/random">
+
+					</com.otaku.fetch.base.ui.MarginTextView>
+
+					<com.google.android.material.textview.MaterialTextView
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:layout_marginStart="24dp"
+						android:text="@string/all_episodes"
+						android:textAppearance="@style/TextAppearance.Material3.HeadlineMedium" />
+
+					<androidx.recyclerview.widget.RecyclerView
+						android:id="@+id/episodeList"
+						android:layout_width="match_parent"
+						android:layout_height="match_parent"
+						android:layout_gravity="center_horizontal"
+						android:layout_marginTop="12dp"
+						android:nestedScrollingEnabled="false"
+						android:orientation="horizontal"
+						app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+						app:spanCount="9"
+						tools:itemCount="100"
+						tools:listitem="@layout/item_episode" />
+
+				</LinearLayout>
+			</androidx.core.widget.NestedScrollView>
+
+		</androidx.coordinatorlayout.widget.CoordinatorLayout>
+	</FrameLayout>
+</layout>

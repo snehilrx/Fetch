@@ -10,9 +10,9 @@ import android.view.ViewGroup
 import androidx.annotation.ColorInt
 import com.google.android.material.appbar.AppBarLayout
 import com.otaku.fetch.base.R
+import com.otaku.fetch.base.utils.UiUtils
 import java.lang.Math.toRadians
 import kotlin.math.cos
-import kotlin.math.roundToInt
 import kotlin.math.sin
 
 
@@ -109,7 +109,7 @@ class ShineView : View, AppBarLayout.OnOffsetChangedListener {
         )
     }
 
-    private fun getColor() = adjustAlpha(shineColor, (progress + 0.5f).coerceAtMost(1f))
+    private fun getColor() = UiUtils.adjustAlpha(shineColor, (progress + 0.5f).coerceAtMost(1f))
 
     // to fix view flickering
     private var lock = true
@@ -124,16 +124,6 @@ class ShineView : View, AppBarLayout.OnOffsetChangedListener {
         if(!lock) return
         parent.bringChildToFront(this)
         lock = false
-    }
-
-    @ColorInt
-    fun adjustAlpha(@ColorInt color: Int, factor: Float): Int {
-        val fl = (Color.alpha(color) * factor)
-        val alpha = (if (fl.isNaN()) 0 else fl.roundToInt() + 50).coerceAtMost(255)
-        val red = Color.red(color)
-        val green = Color.green(color)
-        val blue = Color.blue(color)
-        return Color.argb(alpha, red, green, blue)
     }
 
     override fun onDraw(canvas: Canvas) {

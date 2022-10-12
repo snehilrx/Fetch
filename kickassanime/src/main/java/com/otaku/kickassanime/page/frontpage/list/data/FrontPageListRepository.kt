@@ -19,9 +19,13 @@ class FrontPageListRepository @Inject constructor(
             pageSize = Constraints.NETWORK_PAGE_SIZE,
             enablePlaceholders = true,
         ),
-        remoteMediator = FrontPageListMediator(database, kickassAnimeService::getFrontPageAnimeList),
+        remoteMediator = FrontPageListMediator(
+            database,
+            kickassAnimeService::getFrontPageAnimeList
+        ),
     ) {
-        database.frontPageEpisodesDao().getFrontPageEpisodes()
+        val x = database.frontPageEpisodesDao().getFrontPageEpisodes()
+        x
     }
 
     @OptIn(ExperimentalPagingApi::class)
@@ -30,7 +34,10 @@ class FrontPageListRepository @Inject constructor(
             pageSize = Constraints.NETWORK_PAGE_SIZE,
             enablePlaceholders = true,
         ),
-        remoteMediator = FrontPageListMediator(database, kickassAnimeService::getFrontPageAnimeListDub),
+        remoteMediator = FrontPageListMediator(
+            database,
+            kickassAnimeService::getFrontPageAnimeListDub
+        ),
     ) {
         database.frontPageEpisodesDao().getFrontPageEpisodesDub()
     }
@@ -41,7 +48,10 @@ class FrontPageListRepository @Inject constructor(
             pageSize = Constraints.NETWORK_PAGE_SIZE,
             enablePlaceholders = true,
         ),
-        remoteMediator = FrontPageListMediator(database, kickassAnimeService::getFrontPageAnimeListSub),
+        remoteMediator = FrontPageListMediator(
+            database,
+            kickassAnimeService::getFrontPageAnimeListSub
+        ),
     ) {
         database.frontPageEpisodesDao().getFrontPageEpisodesSub()
     }

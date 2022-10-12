@@ -25,6 +25,7 @@ android {
 
     buildFeatures {
         dataBinding true
+        viewBinding true
     }
 
     compileOptions {
@@ -42,7 +43,6 @@ dependencies {
     implementation "androidx.appcompat:appcompat:$versions.appcompat"
     implementation "com.google.android.material:material:$versions.material"
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:$versions.swipe_refresh_layout"
-    implementation "com.github.sparrow007:carouselrecyclerview:$versions.carouselrecyclerview"
     implementation "androidx.palette:palette:$versions.palette"
 
     // Hilt
@@ -57,7 +57,7 @@ dependencies {
 
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.9.1'
 
-    implementation 'androidx.navigation:navigation-ui-ktx:2.5.0'
+    implementation 'androidx.navigation:navigation-ui-ktx:2.5.1'
     // Glide
     implementation "com.github.bumptech.glide:glide:$versions.glide"
     implementation group: 'com.github.bumptech.glide', name: 'okhttp3-integration', version: versions.glide_okhttp
@@ -68,6 +68,7 @@ dependencies {
     implementation 'com.mikepenz:fontawesome-typeface:5.13.3.0-kotlin@aar'
     implementation "com.maxkeppeler.sheets:core:$versions.sheets"
     implementation "com.maxkeppeler.sheets:info:$versions.sheets"
+    implementation "com.mikepenz:iconics-views:5.3.4"
 
     /* test dependency */
     androidTestImplementation "androidx.test.espresso:espresso-core:$versions.espresso_core"
@@ -80,4 +81,7 @@ dependencies {
     kapt "com.github.bumptech.glide:compiler:$versions.glide"
     implementation "com.github.bumptech.glide:glide:$versions.glide"
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:$versions.swipe_refresh_layout"
+    implementation 'com.google.android.exoplayer:exoplayer-core:2.18.1'
+    implementation 'com.google.android.exoplayer:exoplayer-dash:2.18.1'
+    implementation 'com.google.android.exoplayer:exoplayer-ui:2.18.1'
 }

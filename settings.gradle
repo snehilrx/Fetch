@@ -9,8 +9,9 @@ dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         maven {
-            url "https://maven.mozilla.org/maven2"
+            url 'https://mvn.jwplayer.com/content/repositories/releases/'
         }
+        maven { url "https://jitpack.io" }
         google()
         mavenCentral()
     }
@@ -20,3 +21,4 @@ include ':app'
 include ':kickassanime'
 include ':base'
 include ':base:cloudflarebypass'
+include ':MAL'

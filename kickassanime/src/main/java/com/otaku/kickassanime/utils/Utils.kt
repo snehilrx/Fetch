@@ -3,6 +3,8 @@ package com.otaku.kickassanime.utils
 import android.app.Activity
 import android.graphics.Color
 import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
 import androidx.paging.LoadState
 import androidx.room.withTransaction
 import com.maxkeppeler.sheets.info.InfoSheet
@@ -10,11 +12,13 @@ import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.typeface.library.fontawesome.FontAwesome
 import com.mikepenz.iconics.utils.colorInt
 import com.mikepenz.iconics.utils.sizeDp
+import com.otaku.fetch.base.TAG
 import com.otaku.kickassanime.api.model.AnimeListFrontPageResponse
 import com.otaku.kickassanime.db.KickassAnimeDb
 import com.otaku.kickassanime.db.models.entity.FrontPageEpisodes
 import com.otaku.kickassanime.utils.Constraints.patternDate
 import com.otaku.kickassanime.utils.Constraints.patternDateTime
+import org.threeten.bp.LocalDate
 import org.threeten.bp.LocalDateTime
 import org.threeten.bp.format.DateTimeFormatter
 
@@ -38,10 +42,10 @@ object Utils {
 
     fun parseDate(date: String): LocalDateTime {
         return try {
-            LocalDateTime.parse(date, formatterDate)
+            LocalDate.parse(date, formatterDate).atStartOfDay()
         } catch (e: Exception) {
             Log.e(TAG, "parseDate: ", e)
-            LocalDateTime.now()
+            return parseDateTime(date)
         }
     }
 
@@ -49,7 +53,7 @@ object Utils {
     suspend fun saveResponse(response: AnimeListFrontPageResponse?, database: KickassAnimeDb) {
         database.withTransaction {
             val anime = response?.anime?.map { it.asAnimeEntity() }
-            val episode = response?.anime?.map { it.asEpisodeEntity() }
+            val episode = response?.anime?.map { it.asEpisodeEntities() }
             val fpe = anime?.mapIndexed { index, animeEntity ->
                 episode?.get(index)?.let {
                     FrontPageEpisodes(
@@ -74,12 +78,12 @@ object Utils {
         showError(loadingError.error, activity)
     }
 
-    fun showError(loadingError: Throwable?, activity: Activity, onPositive: () -> Unit = {}) {
+    fun showError(loadingError: Throwable?, activity: Activity, onPositive: () -> Unit = {activity.finish()}) {
         val errorIcon = IconicsDrawable(activity, FontAwesome.Icon.faw_bug).apply {
             colorInt = Color.RED
             sizeDp = 24
         }
-        Log.e(this.TAG, "showError: ", loadingError)
+        Log.e(TAG, "showError: ", loadingError)
         InfoSheet().show(activity) {
             title("Oops, we got an error")
             loadingError?.localizedMessage?.let { content(it) }
@@ -89,6 +93,4 @@ object Utils {
             }
         }
     }
-
-    private const val TAG = "Utils"
 }

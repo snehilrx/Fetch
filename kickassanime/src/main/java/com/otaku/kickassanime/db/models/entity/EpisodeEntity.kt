@@ -1,11 +1,15 @@
 package com.otaku.kickassanime.db.models.entity
 
+import android.os.Parcelable
 import android.text.format.DateUtils
 import android.text.format.DateUtils.MINUTE_IN_MILLIS
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
+import com.otaku.kickassanime.utils.LocalDateTimeSerializable
+import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 import org.threeten.bp.LocalDateTime
 import org.threeten.bp.ZoneOffset
 
@@ -18,6 +22,7 @@ import org.threeten.bp.ZoneOffset
     )]
 
 )
+@Parcelize
 data class EpisodeEntity(
     val name: String? = null,
     var title: String? = null,
@@ -32,6 +37,7 @@ data class EpisodeEntity(
     @ColumnInfo(index = true)
     var animeId: String? = null,
     var sector: String? = null,
+    @Serializable(with = LocalDateTimeSerializable::class)
     var createdDate: LocalDateTime? = null,
     var next: Int? = null,
     var prev: Int? = null,
@@ -39,7 +45,7 @@ data class EpisodeEntity(
     var rating: Int? = null,
     var votes: String? = null,
     var favourite: Boolean? = null
-) {
+) : Parcelable {
     val timeAgo: String
         get() {
             val date = createdDate ?: return ""

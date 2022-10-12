@@ -9,5 +9,8 @@
         <item name="colorSecondary">#e7dba3</item>
         <item name="colorSecondaryVariant">#e7dba3</item>
         <item name="colorOnSecondary">#a0a0a0</item>
+        <item name="colorOnSurface">#fff</item>
+        <item name="colorOutline">#2fff</item>
     </style>
+
 </resources>
