@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.GridLayoutManager.SpanSizeLookup
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.gms.cast.CastRemoteDisplay.Configuration
 import com.lapism.search.widget.MaterialSearchView
 import com.otaku.fetch.base.TAG
 import com.otaku.fetch.base.databinding.CarouselItemLayoutBinding
@@ -221,21 +222,6 @@ class FrontPageFragment : BindingFragment<FragmentFrontPageBinding>(R.layout.fra
     }
 
     private fun initFrontPageList() {
-        binding.appbarLayout.addOnOffsetChangedListener { appBarLayout, verticalOffset ->
-            if (abs(verticalOffset) == appBarLayout.totalScrollRange) {
-                binding.carousel.visibility = View.INVISIBLE
-                binding.carouselHeading.root.visibility = View.INVISIBLE
-                binding.searchBar.visibility = View.INVISIBLE
-            } else if (verticalOffset == 0) {
-                binding.carousel.visibility = View.VISIBLE
-                binding.carouselHeading.root.visibility = View.VISIBLE
-                binding.searchBar.visibility = View.VISIBLE
-            } else {
-                binding.carousel.visibility = View.VISIBLE
-                binding.carouselHeading.root.visibility = View.VISIBLE
-                binding.searchBar.visibility = View.VISIBLE
-            }
-        }
         initCarousel()
         initList()
         binding.refreshLayout.setOnRefreshListener {
@@ -270,10 +256,13 @@ class FrontPageFragment : BindingFragment<FragmentFrontPageBinding>(R.layout.fra
         binding.carousel.set3DItem(true)
         binding.carousel.adapter = newAnimeAdapter
         binding.appbarLayout.addOnOffsetChangedListener { appbarLayout, verticalOffset ->
-            val alpha = 1 - abs(verticalOffset / appbarLayout.height.toFloat())
-            binding.carouselContainer.alpha = alpha
-            binding.refreshLayout.isEnabled = verticalOffset == 0
-            binding.carousel.isVisible = abs(verticalOffset) < appbarLayout.totalScrollRange
+            if (appbarLayout.context.resources.configuration.orientation != android.content.res.Configuration.ORIENTATION_LANDSCAPE) {
+                val alpha = 1 - abs(verticalOffset / appbarLayout.height.toFloat())
+                binding.carouselContainer.alpha = alpha
+                binding.refreshLayout.isEnabled = verticalOffset == 0
+                binding.carouselContainer.isVisible =
+                    abs(verticalOffset) < appbarLayout.totalScrollRange
+            }
         }
         binding.carouselHeading.actionButton.setOnClickListener {
             findNavController().navigate(FrontPageFragmentDirections.actionFrontPageFragmentToAllListFragment())

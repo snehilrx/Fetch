@@ -1,18 +1,21 @@
 package com.otaku.kickassanime.page.episodepage
 
 import android.content.Context
+import android.net.Uri
 import android.os.Bundle
 import android.os.Parcelable
 import android.util.AttributeSet
 import android.webkit.*
+import com.otaku.kickassanime.Strings.KAA2_URL
+import com.otaku.kickassanime.Strings.KAA_URL
+import com.otaku.kickassanime.Strings.MAVERICKKI_URL
 
 
 class CustomWebView : WebView {
 
-    var kaaPlayerCallback: ((url: String) -> Unit)? = null
-    var maverickkiCallback: ((url: String) -> Unit)? = null
     var onPageFinished: (() -> Unit)? = null
     var onProgressChanged: ((Int) -> Unit)? = null
+    var videoLinksCallback: ((url: Uri) -> Unit)? = null
 
     constructor(context: Context) : super(context)
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
@@ -22,6 +25,7 @@ class CustomWebView : WebView {
         defStyleAttr
     )
 
+    @SuppressWarnings("unused")
     constructor(
         context: Context,
         attrs: AttributeSet?,
@@ -29,6 +33,7 @@ class CustomWebView : WebView {
         defStyleRes: Int
     ) : super(context, attrs, defStyleAttr, defStyleRes)
 
+    @SuppressWarnings("unused")
     constructor(
         context: Context,
         attrs: AttributeSet?,
@@ -40,6 +45,7 @@ class CustomWebView : WebView {
     init {
         setWebContentsDebuggingEnabled(true)
         settings.databaseEnabled = true
+        settings.mediaPlaybackRequiresUserGesture = false
         settings.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
         settings.javaScriptEnabled = true
         settings.allowFileAccess = true
@@ -66,17 +72,17 @@ class CustomWebView : WebView {
                 val mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension)
                 requestUrl?.let {
                     when (it.host) {
-                        "maverickki.com" -> {
+                        MAVERICKKI_URL -> {
                             if (it.pathSegments?.get(0) == "api" && it.pathSegments?.get(1) == "source") {
-                                maverickkiCallback?.invoke(urlString)
+                                videoLinksCallback?.invoke(requestUrl)
                                 return null
                             }
                         }
-                        "kaaplayer.com" -> {
+                        KAA_URL, KAA2_URL -> {
                             if (mimeType != null && (mimeType.startsWith("video/") || mimeType.startsWith(
                                     "audio/"
                                 ))
-                            ) kaaPlayerCallback?.invoke(urlString)
+                            ) videoLinksCallback?.invoke(requestUrl)
                         }
                     }
                 }

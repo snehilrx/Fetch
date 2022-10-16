@@ -4,24 +4,16 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.text.SpannableString
-import android.text.Spanned
-import android.text.style.ClickableSpan
-import android.text.style.RelativeSizeSpan
-import android.view.View
-import android.widget.TextView
+import android.widget.AdapterView.OnItemClickListener
 import android.widget.Toast
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.ActivityNavigator
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import com.maxkeppeler.sheets.info.InfoSheet
-import com.maxkeppeler.sheets.input.InputSheet
-import com.maxkeppeler.sheets.input.type.InputRadioButtons
 import com.mikepenz.iconics.typeface.library.fontawesome.FontAwesome
 import com.otaku.fetch.base.ui.BindingFragment
+import com.otaku.fetch.base.utils.UiUtils.showError
 import com.otaku.kickassanime.R
-import com.otaku.kickassanime.api.model.Maverickki
 import com.otaku.kickassanime.databinding.FragmentEpisodeControlsBinding
 import com.otaku.kickassanime.page.animepage.AnimeActivity
 import com.otaku.kickassanime.page.episodepage.EpisodeViewModel
@@ -44,20 +36,10 @@ class EpisodeControlsFragment :
             )
         }
         binding.next.setOnClickListener {
-            val next = args.episode.next
-            if (next != null) {
-                openEpisode(next)
-            } else {
-                Toast.makeText(it.context, "No Next Episode", Toast.LENGTH_SHORT).show()
-            }
+            openNextEpisode()
         }
         binding.previous.setOnClickListener {
-            val prev = args.episode.prev
-            if (prev != null) {
-                openEpisode(prev)
-            } else {
-                Toast.makeText(it.context, "No Previous Episode", Toast.LENGTH_SHORT).show()
-            }
+            openPrevEpisode()
         }
         binding.mal.setOnClickListener {
             openLink(
@@ -67,11 +49,30 @@ class EpisodeControlsFragment :
             )
         }
         binding.links.setOnClickListener {
-            val link = viewModel.getMaverickkiVideo().value?.link() ?: viewModel.getKaaPlayerVideoLink().value
+            val link = viewModel.getVideoLink().value
             if(link != null) {
                 openLink(link)
             } else {
                 Toast.makeText(requireContext(),"No Link was found", Toast.LENGTH_SHORT).show()
+            }
+        }
+        initDropDown()
+        viewModel.onNextEpisode = this::openNextEpisode
+        viewModel.onPreviousEpisode = this::openPrevEpisode
+    }
+
+
+
+    private fun initDropDown() {
+        viewModel.getLinks().observe(this){ links ->
+            if(links.size>0){
+                binding.servers.setSimpleItems(links.map { it.first }.toTypedArray())
+                binding.servers.onItemClickListener =
+                    OnItemClickListener { _, _, position, _ -> viewModel.setCurrentServer(links[position].second) }
+                binding.servers.setText(links[0].first)
+                viewModel.setCurrentServer(links[0].second)
+            } else {
+              showError(Exception("No servers found"), requireActivity())
             }
         }
     }
@@ -82,6 +83,24 @@ class EpisodeControlsFragment :
             startActivity(browserIntent)
         } catch (e: ActivityNotFoundException){
             Toast.makeText(context, "No activity found to open link $link", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    fun openNextEpisode() {
+        val next = args.episode.next
+        if (next != null) {
+            openEpisode(next)
+        } else {
+            Toast.makeText(requireContext(), "No Next Episode", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    fun openPrevEpisode() {
+        val prev = args.episode.prev
+        if (prev != null) {
+            openEpisode(prev)
+        } else {
+            Toast.makeText(requireContext(), "No Previous Episode", Toast.LENGTH_SHORT).show()
         }
     }
 

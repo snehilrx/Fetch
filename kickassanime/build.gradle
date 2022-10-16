@@ -97,6 +97,7 @@ dependencies {
     implementation 'com.mikepenz:iconics-views:5.4.0'
     // paging
     implementation "androidx.paging:paging-runtime:$versions.paging"
+    implementation "com.squareup.retrofit2:converter-scalars:$versions.retrofit"
 
     // OkHttp / Retrofit
     implementation "com.squareup.retrofit2:retrofit:$versions.retrofit"

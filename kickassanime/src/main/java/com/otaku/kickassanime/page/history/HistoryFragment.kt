@@ -8,6 +8,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.paging.PagingData
 import androidx.paging.map
 import androidx.recyclerview.widget.GridLayoutManager
+import com.otaku.fetch.base.isLandscape
 import com.otaku.fetch.data.ITileData
 import com.otaku.kickassanime.R
 import com.otaku.kickassanime.databinding.FragmentAnimeListBinding
@@ -23,7 +24,7 @@ class HistoryFragment : ListFragment<ItemHistoryBinding>() {
 
     override fun onBind(binding: FragmentAnimeListBinding, savedInstanceState: Bundle?) {
         super.onBind(binding, savedInstanceState)
-        (binding.animeList.layoutManager as GridLayoutManager).spanCount = 1
+        (binding.animeList.layoutManager as GridLayoutManager).spanCount = if (isLandscape) 2 else 1
     }
 
     override val layoutId: Int
@@ -35,7 +36,7 @@ class HistoryFragment : ListFragment<ItemHistoryBinding>() {
     }
 
     override fun getList(): LiveData<PagingData<ITileData>> = historyViewModel.recents.map {
-        pagingData -> pagingData.map { it as ITileData }
+        pagingData -> pagingData.map { it }
     }
 
     override fun getListTag() = "Recently Watched"

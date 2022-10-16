@@ -26,6 +26,8 @@ class CarouselRecyclerview(context: Context, attributeSet: AttributeSet) :
     init {
         layoutManager = carouselLayoutManagerBuilder.build()
         isChildrenDrawingOrderEnabled = true
+        set3DItem(true)
+        setInfinite(true)
     }
 
     /**

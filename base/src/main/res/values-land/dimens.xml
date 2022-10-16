@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="cardview_height_with_reflection">320dp</dimen>
+    <dimen name="cardview_height">220dp</dimen>
+    <dimen name="cardview_margin">36dp</dimen>
+</resources>

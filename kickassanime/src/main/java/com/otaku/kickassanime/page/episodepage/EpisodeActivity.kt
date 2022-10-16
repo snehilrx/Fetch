@@ -16,7 +16,6 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.isVisible
-import androidx.lifecycle.LiveData
 import androidx.media3.common.*
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.database.StandaloneDatabaseProvider
@@ -38,10 +37,12 @@ import com.otaku.fetch.base.ui.BindingActivity
 import com.otaku.fetch.base.utils.UiUtils.loadBitmapFromUrl
 import com.otaku.fetch.base.utils.UiUtils.showError
 import com.otaku.kickassanime.R
+import com.otaku.kickassanime.Strings
 import com.otaku.kickassanime.api.model.Maverickki
 import com.otaku.kickassanime.databinding.ActivityEpisodeBinding
 import com.otaku.kickassanime.db.models.entity.AnimeEntity
 import com.otaku.kickassanime.db.models.entity.EpisodeEntity
+import com.otaku.kickassanime.page.episodepage.details.EpisodeControlsFragment
 import com.otaku.kickassanime.utils.TrackSelectionDialog
 import dagger.hilt.android.AndroidEntryPoint
 import okhttp3.OkHttpClient
@@ -54,8 +55,6 @@ import javax.inject.Inject
 class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activity_episode) {
 
     private lateinit var mFullScreenDialog: Dialog
-    private lateinit var episodeLiveData: LiveData<EpisodeEntity?>
-    private lateinit var animeLiveData: LiveData<AnimeEntity?>
     private val viewModel: EpisodeViewModel by viewModels()
 
     private lateinit var args: EpisodeActivityArgs
@@ -77,7 +76,6 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
         mFullScreenDialog.setOnDismissListener {
             exitFullScreen()
         }
-
         initAppbar(
             binding.appbarImageView,
             binding.toolbar
@@ -160,6 +158,12 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
         )
         player.repeatMode = ExoPlayer.REPEAT_MODE_OFF
         binding.playerView.player = player
+        binding.playerView.findViewById<View>(androidx.media3.ui.R.id.exo_next).setOnClickListener {
+            viewModel.onNextEpisode?.invoke()
+        }
+        binding.playerView.findViewById<View>(androidx.media3.ui.R.id.exo_prev).setOnClickListener {
+            viewModel.onPreviousEpisode?.invoke()
+        }
         binding.playerView.setShowBuffering(PlayerView.SHOW_BUFFERING_ALWAYS)
         binding.playerView.setKeepContentOnPlayerReset(true)
         binding.animeDetails?.getImageUrl()?.let {
@@ -322,11 +326,8 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
     }
 
     private fun initializeWebView() {
-        binding.webView.maverickkiCallback = {
-            viewModel.addMaverickki(it)
-        }
-        binding.webView.kaaPlayerCallback = {
-            viewModel.addKaaPlayer(it)
+        binding.webView.videoLinksCallback = {
+            viewModel.handleVideoLinks(it)
         }
         binding.webView.onProgressChanged = {
             binding.progress = it
@@ -334,8 +335,7 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
     }
 
     private fun destroyWebView() {
-        binding.webView.maverickkiCallback = null
-        binding.webView.kaaPlayerCallback = null
+        binding.webView.videoLinksCallback = null
         binding.webView.onProgressChanged = null
     }
 
@@ -344,51 +344,45 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
     }
 
     private fun initObservers(savedInstanceState: Bundle?) {
-        initLiveData()
-        episodeLiveData.observe(this) { episode ->
+        viewModel.getEpisode(args.episodeSlugId).observe(this) { episode ->
             if (episode != null) {
                 setAppbarEpisodeNumber(binding, "EP: ${episode.name}")
                 binding.episodeDetails = episode
                 viewModel.addToHistory(episode)
-                val url = episode.link1 ?: episode.link2 ?: episode.link3 ?: episode.link4
-                if (url != null) {
-                    if (savedInstanceState == null) binding.webView.loadUrl(url)
+                viewModel.loadDustUrls(episode.link1)
+                viewModel.loadMobile2Urls(episode.link4)
+            }
+            viewModel.getAnime(args.animeSlugId).observe(this) { anime ->
+                if (anime != null) {
+                    binding.animeDetails = anime
+                    binding.collapsingToolbar.title = anime.name
                 }
+                initDetailsFragment(episode, anime)
             }
-            initDetailsFragment(episode, animeLiveData.value)
         }
-        animeLiveData.observe(this) { anime ->
-            if (anime != null) {
-                binding.animeDetails = anime
-                binding.collapsingToolbar.title = anime.name
-            }
-            initDetailsFragment(episodeLiveData.value, anime)
+
+        viewModel.getCurrentServer().observe(this) {
+            mediaSources.clear()
+            binding.webView.loadUrl(it)
         }
-        viewModel.getKaaPlayerVideoLink().observe(this) {
+
+        viewModel.getVideoLink().observe(this) {
             addLink(it)
-        }
-        viewModel.getMaverickkiVideo().observe(this) {
-            it.link()?.let { it1 ->
-                addLink(it1)
-            }
         }
     }
 
-    private fun initLiveData() {
-        if (this::episodeLiveData.isInitialized) episodeLiveData.removeObservers(this)
-        if (this::animeLiveData.isInitialized) animeLiveData.removeObservers(this)
-        animeLiveData = viewModel.getAnime(args.animeSlugId)
-        episodeLiveData = viewModel.getEpisode(args.episodeSlugId)
-    }
 
     private fun initDetailsFragment(episode: EpisodeEntity?, anime: AnimeEntity?) {
         if (episode != null && anime != null)
-            (supportFragmentManager.findFragmentByTag("episodeDetailsContainer") as? NavHostFragment)
+            getEpisodeControlsNavigationHost()
                 ?.navController?.setGraph(
                     R.navigation.episode_detatils_navigation,
                     bundleOf(Pair("anime", anime), Pair("episode", episode))
                 )
     }
+
+    private fun getEpisodeControlsNavigationHost() =
+        (supportFragmentManager.findFragmentByTag("episodeDetailsContainer") as? NavHostFragment)
 
     @SuppressLint("MissingSuperCall")
     override fun onNewIntent(intent: Intent) {
@@ -396,8 +390,6 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
         viewModel.removeObservers(this)
         showLoading()
         intent.extras?.let { args = EpisodeActivityArgs.fromBundle(it) }
-        if (this::episodeLiveData.isInitialized) episodeLiveData.removeObservers(this)
-        if (this::animeLiveData.isInitialized) animeLiveData.removeObservers(this)
         mediaSources.clear()
         initialize(null)
     }

@@ -145,7 +145,7 @@
 						android:id="@+id/textView3"
 						android:layout_width="0dp"
 						android:layout_height="wrap_content"
-						android:layout_marginLeft="16dp"
+						android:layout_marginStart="16dp"
 						android:layout_marginTop="16dp"
 						android:text="@{episodeDetails.timeAgo}"
 						android:textAllCaps="true"
@@ -210,7 +210,7 @@
 							android:gravity="center"
 							android:text="@{progress+`%`}"
 							android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
-							android:textColor="#EF6C00"
+							android:textColor="#78909C"
 							android:textStyle="bold"
 							android:visibility="@{progress == -1 ? View.GONE : View.VISIBLE, default=visible}"
 							tools:text="50%" />
@@ -221,9 +221,9 @@
 
 			<com.otaku.kickassanime.page.episodepage.CustomWebView
 				android:id="@+id/webView"
+				android:visibility="gone"
 				android:layout_width="0dp"
-				android:layout_height="0dp"
-				android:visibility="invisible" />
+				android:layout_height="0dp" />
 		</androidx.coordinatorlayout.widget.CoordinatorLayout>
 	</FrameLayout>
 

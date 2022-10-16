@@ -1,6 +1,10 @@
 package com.otaku.kickassanime.page.episodepage
 
+import android.util.Log
+import com.google.gson.Gson
+import com.otaku.fetch.base.TAG
 import com.otaku.kickassanime.api.KickassAnimeService
+import com.otaku.kickassanime.api.model.Dust
 import com.otaku.kickassanime.db.KickassAnimeDb
 import com.otaku.kickassanime.db.models.entity.AnimeEntity
 import com.otaku.kickassanime.db.models.entity.EpisodeEntity
@@ -11,7 +15,8 @@ import javax.inject.Inject
 
 class EpisodeRepository @Inject constructor(
     private val kickassAnimeDb: KickassAnimeDb,
-    private val kickassAnimeService: KickassAnimeService
+    private val kickassAnimeService: KickassAnimeService,
+    private val gson: Gson
 ) {
 
     fun getAnime(slugId: Int): Flow<AnimeEntity?> {
@@ -41,5 +46,22 @@ class EpisodeRepository @Inject constructor(
             kickassAnimeDb.episodeEntityDao().updateAll(episodeEntity)
         }
     }
+
+    suspend fun fetchDustLinks(link: String): Dust? {
+        try {
+            val text = kickassAnimeService.urlToText(link)
+            val find = jsText.find(text)?.value ?: return null
+            return gson.fromJson("{\"data\": $find}", Dust::class.java)
+        } catch (e: Exception){
+            Log.e(TAG, e.message, e)
+            return null
+        }
+    }
+
+    companion object{
+        @JvmStatic
+        private val jsText = "\\[\\{.*\\}\\]".toRegex()
+    }
+
 
 }

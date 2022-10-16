@@ -8,6 +8,27 @@
         android:layout_height="match_parent"
         tools:context=".page.episodepage.details.EpisodeControlsFragment">
 
+		<com.google.android.material.textfield.TextInputLayout
+			android:id="@+id/videoPicker"
+			style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:hint="Servers"
+			android:layout_marginStart="14dp"
+			android:layout_marginEnd="14dp"
+			android:layout_marginTop="14dp"
+			app:layout_constraintEnd_toEndOf="parent"
+			app:layout_constraintStart_toStartOf="parent"
+			app:layout_constraintTop_toTopOf="parent"
+			>
+
+			<com.otaku.fetch.base.ui.ComboBox
+				android:id="@+id/servers"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:inputType="none" />
+
+		</com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/mal"
@@ -53,32 +74,32 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/anime" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/previous"
-            style="@style/Widget.KickassAnime.NoSpacingButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:gravity="start|center_vertical"
-            android:paddingStart="14dp"
-            app:startIcon="@{`faw_chevron_left`}"
-            android:text="@string/prev"
-            app:layout_constraintEnd_toStartOf="@+id/guideline2"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:drawableBottom="@color/sheetsDividerColor"/>
+		<com.google.android.material.button.MaterialButton
+			android:id="@+id/previous"
+			style="@style/Widget.KickassAnime.NoSpacingButton"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:drawableBottom="@color/sheetsDividerColor"
+			android:gravity="start|center_vertical"
+			android:paddingStart="14dp"
+			android:text="@string/prev"
+			app:layout_constraintEnd_toStartOf="@+id/guideline2"
+			app:layout_constraintStart_toStartOf="parent"
+			app:layout_constraintTop_toBottomOf="@+id/videoPicker"
+			app:startIcon="@{`faw_chevron_left`}" />
 
-	    <com.google.android.material.button.MaterialButton
-		    android:id="@+id/next"
-		    style="@style/Widget.KickassAnime.NoSpacingButton"
-		    android:layout_width="0dp"
-		    android:layout_height="wrap_content"
-		    android:gravity="end|center_vertical"
-		    android:paddingEnd="14dp"
-		    android:text="@string/next"
-		    app:endIcon="@{`faw_chevron_right`}"
-		    app:layout_constraintEnd_toEndOf="parent"
-		    app:layout_constraintStart_toStartOf="@+id/guideline2"
-		    app:layout_constraintTop_toTopOf="parent" />
+		<com.google.android.material.button.MaterialButton
+			android:id="@+id/next"
+			style="@style/Widget.KickassAnime.NoSpacingButton"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:gravity="end|center_vertical"
+			android:paddingEnd="14dp"
+			android:text="@string/next"
+			app:endIcon="@{`faw_chevron_right`}"
+			app:layout_constraintEnd_toEndOf="parent"
+			app:layout_constraintStart_toStartOf="@+id/guideline2"
+			app:layout_constraintTop_toBottomOf="@+id/videoPicker" />
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guideline2"
