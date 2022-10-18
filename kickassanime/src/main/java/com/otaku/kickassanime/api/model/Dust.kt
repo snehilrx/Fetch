@@ -6,9 +6,6 @@ data class Dust(
     @SerializedName("data" ) var data : ArrayList<Data> = arrayListOf()
 )
 
-
-
-
 data class Data (
     @SerializedName("name"   ) var name   : String? = null,
     @SerializedName("src"    ) var src    : String? = null,

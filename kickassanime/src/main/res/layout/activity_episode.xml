@@ -155,13 +155,11 @@
 						app:layout_constraintTop_toBottomOf="@+id/textView"
 						tools:text="Uploaded : 0 mins ago" />
 
-					<androidx.fragment.app.FragmentContainerView
+					<include
 						android:id="@+id/episodeDetailsContainer"
-						android:name="androidx.navigation.fragment.NavHostFragment"
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
-						android:tag="episodeDetailsContainer"
-						app:defaultNavHost="false"
+						layout="@layout/fragment_episode_controls"
 						app:layout_constraintEnd_toEndOf="parent"
 						app:layout_constraintStart_toStartOf="parent"
 						app:layout_constraintTop_toBottomOf="@+id/aspectRatioFrameLayout"

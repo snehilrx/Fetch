@@ -27,9 +27,9 @@ class EpisodeRepository @Inject constructor(
         return kickassAnimeDb.episodeEntityDao().getEpisodeFlow(episodeSlugId)
     }
 
-    suspend fun fetchRemote(animeSlugId: Int, episodeSlugId: Int) {
-        val episode = kickassAnimeDb.episodeEntityDao().getEpisode(episodeSlugId) ?: return
-        val episodeSlug = episode.episodeSlug ?: return
+    suspend fun fetchRemote(animeSlugId: Int, episodeSlugId: Int) : EpisodeEntity? {
+        val episode = kickassAnimeDb.episodeEntityDao().getEpisode(episodeSlugId) ?: return null
+        val episodeSlug = episode.episodeSlug ?: return null
         val animeEpisode = kickassAnimeService.getAnimeEpisode(episodeSlug)
         animeEpisode.asEpisodeEntity()
         val anime = kickassAnimeDb.animeEntityDao().getAnime(animeSlugId)
@@ -45,6 +45,7 @@ class EpisodeRepository @Inject constructor(
         if (episodeEntity != null) {
             kickassAnimeDb.episodeEntityDao().updateAll(episodeEntity)
         }
+        return episodeEntity
     }
 
     suspend fun fetchDustLinks(link: String): Dust? {

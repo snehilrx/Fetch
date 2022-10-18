@@ -2,12 +2,16 @@ package com.otaku.kickassanime.page.episodepage
 
 import android.annotation.SuppressLint
 import android.app.Dialog
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.pm.ActivityInfo
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
 import android.widget.ImageButton
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toDrawable
@@ -16,6 +20,7 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.isVisible
+import androidx.lifecycle.LiveData
 import androidx.media3.common.*
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.database.StandaloneDatabaseProvider
@@ -30,23 +35,21 @@ import androidx.media3.exoplayer.source.ConcatenatingMediaSource
 import androidx.media3.exoplayer.trackselection.AdaptiveTrackSelection
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import androidx.media3.ui.PlayerView
-import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.navArgs
 import com.otaku.fetch.base.livedata.State
 import com.otaku.fetch.base.ui.BindingActivity
 import com.otaku.fetch.base.utils.UiUtils.loadBitmapFromUrl
 import com.otaku.fetch.base.utils.UiUtils.showError
 import com.otaku.kickassanime.R
-import com.otaku.kickassanime.Strings
-import com.otaku.kickassanime.api.model.Maverickki
 import com.otaku.kickassanime.databinding.ActivityEpisodeBinding
 import com.otaku.kickassanime.db.models.entity.AnimeEntity
 import com.otaku.kickassanime.db.models.entity.EpisodeEntity
-import com.otaku.kickassanime.page.episodepage.details.EpisodeControlsFragment
+import com.otaku.kickassanime.page.animepage.AnimeActivity
 import com.otaku.kickassanime.utils.TrackSelectionDialog
 import dagger.hilt.android.AndroidEntryPoint
 import okhttp3.OkHttpClient
 import java.io.File
+import java.lang.ref.WeakReference
 import javax.inject.Inject
 
 
@@ -63,8 +66,41 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
 
     private val mediaSources = ConcatenatingMediaSource()
 
+    private lateinit var episodeLD : LiveData<EpisodeEntity?>
+    private lateinit var animeLD : LiveData<AnimeEntity?>
+
     private val trackSelector by lazy {
         DefaultTrackSelector(this, AdaptiveTrackSelection.Factory())
+    }
+
+    private fun showPlayerError(error: Exception){
+        showError(error, this@EpisodeActivity, "retry") {
+            binding.playerView.player?.prepare()
+        }
+    }
+
+    private val playerListener = object : Player.Listener {
+
+        val weakReference = WeakReference(this@EpisodeActivity)
+
+        override fun onPlayerError(error: PlaybackException) {
+            super.onPlayerError(error)
+            weakReference.get()?.showPlayerError(error)
+        }
+
+        override fun onIsPlayingChanged(isPlaying: Boolean) {
+            weakReference.get()?.viewModel?.setIsPlaying(isPlaying)
+        }
+
+        override fun onPlaybackStateChanged(playbackState: Int) {
+            super.onPlaybackStateChanged(playbackState)
+            val binding = weakReference.get()?.binding ?: return
+            if (playbackState == ExoPlayer.STATE_ENDED) {
+                binding.episodeDetails?.episodeSlugId?.let { viewModel.addToFavourites(it) }
+            }
+            binding.playerView.keepScreenOn =
+                !(playbackState == Player.STATE_IDLE || playbackState == Player.STATE_ENDED)
+        }
     }
 
     @Inject
@@ -80,7 +116,7 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
             binding.appbarImageView,
             binding.toolbar
         )
-        initialize(savedInstanceState)
+        initialize()
         initializeWebView()
         setTransparentStatusBar()
         showBackButton()
@@ -158,12 +194,6 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
         )
         player.repeatMode = ExoPlayer.REPEAT_MODE_OFF
         binding.playerView.player = player
-        binding.playerView.findViewById<View>(androidx.media3.ui.R.id.exo_next).setOnClickListener {
-            viewModel.onNextEpisode?.invoke()
-        }
-        binding.playerView.findViewById<View>(androidx.media3.ui.R.id.exo_prev).setOnClickListener {
-            viewModel.onPreviousEpisode?.invoke()
-        }
         binding.playerView.setShowBuffering(PlayerView.SHOW_BUFFERING_ALWAYS)
         binding.playerView.setKeepContentOnPlayerReset(true)
         binding.animeDetails?.getImageUrl()?.let {
@@ -174,38 +204,13 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
             }
         }
         binding.playerView.useArtwork = true
-        viewModel.getPlaybackTime().observe(this){
-            if(it != null) {
+        viewModel.getPlaybackTime().observe(this) {
+            if (it != null) {
                 binding.playerView.player?.seekTo(it)
             }
         }
         initPlayerControls()
-        player.addListener(object : Player.Listener {
-            override fun onTracksChanged(tracks: Tracks) {
-                tracks.groups.forEach {
-                    it.getTrackFormat(0)
-                }
-            }
-
-            override fun onPlayerError(error: PlaybackException) {
-                super.onPlayerError(error)
-                showError(error, this@EpisodeActivity, "retry") {
-                    player.prepare()
-                }
-            }
-
-            override fun onIsPlayingChanged(isPlaying: Boolean) {
-                viewModel.setIsPlaying(isPlaying)
-            }
-
-            override fun onPlaybackStateChanged(playbackState: Int) {
-                super.onPlaybackStateChanged(playbackState)
-                if(playbackState == ExoPlayer.STATE_ENDED) {
-                    binding.episodeDetails?.episodeSlugId?.let { viewModel.addToFavourites(it) }
-                }
-                binding.playerView.keepScreenOn = !(playbackState == Player.STATE_IDLE || playbackState == Player.STATE_ENDED)
-            }
-        })
+        player.addListener(playerListener)
     }
 
     private fun initPlayerControls() {
@@ -243,8 +248,15 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
 
     override fun onDestroy() {
         destroyWebView()
-        binding.playerView.player?.release()
+        releasePlayer()
         super.onDestroy()
+    }
+
+    private fun releasePlayer() {
+        playerListener.weakReference.clear()
+        binding.playerView.player?.removeListener(playerListener)
+        binding.playerView.player?.release()
+        binding.playerView.player = null
     }
 
     private fun addLink(url: String) {
@@ -301,7 +313,7 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
         return downloadCacheLocal
     }
 
-    private fun initialize(savedInstanceState: Bundle?) {
+    private fun initialize() {
         initPlayer()
         fetchRemote()
         viewModel.getIsPlaying().observe(this) {
@@ -319,10 +331,10 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
                 is State.LOADING -> showLoading()
                 is State.SUCCESS -> {
                     hideLoading()
-                    initObservers(savedInstanceState)
                 }
             }
         }
+        initObservers()
     }
 
     private fun initializeWebView() {
@@ -343,21 +355,22 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
         viewModel.fetchEpisode(args.animeSlugId, args.episodeSlugId)
     }
 
-    private fun initObservers(savedInstanceState: Bundle?) {
-        viewModel.getEpisode(args.episodeSlugId).observe(this) { episode ->
+
+    private fun initObservers() {
+        episodeLD = viewModel.getEpisode(args.episodeSlugId)
+        animeLD = viewModel.getAnime(args.animeSlugId)
+        episodeLD.observe(this) { episode ->
             if (episode != null) {
                 setAppbarEpisodeNumber(binding, "EP: ${episode.name}")
                 binding.episodeDetails = episode
-                viewModel.addToHistory(episode)
-                viewModel.loadDustUrls(episode.link1)
-                viewModel.loadMobile2Urls(episode.link4)
+                animeLD.value?.let { initDetails(episode, it) }
             }
-            viewModel.getAnime(args.animeSlugId).observe(this) { anime ->
-                if (anime != null) {
-                    binding.animeDetails = anime
-                    binding.collapsingToolbar.title = anime.name
-                }
-                initDetailsFragment(episode, anime)
+        }
+        animeLD.observe(this) { anime ->
+            if (anime != null) {
+                binding.animeDetails = anime
+                binding.collapsingToolbar.title = anime.name
+                episodeLD.value?.let { initDetails(it, anime) }
             }
         }
 
@@ -372,26 +385,117 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
     }
 
 
-    private fun initDetailsFragment(episode: EpisodeEntity?, anime: AnimeEntity?) {
-        if (episode != null && anime != null)
-            getEpisodeControlsNavigationHost()
-                ?.navController?.setGraph(
-                    R.navigation.episode_detatils_navigation,
-                    bundleOf(Pair("anime", anime), Pair("episode", episode))
-                )
+    private fun initDetails(episode: EpisodeEntity, anime: AnimeEntity) {
+        binding.episodeDetailsContainer.anime.setOnClickListener {
+            startActivity(
+                AnimeActivity.newInstance(this, anime)
+                    .addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+            )
+        }
+        binding.playerView.findViewById<View>(androidx.media3.ui.R.id.exo_next).setOnClickListener {
+            openNextEpisode(episode)
+        }
+        binding.playerView.findViewById<View>(androidx.media3.ui.R.id.exo_prev).setOnClickListener {
+            openPrevEpisode(episode)
+        }
+        binding.episodeDetailsContainer.next.setOnClickListener {
+            openNextEpisode(episode)
+        }
+        binding.episodeDetailsContainer.previous.setOnClickListener {
+            openPrevEpisode(episode)
+        }
+        binding.episodeDetailsContainer.mal.setOnClickListener {
+            openLink(
+                "https://myanimelist.net/anime/${
+                    episode.episodeSlugId
+                }"
+            )
+        }
+        binding.episodeDetailsContainer.links.setOnClickListener {
+            val link = viewModel.getVideoLink().value
+            if (link != null) {
+                openLink(link)
+            } else {
+                Toast.makeText(this, "No Link was found", Toast.LENGTH_SHORT).show()
+            }
+        }
+        initDropDown()
     }
 
-    private fun getEpisodeControlsNavigationHost() =
-        (supportFragmentManager.findFragmentByTag("episodeDetailsContainer") as? NavHostFragment)
+
+    private fun initDropDown() {
+        viewModel.getServersLinks().observe(this) { links ->
+            if (links.isNotEmpty()) {
+                val list = links.toTypedArray()
+                val serverNames = links.map { it.serverName }.toTypedArray()
+                binding.episodeDetailsContainer.servers.setSimpleItems(serverNames)
+                binding.episodeDetailsContainer.servers.onItemClickListener =
+                    AdapterView.OnItemClickListener { _, _, position, _ ->
+                        viewModel.setCurrentServer(
+                            list[position].link
+                        )
+                    }
+                binding.episodeDetailsContainer.servers.setText(list[0].serverName)
+                viewModel.setCurrentServer(list[0].link)
+            } else {
+                showError(Exception("No servers found"), this)
+            }
+        }
+    }
+
+    private fun openLink(link: String) {
+        val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(link))
+        try {
+            startActivity(browserIntent)
+        } catch (e: ActivityNotFoundException) {
+            Toast.makeText(this, "No activity found to open link $link", Toast.LENGTH_SHORT)
+                .show()
+        }
+    }
+
+    private fun openNextEpisode(episode: EpisodeEntity) {
+        val next = episode.next
+        if (next != null) {
+            openEpisode(next)
+        } else {
+            Toast.makeText(this, "No Next Episode", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun openPrevEpisode(episode: EpisodeEntity) {
+        val prev = episode.prev
+        if (prev != null) {
+            openEpisode(prev)
+        } else {
+            Toast.makeText(this, "No Previous Episode", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun openEpisode(episodeSlugId: Int) {
+        releasePlayer()
+        animeLD.removeObservers(this)
+        episodeLD.removeObservers(this)
+        viewModel.removeObservers(this)
+        viewModel.clearServers()
+        val newActivityIntent = Intent(this, this.javaClass).apply {
+            flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+        }
+        newActivityIntent.putExtras(bundleOf(
+            "title" to args.title,
+            "episodeSlugId" to episodeSlugId,
+            "animeSlugId" to args.animeSlugId
+        ))
+        startActivity(newActivityIntent)
+    }
 
     @SuppressLint("MissingSuperCall")
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        viewModel.removeObservers(this)
+        binding.playerView.player = null
         showLoading()
         intent.extras?.let { args = EpisodeActivityArgs.fromBundle(it) }
         mediaSources.clear()
-        initialize(null)
+        initialize()
     }
 
 
