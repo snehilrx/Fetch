@@ -305,7 +305,7 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
             )
             downloadCacheLocal = SimpleCache(
                 downloadContentDirectory,
-                NoOpCacheEvictor(),
+                LeastRecentlyUsedCacheEvictor(MAX_CACHE_SIZE),
                 StandaloneDatabaseProvider(this)
             )
             downloadCache = downloadCacheLocal
@@ -519,5 +519,8 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
     companion object {
         @JvmStatic
         private var downloadCache: SimpleCache? = null
+
+        private const val MAX_CACHE_SIZE: Long = 2000000000
+
     }
 }
