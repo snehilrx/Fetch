@@ -7,6 +7,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.graphics.drawable.IconCompat
@@ -18,6 +19,7 @@ import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.typeface.library.fontawesome.FontAwesome
 import com.mikepenz.iconics.utils.color
 import com.otaku.fetch.AppModule
+import com.otaku.fetch.base.TAG
 import com.otaku.fetch.base.utils.UiUtils
 import com.otaku.kickassanime.api.KickassAnimeService
 import com.otaku.kickassanime.api.model.Anime
@@ -57,6 +59,7 @@ class PackageModule @Inject constructor(
     }
 
     override suspend fun triggerNotification(context: Context) {
+        Log.d(TAG, "Started notification fetch")
         val newEpisodes = kickassAnimeService.getFrontPageAnimeList(1)
         val newHash = HashUtils.hash64(newEpisodes.anime)
         val oldHash = context.getSharedPreferences(context.packageName, Context.MODE_PRIVATE)
@@ -68,6 +71,7 @@ class PackageModule @Inject constructor(
             val filtered = AnimeListFrontPageResponse(newEpisodes.anime.filterIndexed { _, it ->
                 !dbSet.contains(it.slug)
             }, newEpisodes.page)
+            Log.d(TAG, "New Anime ${filtered.anime.size} found.")
             Utils.saveResponse(filtered, kickassAnimeDb)
             createNotificationChannel(context)
             filtered.anime.forEach {

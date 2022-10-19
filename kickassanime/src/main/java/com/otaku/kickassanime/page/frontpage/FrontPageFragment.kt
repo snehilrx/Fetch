@@ -17,7 +17,6 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.GridLayoutManager.SpanSizeLookup
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.gms.cast.CastRemoteDisplay.Configuration
 import com.lapism.search.widget.MaterialSearchView
 import com.otaku.fetch.base.TAG
 import com.otaku.fetch.base.databinding.CarouselItemLayoutBinding
@@ -101,11 +100,15 @@ class FrontPageFragment : BindingFragment<FragmentFrontPageBinding>(R.layout.fra
         initMenu()
     }
 
+    @SuppressWarnings
     private fun initMenu() {
         setHasOptionsMenu(true)
         binding.toolbar.setOnMenuItemClickListener(menuProvider::onMenuItemSelected)
     }
 
+
+    @Deprecated("Deprecated in Java")
+    @SuppressWarnings
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
         menuProvider.onCreateMenu(menu, inflater)
@@ -139,9 +142,10 @@ class FrontPageFragment : BindingFragment<FragmentFrontPageBinding>(R.layout.fra
 
         override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
             val textView = holder.itemView as TextView
-            textView.text = getItem(position).first
+            val item = getItem(position)
+            textView.text = item.first
             textView.setOnClickListener {
-                onClick(getItem(position))
+                onClick(item)
             }
         }
     }
