@@ -1,18 +1,16 @@
 package com.otaku.kickassanime.page.episodepage
 
+import android.content.res.Configuration
 import android.net.Uri
-import android.util.Log
 import androidx.lifecycle.*
 import com.google.gson.Gson
 import com.otaku.fetch.base.livedata.SingleLiveEvent
 import com.otaku.fetch.base.livedata.State
 import com.otaku.kickassanime.Strings
-import com.otaku.kickassanime.api.model.Dust
 import com.otaku.kickassanime.api.model.Maverickki
 import com.otaku.kickassanime.api.model.ServerLinks
 import com.otaku.kickassanime.db.models.entity.AnimeEntity
 import com.otaku.kickassanime.db.models.entity.EpisodeEntity
-import com.otaku.kickassanime.page.adapters.AnimeTileAdapter.Companion.TAG
 import com.otaku.kickassanime.page.favourtites.FavouritesRepository
 import com.otaku.kickassanime.page.history.HistoryRepository
 import com.otaku.kickassanime.utils.asVideoHistory
@@ -21,10 +19,8 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.launch
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import java.util.concurrent.atomic.AtomicReference
-import java.util.function.UnaryOperator
 import javax.inject.Inject
 import javax.inject.Named
-import kotlin.reflect.KFunction0
 
 @HiltViewModel
 class EpisodeViewModel @Inject constructor(
@@ -45,6 +41,8 @@ class EpisodeViewModel @Inject constructor(
     private val subtitleLink = SingleLiveEvent<List<String>>()
     private val posterLink = SingleLiveEvent<String>()
     private val serverLinks = hashSetOf<ServerLinks>()
+
+    var orientation = Configuration.ORIENTATION_UNDEFINED
 
     fun fetchEpisode(animeSlugId: Int, episodeSlugId: Int) {
         viewModelScope.launch(dispatcher) {

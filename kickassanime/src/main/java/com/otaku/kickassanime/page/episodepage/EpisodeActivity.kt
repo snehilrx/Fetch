@@ -124,7 +124,7 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
     }
 
     private fun exitFullScreen() {
-        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+        requestedOrientation = viewModel.orientation
         (binding.playerView.parent as ViewGroup).removeView(binding.playerView)
         binding.aspectRatioFrameLayout.addView(
             binding.playerView,
@@ -163,7 +163,8 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
 
     @SuppressLint("PrivateResource")
     private fun enterFullScreen() {
-        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE
+        viewModel.orientation = resources.configuration.orientation
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
         (binding.playerView.parent as ViewGroup).removeView(binding.playerView)
         mFullScreenDialog.addContentView(
             binding.playerView,
