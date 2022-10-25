@@ -2,9 +2,9 @@ package com.otaku.kickassanime.page.animepage
 
 import android.app.Activity
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import androidx.core.os.bundleOf
-import androidx.fragment.app.FragmentActivity
 import com.otaku.fetch.base.ui.BindingActivity
 import com.otaku.kickassanime.R
 import com.otaku.kickassanime.api.model.AnimeSearchResponse
@@ -32,7 +32,11 @@ class AnimeActivity : BindingActivity<ActivityAnimeBinding>(R.layout.activity_an
         companion object {
             private const val ARG_ANIME = "anime_args"
             fun fromBundle(bundle: Bundle): AnimeActivityArgs? {
-                return bundle.getParcelable<AnimeEntity>(ARG_ANIME)?.let { AnimeActivityArgs(it) }
+                return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    bundle.getParcelable(ARG_ANIME, AnimeEntity::class.java)?.let { AnimeActivityArgs(it) }
+                } else {
+                    bundle.getParcelable<AnimeEntity>(ARG_ANIME)?.let { AnimeActivityArgs(it) }
+                }
             }
 
             fun toBundle(anime: AnimeEntity): Bundle {
