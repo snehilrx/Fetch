@@ -7,10 +7,9 @@ import java.util.List;
 public class HashUtils {
 
     public static long hash64(List<Anime> data) {
-        long hash = 0xcbf29ce484222325L;
+        long hash = 0;
         for (Anime anime : data) {
-            hash <<= (anime.hashCode() & 0xff);
-            hash *= 16777619;
+            hash = 31*hash + anime.hashCode();
         }
         return hash;
     }
