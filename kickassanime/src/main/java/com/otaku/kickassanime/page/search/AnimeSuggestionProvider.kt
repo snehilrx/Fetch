@@ -9,6 +9,6 @@ class AnimeSuggestionProvider : SearchRecentSuggestionsProvider() {
 
     companion object {
         const val AUTHORITY = "com.otaku.kickassanime.page.search.AnimeSuggestionProvider"
-        const val MODE: Int = SearchRecentSuggestionsProvider.DATABASE_MODE_QUERIES
+        const val MODE: Int = DATABASE_MODE_QUERIES
     }
 }

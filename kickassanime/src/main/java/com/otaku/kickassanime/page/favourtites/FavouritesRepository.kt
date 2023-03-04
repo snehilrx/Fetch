@@ -2,7 +2,6 @@ package com.otaku.kickassanime.page.favourtites
 
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
-import androidx.paging.liveData
 import com.otaku.kickassanime.db.KickassAnimeDb
 import javax.inject.Inject
 

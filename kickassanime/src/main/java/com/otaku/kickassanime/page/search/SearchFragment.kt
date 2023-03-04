@@ -8,8 +8,8 @@ import com.otaku.fetch.data.ITileData
 import com.otaku.kickassanime.api.model.AnimeSearchResponse
 import com.otaku.kickassanime.page.animepage.AnimeActivity
 import com.otaku.kickassanime.page.frontpage.list.FrontPageListFragment
-import com.otaku.kickassanime.page.frontpage.list.ListFragment
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.Flow
 
 @AndroidEntryPoint
 class SearchFragment : FrontPageListFragment() {
@@ -17,7 +17,7 @@ class SearchFragment : FrontPageListFragment() {
     val viewModel: SearchViewModel by viewModels()
     private val args: SearchFragmentArgs by navArgs()
 
-    override fun getList(): LiveData<PagingData<ITileData>> = viewModel.doSearch(args.query)
+    override fun getList(): Flow<PagingData<ITileData>> = viewModel.doSearch(args.query)
 
     override fun getListTag(): String {
         return args.query

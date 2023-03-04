@@ -1,34 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:context=".page.episodepage.details.EpisodeControlsFragment">
+        android:layout_height="match_parent">
 
-		<com.google.android.material.textfield.TextInputLayout
-			android:id="@+id/videoPicker"
-			style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-			android:layout_width="0dp"
-			android:layout_height="wrap_content"
-			android:hint="Servers"
-			android:layout_marginStart="14dp"
-			android:layout_marginEnd="14dp"
-			android:layout_marginTop="14dp"
-			app:layout_constraintEnd_toEndOf="parent"
-			app:layout_constraintStart_toStartOf="parent"
-			app:layout_constraintTop_toTopOf="parent"
-			>
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/videoPicker"
+            style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="14dp"
+            android:layout_marginTop="14dp"
+            android:layout_marginEnd="14dp"
+            android:hint="@string/servers"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
-			<com.otaku.fetch.base.ui.ComboBox
-				android:id="@+id/servers"
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:inputType="none" />
+            <com.otaku.fetch.base.ui.ComboBox
+                android:id="@+id/servers"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="none" />
 
-		</com.google.android.material.textfield.TextInputLayout>
+        </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/mal"
@@ -38,8 +35,8 @@
             android:gravity="start|center_vertical"
             android:paddingStart="14dp"
             android:paddingEnd="14dp"
-            app:endIcon="@{`faw_chevron_right`}"
             android:text="@string/view_on_mal"
+            app:endIcon="@{`faw_chevron_right`}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/previous" />
@@ -53,6 +50,7 @@
             android:insetTop="0dp"
             android:insetBottom="0dp"
             android:paddingStart="14dp"
+            android:paddingEnd="14dp"
             android:text="@string/view_all_episodes"
             app:endIcon="@{`faw_chevron_right`}"
             app:layout_constraintEnd_toEndOf="parent"
@@ -68,45 +66,88 @@
             android:insetTop="0dp"
             android:insetBottom="0dp"
             android:paddingStart="14dp"
+            android:paddingEnd="14dp"
             android:text="@string/download_links"
             app:endIcon="@{`faw_chevron_right`}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/anime" />
 
-		<com.google.android.material.button.MaterialButton
-			android:id="@+id/previous"
-			style="@style/Widget.KickassAnime.NoSpacingButton"
-			android:layout_width="0dp"
-			android:layout_height="wrap_content"
-			android:drawableBottom="@color/sheetsDividerColor"
-			android:gravity="start|center_vertical"
-			android:paddingStart="14dp"
-			android:text="@string/prev"
-			app:layout_constraintEnd_toStartOf="@+id/guideline2"
-			app:layout_constraintStart_toStartOf="parent"
-			app:layout_constraintTop_toBottomOf="@+id/videoPicker"
-			app:startIcon="@{`faw_chevron_left`}" />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/previous"
+            style="@style/Widget.KickassAnime.NoSpacingButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:drawableBottom="@color/sheetsDividerColor"
+            android:gravity="start|center_vertical"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp"
+            android:text="@string/prev"
+            app:layout_constraintEnd_toStartOf="@+id/guideline2"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/videoPicker"
+            app:startIcon="@{`faw_chevron_left`}" />
 
-		<com.google.android.material.button.MaterialButton
-			android:id="@+id/next"
-			style="@style/Widget.KickassAnime.NoSpacingButton"
-			android:layout_width="0dp"
-			android:layout_height="wrap_content"
-			android:gravity="end|center_vertical"
-			android:paddingEnd="14dp"
-			android:text="@string/next"
-			app:endIcon="@{`faw_chevron_right`}"
-			app:layout_constraintEnd_toEndOf="parent"
-			app:layout_constraintStart_toStartOf="@+id/guideline2"
-			app:layout_constraintTop_toBottomOf="@+id/videoPicker" />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/next"
+            style="@style/Widget.KickassAnime.NoSpacingButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:gravity="end|center_vertical"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp"
+            android:text="@string/next"
+            app:endIcon="@{`faw_chevron_right`}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/guideline2"
+            app:layout_constraintTop_toBottomOf="@+id/videoPicker" />
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guideline2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            app:layout_constraintWidth_percent="0.5"
-            app:layout_constraintGuide_percent="0.5" />
+            app:layout_constraintGuide_percent="0.5"
+            app:layout_constraintWidth_percent="0.5" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="@+id/links"
+            app:layout_constraintStart_toStartOf="@+id/links"
+            app:layout_constraintTop_toBottomOf="@+id/links">
+
+            <androidx.mediarouter.app.MediaRouteButton
+                android:id="@+id/mediaCast"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="center|start"
+                android:layout_marginStart="@dimen/md_icon_margin"
+                app:iconTint="?attr/colorOnSurface"
+                android:layout_marginTop="4dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/castBtn"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                app:iconTint="?attr/colorOnSurface"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginRight="8dp"
+                android:gravity="start|center_vertical"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:paddingTop="16dp"
+                android:paddingBottom="16dp"
+                android:paddingLeft="@dimen/preferenceIconMaxSize"
+                android:paddingRight="@dimen/preferenceIconMaxSize"
+                android:strokeColor="?attr/colorPrimary"
+                android:text="@string/cast"
+                android:textAllCaps="true"
+                android:textAppearance="@style/TextAppearance.Material3.LabelLarge"
+                android:textColor="?attr/colorOnSurface" />
+        </FrameLayout>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

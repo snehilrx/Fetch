@@ -26,3 +26,8 @@
 -keep public class com.otaku.kickassanime.api.model.**  {
     public *;
 }
+
+
+-keep public class androidx.media3.cast.DefaultCastOptionsProvider {
+    public *;
+}

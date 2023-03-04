@@ -7,6 +7,7 @@ import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 
+@Suppress("UNUSED")
 class ConnectionStateMonitor(
     val onInternetDisconnected: () -> Unit,
     val onInternetConnected: () -> Unit)  : NetworkCallback() {

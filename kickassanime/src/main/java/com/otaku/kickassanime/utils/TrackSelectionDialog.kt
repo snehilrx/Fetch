@@ -1,5 +1,6 @@
 package com.otaku.kickassanime.utils
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.DialogInterface
 import android.content.res.Resources
@@ -169,13 +170,14 @@ class TrackSelectionDialog : Sheet() {
             )
         }
 
+        @SuppressLint("PrivateResource")
         override fun onCreateView(
             inflater: LayoutInflater,
             container: ViewGroup?,
             savedInstanceState: Bundle?
         ): View? {
             val rootView = inflater.inflate(
-                R.layout.exo_track_selection_dialog, container,  /* attachToRoot= */false
+                R.layout.exo_track_selection_dialog, container, false
             )
             val trackSelectionView = rootView.findViewById<TrackSelectionView>(
                 R.id.exo_track_selection_view
@@ -186,8 +188,8 @@ class TrackSelectionDialog : Sheet() {
             trackSelectionView.init(
                 trackGroups,
                 isDisabled,
-                overrides,  /* trackFormatComparator= */
-                null,  /* listener= */
+                overrides,
+                null,
                 this
             )
             return rootView
@@ -300,6 +302,7 @@ class TrackSelectionDialog : Sheet() {
             return trackSelectionDialog
         }
 
+        @SuppressLint("PrivateResource")
         @Throws(IllegalArgumentException::class)
         private fun getTrackTypeString(resources: Resources, trackType: @TrackType Int): String {
             return when (trackType) {

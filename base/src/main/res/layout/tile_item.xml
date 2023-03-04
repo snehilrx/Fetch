@@ -46,7 +46,7 @@
 
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/tags"
-                android:layout_width="80dp"
+                android:layout_width="68dp"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
                 android:layout_marginBottom="8dp"
@@ -62,17 +62,33 @@
 
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/tags2"
-                android:layout_width="80dp"
+                android:layout_width="68dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_marginBottom="8dp"
                 android:background="@drawable/black_chip"
                 android:gravity="center"
-	            android:visibility="@{tileData.tags.size() > 0 ? View.VISIBLE : View.GONE}"
-	            android:text="@{tileData.tags.size() > 0 ? tileData.tags.get(1) : ``}"
+	            android:visibility="@{tileData.tags.size() > 1 ? View.VISIBLE : View.GONE}"
+	            android:text="@{tileData.tags.size() > 1 ? tileData.tags.get(1) : ``}"
                 android:textAppearance="@style/Fetch.ChipText"
                 app:layout_constraintBottom_toTopOf="@+id/title"
                 app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintVertical_chainStyle="packed"
+                tools:text="Hello" />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/tags3"
+                android:layout_width="68dp"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:background="@drawable/black_chip"
+                android:gravity="center"
+                android:text="@{tileData.tags.size() > 2 ? tileData.tags.get(2) : ``}"
+                android:textAppearance="@style/Fetch.ChipText"
+                android:visibility="@{tileData.tags.size() > 2 ? View.VISIBLE : View.GONE}"
+                app:layout_constraintBottom_toTopOf="@+id/title"
+                app:layout_constraintEnd_toStartOf="@+id/tags"
+                app:layout_constraintStart_toEndOf="@+id/tags2"
                 app:layout_constraintVertical_chainStyle="packed"
                 tools:text="Hello" />
 
@@ -82,7 +98,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center|bottom"
                 android:lineSpacingExtra="2sp"
-                android:padding="8dp"
+                android:paddingTop="8dp"
                 android:text="@{tileData.title}"
                 android:textAlignment="center"
                 android:textAppearance="@style/TextAppearance.Material3.LabelMedium"

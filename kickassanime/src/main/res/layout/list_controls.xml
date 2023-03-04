@@ -19,7 +19,7 @@
 
         <TextView
             android:id="@+id/emptyList"
-            android:text="NOTHING\nFOUND"
+            android:text="@string/nothing_found"
             android:textStyle="bold"
             android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
             android:gravity="center"

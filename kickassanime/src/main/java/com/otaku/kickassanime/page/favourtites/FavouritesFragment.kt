@@ -1,11 +1,10 @@
 package com.otaku.kickassanime.page.favourtites
 
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.map
 import androidx.navigation.fragment.findNavController
 import androidx.paging.PagingData
 import androidx.paging.map
+import com.otaku.fetch.base.ui.setOnClick
 import com.otaku.fetch.data.ITileData
 import com.otaku.kickassanime.R
 import com.otaku.kickassanime.databinding.ItemFavoriteBinding
@@ -13,13 +12,15 @@ import com.otaku.kickassanime.db.models.AnimeFavorite
 import com.otaku.kickassanime.db.models.entity.AnimeEntity
 import com.otaku.kickassanime.page.frontpage.list.ListFragment
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 @AndroidEntryPoint
 class FavouritesFragment : ListFragment<ItemFavoriteBinding>() {
 
     private val viewModel: FavouritesViewModel by viewModels()
 
-    override fun getList(): LiveData<PagingData<ITileData>> {
+    override fun getList(): Flow<PagingData<ITileData>> {
         return viewModel.favourites.map { it.map { fav -> fav } }
     }
 
@@ -30,7 +31,7 @@ class FavouritesFragment : ListFragment<ItemFavoriteBinding>() {
         FavouritesFragmentDirections.actionFavouritesFragmentToAnimeActivity(
             AnimeEntity(
                 animeSlugId = fav.animeSlugId,
-                animeslug = fav.animeslug
+                animeSlug = fav.animeSlug
             )
         )
     }
@@ -42,20 +43,20 @@ class FavouritesFragment : ListFragment<ItemFavoriteBinding>() {
         { itemFavoriteBinding: ItemFavoriteBinding, iTileData: ITileData ->
             if (iTileData is AnimeFavorite) {
                 itemFavoriteBinding.fav = iTileData
-                itemFavoriteBinding.root.setOnClickListener {
+                itemFavoriteBinding.root.setOnClick {
                     val actionFavouritesFragmentToAnimeActivity =
                         FavouritesFragmentDirections.actionFavouritesFragmentToAnimeActivity(
                             AnimeEntity(
                                 animeSlugId = iTileData.animeSlugId,
-                                animeslug = iTileData.animeslug,
+                                animeSlug = iTileData.animeSlug,
                             )
                         )
                     findNavController().navigate(actionFavouritesFragmentToAnimeActivity)
                 }
-                itemFavoriteBinding.favorite.setOnClickListener {
+                itemFavoriteBinding.favorite.setOnClick {
                     viewModel.removeFavourite(iTileData.animeSlugId)
                 }
-                itemFavoriteBinding.root.setOnClickListener {
+                itemFavoriteBinding.root.setOnClick {
                     onItemClick(iTileData)
                 }
             }

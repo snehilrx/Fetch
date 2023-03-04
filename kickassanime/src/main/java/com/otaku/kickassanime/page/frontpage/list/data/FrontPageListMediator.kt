@@ -6,7 +6,7 @@ import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import com.otaku.fetch.base.TAG
-import com.otaku.kickassanime.api.model.AnimeListFrontPageResponse
+import com.otaku.kickassanime.api.model.Anime
 import com.otaku.kickassanime.db.KickassAnimeDb
 import com.otaku.kickassanime.db.models.AnimeTile
 import com.otaku.kickassanime.utils.Constraints.cacheTimeoutInHours
@@ -18,7 +18,7 @@ import java.io.IOException
 @OptIn(ExperimentalPagingApi::class)
 class FrontPageListMediator(
     private val database: KickassAnimeDb,
-    private val networkFetch: suspend (Int) -> AnimeListFrontPageResponse?
+    private val networkFetch: suspend (Int) -> List<Anime>?
 ) : RemoteMediator<Int, AnimeTile>() {
 
     override suspend fun load(
@@ -27,6 +27,7 @@ class FrontPageListMediator(
     ): MediatorResult {
         return try {
             val endPaging = MediatorResult.Success(endOfPaginationReached = true)
+            val continuePaging = MediatorResult.Success(endOfPaginationReached = false)
             val loadKey = when (loadType) {
                 LoadType.REFRESH -> 1
                 LoadType.PREPEND -> return endPaging
@@ -41,13 +42,16 @@ class FrontPageListMediator(
             }
             Log.i(TAG, "Page No, Load Key: $loadKey")
 
-            val response = networkFetch(loadKey)
+            val response = networkFetch(loadKey+1)
 
-            Log.i(TAG, "Fetch ${response?.anime?.size} anime tiles, ${loadType.name}")
-            Utils.saveResponse(response, database)
-            MediatorResult.Success(
-                endOfPaginationReached = response?.anime?.isEmpty() ?: true
-            )
+            Log.i(TAG, "Fetch ${response?.size} anime tiles, ${loadType.name}")
+            Utils.saveResponse(response, database, loadKey)
+            val empty = response?.isEmpty()
+            return if (empty == true) {
+                endPaging
+            } else {
+                continuePaging
+            }
         } catch (e: IOException) {
             Log.e(TAG, "FAILED Io Error", e)
             MediatorResult.Error(e)

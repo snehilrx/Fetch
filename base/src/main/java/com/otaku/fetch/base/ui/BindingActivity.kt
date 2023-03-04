@@ -4,12 +4,17 @@ import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
+import android.view.ViewGroup
+import android.view.WindowInsets
 import android.view.WindowManager
 import android.widget.ImageView
 import androidx.annotation.LayoutRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import com.google.android.material.appbar.AppBarLayout
@@ -18,10 +23,11 @@ import com.otaku.fetch.base.databinding.AppbarImageBinding
 import com.otaku.fetch.bindings.ImageViewBindings
 import java.lang.ref.WeakReference
 
+
 open class BindingActivity<T : ViewDataBinding>(@LayoutRes private val layoutRes: Int) :
     AppCompatActivity() {
 
-    var _statusBarHeight: Int = 0
+    var mStatusBarHeight: Int = 0
     lateinit var weakReference: WeakReference<T>
     val binding: T get() = weakReference.get() ?: throw IllegalStateException("Binding is null")
 
@@ -29,8 +35,28 @@ open class BindingActivity<T : ViewDataBinding>(@LayoutRes private val layoutRes
         super.onCreate(savedInstanceState)
         weakReference =
             WeakReference(DataBindingUtil.setContentView(this, layoutRes))
-        _statusBarHeight = getStatusBarHeight()
+        mStatusBarHeight = getStatusBarHeight()
         onBind(binding, savedInstanceState)
+        consumeBottomInsets()
+    }
+
+    private fun consumeBottomInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            // Apply the insets as a margin to the view. Here the system is setting
+            // only the bottom, left, and right dimensions, but apply whichever insets are
+            // appropriate to your layout. You can also update the view padding
+            // if that's more appropriate.
+            view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                leftMargin = insets.left
+                bottomMargin = insets.bottom
+                rightMargin = insets.right
+            }
+
+            // Return CONSUMED if you don't want want the window insets to keep being
+            // passed down to descendant views.
+            WindowInsetsCompat.CONSUMED
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -40,7 +66,7 @@ open class BindingActivity<T : ViewDataBinding>(@LayoutRes private val layoutRes
                 return true
             }
         }
-        return super.onOptionsItemSelected(item);
+        return super.onOptionsItemSelected(item)
     }
 
     fun showBackButton() {
@@ -48,7 +74,7 @@ open class BindingActivity<T : ViewDataBinding>(@LayoutRes private val layoutRes
     }
 
     protected fun initShineView(shineView: ShineView, appbarLayout: AppBarLayout) {
-        shineView.statusbarHeight = _statusBarHeight.toFloat()
+        shineView.statusbarHeight = mStatusBarHeight.toFloat()
         appbarLayout.addOnOffsetChangedListener(shineView)
     }
 

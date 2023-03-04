@@ -17,5 +17,10 @@ object ViewModelModule {
     @Named("io")
     fun ioDispatcher() = Dispatchers.IO
 
+    @ViewModelScoped
+    @Provides
+    @Named("default")
+    fun dispatcher() = Dispatchers.Default
+
 
 }

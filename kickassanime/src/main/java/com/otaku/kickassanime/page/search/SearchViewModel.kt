@@ -1,15 +1,12 @@
 package com.otaku.kickassanime.page.search
 
-import androidx.lifecycle.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.paging.*
-import com.otaku.fetch.base.livedata.State
 import com.otaku.fetch.data.ITileData
-import com.otaku.kickassanime.api.model.AnimeSearchResponse
-import com.otaku.kickassanime.db.KickassAnimeDb
-import com.otaku.kickassanime.utils.asAnimeEntity
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -40,12 +37,12 @@ class SearchViewModel @Inject constructor(private val searchRepository: SearchRe
     }
 
 
-    fun doSearch(query: String): LiveData<PagingData<ITileData>> {
+    fun doSearch(query: String): Flow<PagingData<ITileData>> {
         searchRepository.addToSearchHistory(query)
         return Pager(
             PagingConfig(pageSize = 200)
         ) {
             SearchPagingSource(searchRepository, query)
-        }.liveData.cachedIn(viewModelScope)
+        }.flow.cachedIn(viewModelScope)
     }
 }

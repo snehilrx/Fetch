@@ -23,7 +23,6 @@ import com.otaku.fetch.base.TAG
 import com.otaku.fetch.base.utils.UiUtils
 import com.otaku.kickassanime.api.KickassAnimeService
 import com.otaku.kickassanime.api.model.Anime
-import com.otaku.kickassanime.api.model.AnimeListFrontPageResponse
 import com.otaku.kickassanime.db.KickassAnimeDb
 import com.otaku.kickassanime.page.MainFragment
 import com.otaku.kickassanime.page.episodepage.EpisodeActivity
@@ -61,20 +60,20 @@ class PackageModule @Inject constructor(
     override suspend fun triggerNotification(context: Context) {
         Log.d(TAG, "Started notification fetch")
         val newEpisodes = kickassAnimeService.getFrontPageAnimeList(1)
-        val newHash = HashUtils.hash64(newEpisodes.anime)
+        val newHash = HashUtils.hash64(newEpisodes)
         val oldHash = context.getSharedPreferences(context.packageName, Context.MODE_PRIVATE)
             .getLong(PREF_KEY, -1)
         if(oldHash != newHash){
             val dbEpisode = kickassAnimeDb.frontPageEpisodesDao().getFirstFrontPageEpisodes()
                     .first()
             val dbSet = dbEpisode.map { it.episodeSlug }.toHashSet()
-            val filtered = AnimeListFrontPageResponse(newEpisodes.anime.filterIndexed { _, it ->
+            val filtered = newEpisodes.filterIndexed { _, it ->
                 !dbSet.contains(it.slug)
-            }, newEpisodes.page)
-            Log.d(TAG, "New Anime ${filtered.anime.size} found.")
-            Utils.saveResponse(filtered, kickassAnimeDb)
+            }
+            Log.d(TAG, "New Anime ${filtered.size} found.")
+            Utils.saveResponse(filtered, kickassAnimeDb, 1)
             createNotificationChannel(context)
-            filtered.anime.forEach {
+            filtered.forEach {
                 showNotification(it, context)
             }
             context.getSharedPreferences(context.packageName, Context.MODE_PRIVATE)
@@ -90,7 +89,7 @@ class PackageModule @Inject constructor(
         val episodeSlugId = anime.asEpisodeEntity().episodeSlugId
         notifyIntent.putExtras(
             bundleOf(
-                "title" to anime.name,
+                "title" to anime.title,
                 "episodeSlugId" to episodeSlugId,
                 "animeSlugId" to anime.asAnimeEntity().animeSlugId
             )
@@ -113,8 +112,8 @@ class PackageModule @Inject constructor(
         val builder = NotificationCompat
             .Builder(context, context.getString(R.string.module_name))
             .setSmallIcon(IconCompat.createWithBitmap(icon.toBitmap()))
-            .setContentTitle("New Anime Released ${anime.name}")
-            .setContentText("Episode ${anime.episode} ${anime.type}")
+            .setContentTitle("New Anime Released ${anime.title}")
+            .setContentText("Episode ${anime.episodeNumber}")
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setContentIntent(notifyPendingIntent)
             .setAutoCancel(true)

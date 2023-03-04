@@ -6,9 +6,7 @@ import com.google.gson.GsonBuilder
 import com.otaku.kickassanime.Strings
 import com.otaku.kickassanime.api.conveter.FindJsonInTextConverterFactory
 import kotlinx.coroutines.runBlocking
-import okhttp3.*
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.OkHttpClient
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -26,11 +24,11 @@ class KickassAnimeServiceUnitTest {
     fun setup() {
         okHttpClient = CloudflareHTTPClient(object : Log {
             override fun i(tag: String, s: String) {
-                println(s);
+                println(s)
             }
 
             override fun e(tag: String, s: String) {
-                println(s);
+                println(s)
             }
 
         }).okHttpClient.build()

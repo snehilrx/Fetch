@@ -3,9 +3,7 @@ package com.otaku.kickassanime.page
 import androidx.lifecycle.Lifecycle
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.matcher.ViewMatchers.withId
-import androidx.test.espresso.matcher.ViewMatchers.withText
 import com.otaku.kickassanime.R
-import com.otaku.kickassanime.page.adapters.HeaderAdapter
 import com.otaku.kickassanime.utils.launchFragmentInContainer
 import com.otaku.kickassanime.utils.readFromFile
 import dagger.hilt.android.testing.HiltAndroidRule

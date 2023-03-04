@@ -1,12 +1,17 @@
 package com.otaku.kickassanime.page.episodepage
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
 import android.util.AttributeSet
+import android.util.Log
 import android.webkit.*
+import com.otaku.kickassanime.Strings.ADD_KAA
 import com.otaku.kickassanime.Strings.KAA2_URL
+import com.otaku.kickassanime.Strings.KAAST1
 import com.otaku.kickassanime.Strings.KAA_URL
 import com.otaku.kickassanime.Strings.MAVERICKKI_URL
 
@@ -14,7 +19,6 @@ import com.otaku.kickassanime.Strings.MAVERICKKI_URL
 class CustomWebView : WebView {
 
     var onPageFinished: (() -> Unit)? = null
-    var onProgressChanged: ((Int) -> Unit)? = null
     var videoLinksCallback: ((url: Uri) -> Unit)? = null
 
     constructor(context: Context) : super(context)
@@ -25,7 +29,7 @@ class CustomWebView : WebView {
         defStyleAttr
     )
 
-    @SuppressWarnings("unused")
+    @Suppress("UNUSED")
     constructor(
         context: Context,
         attrs: AttributeSet?,
@@ -33,7 +37,7 @@ class CustomWebView : WebView {
         defStyleRes: Int
     ) : super(context, attrs, defStyleAttr, defStyleRes)
 
-    @SuppressWarnings("unused")
+    @Suppress("UNUSED", "DEPRECATION")
     constructor(
         context: Context,
         attrs: AttributeSet?,
@@ -41,12 +45,12 @@ class CustomWebView : WebView {
         privateBrowsing: Boolean
     ) : super(context, attrs, defStyleAttr, privateBrowsing)
 
-
     init {
         setWebContentsDebuggingEnabled(true)
         settings.databaseEnabled = true
         settings.mediaPlaybackRequiresUserGesture = false
         settings.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+        @SuppressLint("SetJavaScriptEnabled")
         settings.javaScriptEnabled = true
         settings.allowFileAccess = true
         settings.allowContentAccess = true
@@ -84,10 +88,20 @@ class CustomWebView : WebView {
                                 ))
                             ) videoLinksCallback?.invoke(requestUrl)
                         }
+                        ADD_KAA, KAAST1 -> {
+                            if (it.pathSegments?.get(0) == "Sapphire-Duck" && it.pathSegments?.get(1) == "player.php" && it.getQueryParameter("action") != null) {
+                                videoLinksCallback?.invoke(requestUrl)
+                                return WebResourceResponse(
+                                    mimeType,
+                                    "UTF-8",
+                                    null
+                                )
+                            }
+                        }
                     }
                 }
 
-                if (mimeType != null) {
+                if (mimeType != null && extension != "html") {
                     // check if any of the requestUrls contain the url of a video file
                     if (mimeType.startsWith("video/") || mimeType.startsWith("audio/")) {
                         return WebResourceResponse(
@@ -107,6 +121,20 @@ class CustomWebView : WebView {
                 return super.shouldInterceptRequest(view, request)
             }
 
+            override fun shouldOverrideUrlLoading(
+                view: WebView?,
+                request: WebResourceRequest?
+            ): Boolean {
+                if(request?.url?.toString()?.equals("about:blank") == true)
+                {
+                    val randomTimeOut = Math.random() * 500 + Math.random() * 2000 + Math.random() * 500
+                    Log.i("about:blank", "random timeout = $randomTimeOut")
+                    Thread.sleep(randomTimeOut.toLong())
+                    return true
+                }
+                return super.shouldOverrideUrlLoading(view, request)
+            }
+
             override fun onPageFinished(view: WebView, url: String) {
                 super.onPageFinished(view, url)
                 onPageFinished?.invoke()
@@ -117,11 +145,6 @@ class CustomWebView : WebView {
         webChromeClient = object : WebChromeClient() {
             override fun onConsoleMessage(cm: ConsoleMessage): Boolean {
                 return true
-            }
-
-            override fun onProgressChanged(view: WebView?, newProgress: Int) {
-                super.onProgressChanged(view, newProgress)
-                onProgressChanged?.invoke(newProgress)
             }
         }
         settings.loadsImagesAutomatically = false
@@ -140,7 +163,11 @@ class CustomWebView : WebView {
     override fun onRestoreInstanceState(state: Parcelable?) {
         state?.let { newState ->
             if (newState is Bundle) {
-                val superState = newState.getParcelable<Parcelable>("superState")
+                val superState = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    newState.getParcelable("superState", Parcelable::class.java)
+                } else {
+                    newState.getParcelable("superState")
+                }
                 super.onRestoreInstanceState(superState)
                 val webState = newState.getBundle("webState")
                 webState?.let {

@@ -1,14 +1,15 @@
 package com.otaku.kickassanime.page.frontpage.data
 
 import android.util.Log
-import androidx.room.withTransaction
 import com.otaku.kickassanime.api.KickassAnimeService
-import com.otaku.kickassanime.api.model.AnimeListFrontPageResponse
+import com.otaku.kickassanime.api.model.Anime
 import com.otaku.kickassanime.db.KickassAnimeDb
 import com.otaku.kickassanime.utils.Constraints.cacheTimeoutInHours
 import com.otaku.kickassanime.utils.Utils.saveResponse
 import org.threeten.bp.LocalDateTime
+import java.util.*
 import javax.inject.Inject
+import kotlin.collections.ArrayList
 
 class FrontPageRepository @Inject constructor(
     private val database: KickassAnimeDb,
@@ -22,11 +23,13 @@ class FrontPageRepository @Inject constructor(
     suspend fun fetchAll() {
         val sub = kickassAnimeService.getFrontPageAnimeListSub(1)
         val dub = kickassAnimeService.getFrontPageAnimeListDub(1)
-        val response = AnimeListFrontPageResponse(sub.anime + dub.anime, 1)
+        val response = ArrayList<Anime>()
+        response.addAll(sub)
+        response.addAll(dub)
         database.frontPageEpisodesDao().removePage(1)
 
-        Log.i(TAG, "fetchAll: ${response.anime.size} anime fetched")
-        saveResponse(response, database)
+        Log.i(TAG, "fetchAll: ${response.size} anime fetched")
+        saveResponse(response, database, 1)
     }
 
     suspend fun lastUpdate(): LocalDateTime? {

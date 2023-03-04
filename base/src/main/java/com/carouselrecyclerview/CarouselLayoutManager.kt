@@ -525,6 +525,7 @@ class CarouselLayoutManager constructor(
      * Get the first visible position from the layout manager
      * @return get view which is at the start of the screen
      */
+    @Suppress("UNUSED")
     fun getFirstVisiblePosition(): Int {
         val displayFrame =
             Rect(mOffsetAll, 0, mOffsetAll + getHorizontalSpace(), getVerticalSpace())
@@ -544,6 +545,7 @@ class CarouselLayoutManager constructor(
      * Get the last visible position from the layout manager
      * @return get view which is at the end of the screen
      */
+    @Suppress("UNUSED")
     fun getLastVisiblePosition(): Int {
         val displayFrame =
             Rect(mOffsetAll, 0, mOffsetAll + getHorizontalSpace(), getVerticalSpace())
@@ -738,7 +740,7 @@ class CarouselLayoutManager constructor(
         fun onItemSelected(position: Int)
     }
 
-    override fun onSaveInstanceState(): Parcelable? {
+    override fun onSaveInstanceState(): Parcelable {
         return SaveState(selectedPosition)
     }
 

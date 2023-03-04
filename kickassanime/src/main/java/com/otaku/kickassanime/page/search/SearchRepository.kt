@@ -1,15 +1,12 @@
 package com.otaku.kickassanime.page.search
 
 import android.content.Context
-import android.content.SharedPreferences
 import com.otaku.kickassanime.api.KickassAnimeService
 import com.otaku.kickassanime.api.model.AnimeSearchResponse
 import com.otaku.kickassanime.db.KickassAnimeDb
 import com.otaku.kickassanime.utils.asAnimeEntity
 import dagger.hilt.android.qualifiers.ApplicationContext
-import java.util.*
 import javax.inject.Inject
-import kotlin.collections.LinkedHashSet
 
 
 const val PREF_SEARCH = "searches"
@@ -41,7 +38,7 @@ class SearchRepository @Inject constructor(
         searches.add(trimmed)
         var save = ""
         searches.forEach {
-            save += it + "\n";
+            save += it + "\n"
         }
         searchHistoryPref.edit().putString(PREF_SEARCH, save).apply()
     }

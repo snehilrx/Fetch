@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
+    <color name="subtitleForgroundColor">#fff</color>
+    <color name="subtitleBackgroundColor">#0fff</color>
+    <color name="subtitleEdgeColor">#000</color>
 </resources>

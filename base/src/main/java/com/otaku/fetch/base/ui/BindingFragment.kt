@@ -16,7 +16,6 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
-import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.otaku.fetch.base.TAG
@@ -30,7 +29,7 @@ open class BindingFragment<T : ViewDataBinding>(@LayoutRes private val layoutRes
 
     private var mStatusBarHeight: Int = 0
     lateinit var weakReference: WeakReference<T>
-    val binding: T get() = weakReference.get() ?: throw IllegalStateException("Binding is null")
+    protected val binding: T get() = weakReference.get() ?: throw IllegalStateException("Binding is null")
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -191,30 +190,4 @@ open class BindingFragment<T : ViewDataBinding>(@LayoutRes private val layoutRes
     }
 
     val bindingActivity: BindingActivity<*> get() = activity as BindingActivity<*>
-}
-
-/**
- * Set the adapter and call [clearReference] extension function in one call.
- * Use this extension if the current Fragment is going to be REPLACED. (When using fragmentTransaction.add is not necessary) the back stack.
- */
-fun <VH : RecyclerView.ViewHolder> RecyclerView.setNullableAdapter(
-    adapter: RecyclerView.Adapter<VH>
-) {
-    this.adapter = adapter
-    this.clearReference()
-}
-
-/**
- * Remove the adapter after the view has been detached from window in order to prevent memory leaks.
- */
-internal fun RecyclerView.clearReference() {
-    addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
-        override fun onViewAttachedToWindow(v: View) {
-
-        }
-
-        override fun onViewDetachedFromWindow(v: View) {
-            this@clearReference.adapter = null
-        }
-    })
 }

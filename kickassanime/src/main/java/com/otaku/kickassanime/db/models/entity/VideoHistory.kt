@@ -2,7 +2,6 @@ package com.otaku.kickassanime.db.models.entity
 
 import androidx.room.Entity
 import org.threeten.bp.LocalDateTime
-import org.threeten.bp.LocalTime
 
 @Entity(
     tableName = "video_history",

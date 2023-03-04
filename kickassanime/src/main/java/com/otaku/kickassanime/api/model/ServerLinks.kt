@@ -1,13 +1,6 @@
 package com.otaku.kickassanime.api.model
 
-class ServerLinks {
-    val serverName: String
-    val link: String
-
-    constructor(serverName: String, link: String) {
-        this.serverName = serverName
-        this.link = link
-    }
+class ServerLinks(val serverName: String, val link: String) {
 
 
     override fun equals(other: Any?): Boolean {

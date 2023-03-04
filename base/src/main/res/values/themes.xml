@@ -10,7 +10,7 @@
 
 
 	<style name="Theme.Fetch.CollapsingToolbar.Large" parent="Theme.Fetch.CollapsingToolbar">
-		<item name="scrimVisibleHeightTrigger">@dimen/m3_appbar_scrim_height_trigger</item>
+		<item name="scrimVisibleHeightTrigger">180dp</item>
 	</style>
 
 	<style name="Theme.Fetch.CollapsingToolbar.CollapseText" parent="TextAppearance.Material3.HeadlineSmall">
@@ -51,11 +51,6 @@
 		<item name="commitIcon">@drawable/abc_ic_commit_search_api_mtrl_alpha</item>
 		<item name="suggestionRowLayout">@layout/abc_search_dropdown_item_icons_2line</item>
 	</style>
-
-
-    <style name="Theme.Fetch.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
-
-    <style name="Theme.Fetch.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
     <style name="ShapeAppearanceOverlay.Fetch.CardView" parent="">
         <item name="cornerSize">5%</item>

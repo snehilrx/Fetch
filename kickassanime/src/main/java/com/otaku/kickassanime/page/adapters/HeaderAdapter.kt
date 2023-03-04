@@ -3,6 +3,7 @@ package com.otaku.kickassanime.page.adapters
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.otaku.fetch.base.ui.setOnClick
 import com.otaku.kickassanime.databinding.HeadingItemBinding
 import com.otaku.kickassanime.utils.Constraints
 
@@ -26,7 +27,7 @@ class HeaderAdapter(
         fun bind(title: CharSequence, actionButtonText: CharSequence, onClick: () -> Unit) {
             headingItemBinding.title = title
             headingItemBinding.actionButtonText = actionButtonText
-            headingItemBinding.actionButton.setOnClickListener { onClick() }
+            headingItemBinding.actionButton.setOnClick { onClick() }
         }
 
     }

@@ -1,6 +1,4 @@
 <resources>
     <string name="app_name">Fetch</string>
-    <string name="title_kickassanime">KickassAnime</string>
-    <string name="previous">Previous</string>
     <string name="no_network">No Network</string>
 </resources>

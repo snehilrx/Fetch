@@ -1,17 +1,14 @@
 package com.otaku.fetch
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.activity.addCallback
 import androidx.core.view.isVisible
-import androidx.navigation.Navigation
-import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.ui.NavigationUI
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.lapism.search.widget.MaterialSearchView
@@ -19,7 +16,6 @@ import com.lapism.search.widget.NavigationIconCompat
 import com.otaku.fetch.base.ui.BindingActivity
 import com.otaku.fetch.base.ui.SearchInterface
 import com.otaku.fetch.databinding.ActivityMainBinding
-import com.otaku.kickassanime.page.frontpage.FrontPageFragmentDirections
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import javax.inject.Named
@@ -54,6 +50,7 @@ class MainActivity : BindingActivity<ActivityMainBinding>(R.layout.activity_main
         initSearchView(binding)
     }
 
+    @SuppressLint("PrivateResource")
     private fun initSearchView(binding: ActivityMainBinding) {
         val searchView = binding.searchView
         val callback = this.onBackPressedDispatcher.addCallback {
@@ -88,7 +85,7 @@ class MainActivity : BindingActivity<ActivityMainBinding>(R.layout.activity_main
 
         searchView.apply {
             findViewById<View>(com.lapism.search.R.id.search_view_background)
-                ?.setPaddingRelative(0, _statusBarHeight, 0, 0)
+                ?.setPaddingRelative(0, mStatusBarHeight, 0, 0)
             addView(searchSuggestionsList)
             addView(label)
             addView(progressBar)
@@ -98,6 +95,14 @@ class MainActivity : BindingActivity<ActivityMainBinding>(R.layout.activity_main
             }
             setHint(getString(com.otaku.kickassanime.R.string.search_anime))
         }
+        val searchEdit =
+            searchView.findViewById<View>(com.lapism.search.R.id.search_view_edit_text)
+        val oldFocus = searchEdit.onFocusChangeListener
+        searchEdit?.setOnFocusChangeListener{ v, b ->
+            binding.fragmentContainerView.findViewById<View>(com.otaku.kickassanime.R.id.front)?.isVisible = !b
+            oldFocus.onFocusChange(v, b)
+        }
+
     }
 
 

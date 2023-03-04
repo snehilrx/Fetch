@@ -1,8 +1,8 @@
 package com.otaku.kickassanime.db.dao
 
 import androidx.room.*
-import androidx.room.OnConflictStrategy.IGNORE
-import androidx.room.OnConflictStrategy.REPLACE
+import androidx.room.OnConflictStrategy.Companion.IGNORE
+import androidx.room.OnConflictStrategy.Companion.REPLACE
 
 @Dao
 interface BaseDao<T> {

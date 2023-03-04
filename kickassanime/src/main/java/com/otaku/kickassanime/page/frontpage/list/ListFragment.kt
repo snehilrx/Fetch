@@ -18,7 +18,7 @@ import com.otaku.kickassanime.databinding.FragmentAnimeListBinding
 import com.otaku.kickassanime.databinding.ListControlsBinding
 import com.otaku.kickassanime.page.adapters.AnimeTileAdapter
 import com.otaku.kickassanime.utils.Utils.showError
-import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -47,8 +47,10 @@ abstract class ListFragment<Binding: ViewDataBinding> : BindingFragment<Fragment
     private fun initFlow(
         animeAdapter: AnimeTileAdapter<*>
     ) {
-        getList().observe(viewLifecycleOwner) { data ->
-            animeAdapter.submitData(lifecycle, data)
+        lifecycleScope.launchWhenCreated {
+            getList().collectLatest {
+                animeAdapter.submitData(lifecycle, it)
+            }
         }
         lifecycleScope.launch {
             animeAdapter.loadStateFlow.collectLatest {
@@ -84,7 +86,7 @@ abstract class ListFragment<Binding: ViewDataBinding> : BindingFragment<Fragment
 
     }
 
-    abstract fun getList(): LiveData<PagingData<ITileData>>
+    abstract fun getList(): Flow<PagingData<ITileData>>
 
     abstract fun getListTag(): String
 

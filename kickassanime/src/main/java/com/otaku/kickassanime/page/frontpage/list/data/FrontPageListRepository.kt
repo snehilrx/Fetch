@@ -17,7 +17,7 @@ class FrontPageListRepository @Inject constructor(
     fun getFrontPageAllPager() = Pager(
         config = PagingConfig(
             pageSize = Constraints.NETWORK_PAGE_SIZE,
-            enablePlaceholders = true,
+            enablePlaceholders = true
         ),
         remoteMediator = FrontPageListMediator(
             database,

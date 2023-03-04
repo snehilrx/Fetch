@@ -7,7 +7,6 @@ import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.recyclerview.widget.ListAdapter
 import com.otaku.fetch.data.ITileData
-import com.otaku.kickassanime.db.models.AnimeTile
 
 class AnimeTileAdapterNoPaging<T : ViewDataBinding>(
     @LayoutRes private val layoutId: Int,

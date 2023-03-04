@@ -21,7 +21,7 @@ data class AnimeEntity(
     var animeSlugId: Int,
     var name: String? = null,
     var enTitle: String? = name,
-    var animeslug: String? = null,
+    var animeSlug: String? = null,
     var description: String? = null,
     var status: String? = null,
     var image: String? = null,

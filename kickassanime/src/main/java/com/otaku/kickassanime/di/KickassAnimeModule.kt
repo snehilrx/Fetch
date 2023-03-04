@@ -8,6 +8,7 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.otaku.fetch.AppModule
 import com.otaku.kickassanime.PackageModule
+import com.otaku.kickassanime.api.AnimeSkipService
 import com.otaku.kickassanime.api.KickassAnimeService
 import com.otaku.kickassanime.db.KickassAnimeDb
 import dagger.Module
@@ -35,6 +36,13 @@ object KickassAnimeModule {
     fun kickassAnimeService(@Named("kickass") retrofit: Retrofit): KickassAnimeService =
         retrofit.create(KickassAnimeService::class.java)
 
+
+    @Provides
+    @Singleton
+    fun animeSkipService(@Named("animeskip") retrofit: Retrofit): AnimeSkipService =
+        retrofit.create(AnimeSkipService::class.java)
+
+
     @Provides
     @Singleton
     fun gson(): Gson = GsonBuilder().setLenient().serializeNulls().create()
@@ -45,5 +53,6 @@ object KickassAnimeModule {
     fun kickassDatabase(@ApplicationContext context: Context): KickassAnimeDb =
         Room.databaseBuilder(
             context, KickassAnimeDb::class.java, "kick.db"
-        ).setAutoCloseTimeout(10000, TimeUnit.DAYS).build()
+        ).fallbackToDestructiveMigration()
+            .setAutoCloseTimeout(10000, TimeUnit.DAYS).build()
 }

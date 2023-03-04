@@ -11,6 +11,7 @@ object Converters {
 
     @TypeConverter
     @JvmStatic
+    @Suppress("UNUSED")
     fun toOffsetDateTime(value: String?): LocalDateTime? {
         return value?.let {
             return dateTimeFormatter.parse(value, LocalDateTime::from)
@@ -19,12 +20,14 @@ object Converters {
 
     @TypeConverter
     @JvmStatic
+    @Suppress("UNUSED")
     fun fromOffsetDateTime(date: LocalDateTime?): String? {
         return date?.format(dateTimeFormatter)
     }
 
     @TypeConverter
     @JvmStatic
+    @Suppress("UNUSED")
     fun toOffsetTime(value: String?): LocalTime? {
         return value?.let {
             return timeFormatter.parse(value, LocalTime::from)
@@ -33,6 +36,7 @@ object Converters {
 
     @TypeConverter
     @JvmStatic
+    @Suppress("UNUSED")
     fun fromOffsetTime(date: LocalTime?): String? {
         return date?.format(timeFormatter)
     }

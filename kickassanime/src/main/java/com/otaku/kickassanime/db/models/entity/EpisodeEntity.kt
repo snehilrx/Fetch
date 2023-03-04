@@ -19,8 +19,7 @@ import org.threeten.bp.ZoneOffset
         entity = AnimeEntity::class,
         parentColumns = ["animeId"],
         childColumns = ["animeId"]
-    )]
-
+    )],
 )
 @Parcelize
 data class EpisodeEntity(

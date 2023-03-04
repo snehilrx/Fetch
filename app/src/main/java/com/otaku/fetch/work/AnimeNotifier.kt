@@ -10,10 +10,10 @@ class AnimeNotifier {
             "fetch_anime_updates",
             ExistingPeriodicWorkPolicy.REPLACE,
             PeriodicWorkRequest.Builder(FeedFetcher::class.java, 15, TimeUnit.MINUTES)
-                .setInitialDelay(2, TimeUnit.MINUTES)
+                .setInitialDelay(20, TimeUnit.MINUTES)
                 .setConstraints(
                     Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build()
-                ).setBackoffCriteria(BackoffPolicy.LINEAR, PeriodicWorkRequest.MIN_BACKOFF_MILLIS, TimeUnit.MILLISECONDS)
+                ).setBackoffCriteria(BackoffPolicy.LINEAR, WorkRequest.MIN_BACKOFF_MILLIS, TimeUnit.MILLISECONDS)
                 .build()
         )
     }

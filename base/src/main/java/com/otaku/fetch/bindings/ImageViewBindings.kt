@@ -3,11 +3,7 @@ package com.otaku.fetch.bindings
 import android.graphics.drawable.AnimatedVectorDrawable
 import android.graphics.drawable.Drawable
 import android.util.Log
-import android.view.animation.Animation
-import android.view.animation.AnimationUtils
-import android.view.animation.AnimationUtils.loadAnimation
 import android.widget.ImageView
-import androidx.annotation.RequiresPermission
 import androidx.core.content.res.ResourcesCompat
 import androidx.databinding.BindingAdapter
 import com.bumptech.glide.Glide
@@ -16,7 +12,6 @@ import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import com.otaku.fetch.base.TAG
-import java.lang.RuntimeException
 
 
 object ImageViewBindings {
@@ -31,9 +26,27 @@ object ImageViewBindings {
                     view.context.theme
                 ) as AnimatedVectorDrawable
             animatedVectorDrawable.start()
+            val urls = arrayOf("${url}hq.webp", "${url}hq.jpg", "${url}hq.jpeg",
+                "${url}hq.webp", "${url}hq.jpg", "${url}hq.jpeg")
             try {
                 Glide.with(view.context)
-                    .load(url)
+                    .load(urls[0])
+                    .error(Glide.with(view.context)
+                        .load(urls[1])
+                        .error(Glide.with(view.context)
+                            .load(urls[2])
+                            .error(Glide.with(view.context)
+                                .load(urls[3])
+                                .error(Glide.with(view.context)
+                                    .load(urls[4])
+                                    .error(
+                                        Glide.with(view.context)
+                                            .load(urls[5])
+                                    )
+                                )
+                            )
+                        )
+                    )
                     .centerCrop()
                     .listener(object : RequestListener<Drawable>{
                         override fun onLoadFailed(
@@ -43,6 +56,7 @@ object ImageViewBindings {
                             isFirstResource: Boolean
                         ): Boolean {
                             animatedVectorDrawable.stop()
+
                             return false
                         }
 

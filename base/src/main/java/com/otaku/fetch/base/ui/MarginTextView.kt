@@ -72,9 +72,9 @@ class MarginTextView : FrameLayout {
             )
         } else {
             // find the breakpoint where to break the String.
-            val breakpoint = textView.layout.getLineEnd(lines-1);
+            val breakpoint = textView.layout.getLineEnd(lines-1)
 
-            spannableStringBuilder.setSpan(MyLeadingMarginSpan2(lines, imageViewWidth + 12.toPxInt), 0, breakpoint, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            spannableStringBuilder.setSpan(MyLeadingMarginSpan2(lines, imageViewWidth + 12.toPxInt), 0, breakpoint, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         }
 
         textView.text = spannableStringBuilder

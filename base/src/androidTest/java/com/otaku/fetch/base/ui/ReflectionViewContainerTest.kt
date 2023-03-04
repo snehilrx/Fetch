@@ -15,7 +15,7 @@ class ReflectionViewContainerTest {
 
     @Before
     fun setUp() {
-        context = ApplicationProvider.getApplicationContext<Context>()
+        context = ApplicationProvider.getApplicationContext()
     }
 
     @Test

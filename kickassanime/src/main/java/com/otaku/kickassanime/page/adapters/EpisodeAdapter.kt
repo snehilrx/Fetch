@@ -5,10 +5,8 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.otaku.kickassanime.R
+import com.otaku.fetch.base.ui.setOnClick
 import com.otaku.kickassanime.databinding.ItemEpisodeBinding
-import com.otaku.kickassanime.db.models.AnimeTile
-import com.otaku.kickassanime.db.models.entity.EpisodeEntity
 
 class EpisodeAdapter(private val onItemClicked: ((Episode) -> Unit)) : ListAdapter<EpisodeAdapter.Episode, EpisodeAdapter.EpisodeViewHolder>(EpisodeComparator) {
 
@@ -24,7 +22,7 @@ class EpisodeAdapter(private val onItemClicked: ((Episode) -> Unit)) : ListAdapt
     ) : RecyclerView.ViewHolder(bindings.root) {
         fun bind(item: Episode) {
             bindings.title.text = item.title
-            bindings.root.setOnClickListener {
+            bindings.root.setOnClick {
                 onItemClicked(item)
             }
         }

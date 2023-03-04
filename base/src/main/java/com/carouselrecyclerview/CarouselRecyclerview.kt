@@ -6,14 +6,21 @@ import android.os.Parcelable
 import android.util.AttributeSet
 import androidx.recyclerview.widget.RecyclerView
 
-class CarouselRecyclerview(context: Context, attributeSet: AttributeSet) :
-    RecyclerView(context, attributeSet) {
+class CarouselRecyclerview : RecyclerView {
 
     /** Create layout manager builder so that we can easily add more methods to it */
     private var carouselLayoutManagerBuilder: CarouselLayoutManager.Builder =
         CarouselLayoutManager.Builder()
 
     private var layoutManagerState: Parcelable? = null
+
+    constructor(context: Context) : super(context)
+    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
+        context,
+        attrs,
+        defStyleAttr
+    )
 
     companion object {
         private const val SAVE_SUPER_STATE = "super-state"
@@ -131,7 +138,7 @@ class CarouselRecyclerview(context: Context, attributeSet: AttributeSet) :
         getCarouselLayoutManager().setOnSelectedListener(listener)
     }
 
-    override fun onSaveInstanceState(): Parcelable? {
+    override fun onSaveInstanceState(): Parcelable {
         val bundle = Bundle()
         bundle.putParcelable(SAVE_SUPER_STATE, super.onSaveInstanceState())
 

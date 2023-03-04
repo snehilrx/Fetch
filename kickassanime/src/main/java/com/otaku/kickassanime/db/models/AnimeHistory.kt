@@ -1,6 +1,7 @@
 package com.otaku.kickassanime.db.models
 
 import android.text.format.DateUtils
+import com.otaku.fetch.data.BaseItem
 import com.otaku.fetch.data.ITileData
 import com.otaku.kickassanime.Strings
 import org.threeten.bp.LocalDateTime
@@ -8,7 +9,7 @@ import org.threeten.bp.ZoneOffset
 
 data class AnimeHistory(
     override val title: String,
-    val animeslug: String,
+    val animeSlug: String,
     val animeSlugId: Int,
     val episodeSlug: String,
     val episodeSlugId: Int,
@@ -26,7 +27,7 @@ data class AnimeHistory(
     }
 
     override val imageUrl: String
-        get() = "${Strings.KICKASSANIME_URL}/uploads/$image"
+        get() = "${Strings.KICKASSANIME_URL}images/poster/$image"
 
     override val tags: List<String>
         get() = listOf(

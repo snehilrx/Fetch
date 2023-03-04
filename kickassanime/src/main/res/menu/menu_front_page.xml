@@ -6,7 +6,7 @@
 		android:id="@+id/history"
 		android:title="@string/history"
 		android:icon="@drawable/ic_baseline_history_24"
-		app:showAsAction="always"
+		app:showAsAction="ifRoom"
 		/>
 	<item
 		android:id="@+id/favourites"

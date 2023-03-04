@@ -86,6 +86,7 @@ open class CloudflareHTTPClient(
             .connectionSpecs(specs)
             .apply { uamSettings.httpClient?.invoke(this) }
             .addInterceptor(CloudflareInterceptor(log, uamSettings))
+
     }
 
 }

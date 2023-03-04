@@ -5,17 +5,27 @@ import com.google.gson.annotations.SerializedName
 
 @Keep
 data class Anime(
-    @SerializedName("episode") val episode: String? = null,
-    /** anime/boruto-naruto-next-generations-923495/episode-245-958365 */
-    @SerializedName("slug") val slug: String? = null,
-    @SerializedName("type") val type: String? = null,
-    @SerializedName("episode_date") val episodeDate: String? = null,
-    @SerializedName("name") val name: String? = null,
-    @SerializedName("poster") val poster: String? = null
+    @SerializedName("isSimulcast"   ) var isSimulcast   : Boolean?,
+    @SerializedName("isSubbed"      ) var isSubbed      : Boolean?,
+    @SerializedName("isDubbed"      ) var isDubbed      : Boolean?,
+    @SerializedName("year"          ) var year          : Int?,
+    @SerializedName("slug"          ) var slug          : String? ,
+    @SerializedName("episodeNumber" ) var episodeNumber : Int?,
+    @SerializedName("title"         ) var title         : String?,
+    @SerializedName("poster"        ) var poster        : Poster?,
+    @SerializedName("lastUpdate"    ) var lastUpdate    : String?,
+    @SerializedName("updatedString" ) var updatedString : String? 
+)
+
+data class Image (
+    @SerializedName("name"    ) var name    : String?,
+    @SerializedName("formats" ) var formats : ArrayList<String> = arrayListOf(),
+    @SerializedName("width"   ) var width   : Int?,
+    @SerializedName("height"  ) var height  : Int?
 )
 
 @Keep
-data class AnimeListFrontPageResponse(
-    @SerializedName("data") val anime: List<Anime>,
-    @SerializedName("page") var page: Int
+data class Poster (
+    @SerializedName("sm" ) var sm : Image?,
+    @SerializedName("hq" ) var hq : Image?
 )

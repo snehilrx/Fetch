@@ -16,7 +16,7 @@ class OrientationAwareRecyclerView @JvmOverloads constructor(
     private var scrolling = false
 
     init {
-        addOnScrollListener(object : RecyclerView.OnScrollListener() {
+        addOnScrollListener(object : OnScrollListener() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 scrolling = newState != SCROLL_STATE_IDLE

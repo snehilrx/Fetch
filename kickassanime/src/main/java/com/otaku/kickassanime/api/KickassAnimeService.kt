@@ -2,27 +2,28 @@ package com.otaku.kickassanime.api
 
 import com.otaku.kickassanime.api.conveter.JsonInText
 import com.otaku.kickassanime.api.model.*
+import com.otaku.kickassanime.utils.Constraints.NETWORK_PAGE_SIZE
 import retrofit2.http.*
 
 
 interface KickassAnimeService {
 
-    @POST("/api/get_anime_list/all/{pageNo}")
+    @POST("/api/recent_update?episodeType=all&&perPage=${NETWORK_PAGE_SIZE}")
     suspend fun getFrontPageAnimeList(
-        @Path("pageNo") pageNo: Int
-    ): AnimeListFrontPageResponse
+        @Query("page") pageNo: Int
+    ): List<Anime>
 
 
-    @POST("/api/get_anime_list/sub/{pageNo}")
+    @POST("/api/recent_update?episodeType=sub&perPage=${NETWORK_PAGE_SIZE}")
     suspend fun getFrontPageAnimeListSub(
-        @Path("pageNo") pageNo: Int
-    ): AnimeListFrontPageResponse
+        @Query("page") pageNo: Int
+    ): List<Anime>
 
 
-    @POST("/api/get_anime_list/dub/{pageNo}")
+    @POST("/api/recent_update?episodeType=dub&perPage=${NETWORK_PAGE_SIZE}")
     suspend fun getFrontPageAnimeListDub(
-        @Path("pageNo") pageNo: Int
-    ): AnimeListFrontPageResponse
+        @Query("page") pageNo: Int
+    ): List<Anime>
 
     @GET("/anime-list")
     @JsonInText("animes")
@@ -45,8 +46,7 @@ interface KickassAnimeService {
         ) path: String
     ): AnimeAndEpisodeInformation
 
-    @GET("{slug}")
-    @JsonInText("anime")
+    @GET("/api/watch/{slug}")
     suspend fun getAnimeInformation(@Path("slug", encoded = true) path: String): AnimeInformation
 
     @GET

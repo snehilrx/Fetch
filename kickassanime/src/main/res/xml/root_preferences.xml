@@ -1,0 +1,40 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory app:title="@string/notification_header">
+
+        <EditTextPreference
+            app:key="signature"
+            app:title="@string/signature_title"
+            app:useSimpleSummaryProvider="true" />
+
+        <ListPreference
+            app:defaultValue="reply"
+            app:entries="@array/reply_entries"
+            app:entryValues="@array/reply_values"
+            app:key="reply"
+            app:title="@string/reply_title"
+            app:useSimpleSummaryProvider="true" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/subtitles_header">
+
+        <ColorPreference
+            android:key="subtitleForegroundColor"
+            android:title="Foreground color"
+            app:defaultColor="@color/subtitleForgroundColor"/>
+
+        <ColorPreference
+            android:key="subtitleBackgroundColor"
+            android:title="Background color"
+            app:defaultColor="@color/subtitleBackgroundColor"/>
+
+        <ColorPreference
+            android:key="subtitleEdgeColor"
+            android:title="Edge color"
+            app:defaultColor="@color/subtitleEdgeColor"/>
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

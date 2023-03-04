@@ -9,19 +9,26 @@ import androidx.paging.cachedIn
 import androidx.paging.liveData
 import androidx.paging.map
 import com.otaku.fetch.data.ITileData
-import com.otaku.kickassanime.db.models.AnimeTile
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 @HiltViewModel
 class FrontPageListViewModel @Inject constructor(
     repository: FrontPageListRepository
 ) : ViewModel() {
-    val all: LiveData<PagingData<ITileData>> =
-        repository.getFrontPageAllPager().liveData.map { it.map { animeTile -> animeTile as ITileData } }.cachedIn(viewModelScope)
-    val sub: LiveData<PagingData<ITileData>> =
-        repository.getFrontPageSubPager().liveData.map { it.map { animeTile -> animeTile as ITileData } }.cachedIn(viewModelScope)
-    val dub: LiveData<PagingData<ITileData>> =
-        repository.getFrontPageDubPager().liveData.map { it.map { animeTile -> animeTile as ITileData } }.cachedIn(viewModelScope)
+
+    @Suppress("USELESS_CAST")
+    val all: Flow<PagingData<ITileData>> =
+        repository.getFrontPageAllPager().flow.map { it.map { animeTile -> animeTile as ITileData } }.cachedIn(viewModelScope)
+
+    @Suppress("USELESS_CAST")
+    val sub: Flow<PagingData<ITileData>> =
+        repository.getFrontPageSubPager().flow.map { it.map { animeTile -> animeTile as ITileData } }.cachedIn(viewModelScope)
+
+    @Suppress("USELESS_CAST")
+    val dub: Flow<PagingData<ITileData>> =
+        repository.getFrontPageDubPager().flow.map { it.map { animeTile -> animeTile as ITileData } }.cachedIn(viewModelScope)
 
 }

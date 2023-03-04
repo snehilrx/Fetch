@@ -9,7 +9,6 @@ import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.otaku.fetch.data.ITileData
-import com.otaku.kickassanime.db.models.AnimeTile
 
 class AnimeTileAdapter<T : ViewDataBinding>(
     @LayoutRes private val layoutId: Int,
@@ -24,7 +23,7 @@ class AnimeTileAdapter<T : ViewDataBinding>(
             onBind
         )
 
-    class AnimeTileViewHolder<T : ViewDataBinding>(
+    open class AnimeTileViewHolder<T : ViewDataBinding>(
         private val binding: T,
         private val onBind: (T, ITileData) -> Unit
     ) :

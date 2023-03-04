@@ -8,8 +8,6 @@ import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.utils.color
 import com.mikepenz.iconics.utils.icon
 import com.mikepenz.iconics.utils.sizeDp
-import com.mikepenz.iconics.view.IconicsButton
-import com.mikepenz.iconics.view.IconicsCompoundButton
 
 object MaterialButtonBinding {
 

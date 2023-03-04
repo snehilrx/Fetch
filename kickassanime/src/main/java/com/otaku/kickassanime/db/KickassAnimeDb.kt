@@ -7,11 +7,10 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.otaku.kickassanime.db.dao.*
 import com.otaku.kickassanime.db.models.entity.*
-import org.jetbrains.annotations.NotNull
 
 @Database(
     entities = [AnimeEntity::class, EpisodeEntity::class, AnimeFilter::class, AnimeGenre::class, FrontPageEpisodes::class, VideoHistory::class],
-    version = 1,
+    version = 2,
     exportSchema = true
 )
 @TypeConverters(Converters::class)
@@ -29,7 +28,7 @@ abstract class KickassAnimeDb : RoomDatabase() {
         @JvmStatic
         private lateinit var instance: KickassAnimeDb
 
-        fun getInstance(@NotNull context: Context): KickassAnimeDb {
+        fun getInstance(context: Context): KickassAnimeDb {
             if (!this::instance.isInitialized) {
                 instance = Room.databaseBuilder(
                     context, KickassAnimeDb::class.java, "database-name"

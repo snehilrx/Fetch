@@ -5,7 +5,6 @@ import android.graphics.Paint
 import android.os.Bundle
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
-import androidx.core.view.marginEnd
 import androidx.databinding.BindingAdapter
 import androidx.fragment.app.FragmentContainerView
 import androidx.fragment.app.viewModels
@@ -19,13 +18,12 @@ import com.mikepenz.iconics.IconicsColor
 import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.IconicsSize
 import com.mikepenz.iconics.typeface.library.fontawesome.FontAwesome
-import com.mikepenz.iconics.utils.backgroundColor
 import com.mikepenz.iconics.utils.color
 import com.mikepenz.iconics.utils.padding
 import com.mikepenz.iconics.utils.size
 import com.otaku.fetch.base.livedata.State
 import com.otaku.fetch.base.ui.BindingFragment
-import com.otaku.fetch.base.utils.UiUtils
+import com.otaku.fetch.base.ui.setOnClick
 import com.otaku.fetch.base.utils.UiUtils.getThemeColor
 import com.otaku.fetch.base.utils.UiUtils.showError
 import com.otaku.fetch.base.utils.UiUtils.toPxInt
@@ -78,7 +76,7 @@ class AnimeFragment : BindingFragment<FragmentAnimeBinding>(R.layout.fragment_an
                 style = Paint.Style.STROKE
                 padding = IconicsSize.TOOLBAR_ICON_PADDING
             }
-            setOnClickListener {
+            setOnClick {
                 binding.anime?.animeSlugId?.let { animeSlugId ->
                     animeViewModel.setFavourite(
                         animeSlugId, binding.favorite.isChecked
@@ -162,7 +160,7 @@ class AnimeFragment : BindingFragment<FragmentAnimeBinding>(R.layout.fragment_an
             view.getFragment<NavHostFragment>().navController.setGraph(
                 navGraphId, bundleOf(
                     "animeSlugId" to args.animeSlugId,
-                    "animeSlug" to (args.animeslug ?: ""),
+                    "animeSlug" to (args.animeSlug ?: ""),
                     "title" to args.getDisplayTitle()
                 )
             )

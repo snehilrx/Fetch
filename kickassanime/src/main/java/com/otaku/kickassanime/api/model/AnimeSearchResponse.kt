@@ -2,6 +2,7 @@ package com.otaku.kickassanime.api.model
 
 import androidx.annotation.Keep
 import com.google.gson.annotations.SerializedName
+import com.otaku.fetch.data.BaseItem
 import com.otaku.fetch.data.ITileData
 import com.otaku.kickassanime.Strings
 
@@ -16,10 +17,14 @@ data class AnimeSearchResponse(
 
 
     override val imageUrl: String
-        get() = "${Strings.KICKASSANIME_URL}uploads/$image"
+        get() = "${Strings.KICKASSANIME_URL}images/poster/$image"
     override val tags: List<String> = emptyList()
     override val title : String
         get() = name ?: "Unknown"
+
+    override fun getItemViewType(): Int {
+        return BaseItem.ITEM_TYPE_LIST
+    }
 
     override fun areItemsTheSame(newItem: ITileData): Boolean {
         return newItem is AnimeSearchResponse && this.slug == newItem.slug

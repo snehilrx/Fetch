@@ -14,7 +14,7 @@ interface FavouriteDao {
     suspend fun setFavourite(animeSlugId: Int, favorite: Int)
 
 
-    @Query("select animeslug, animeSlugId, name as title, image from anime where favourite = 1 ")
+    @Query("select animeSlug, animeSlugId, name as title, image from anime where favourite = 1 ")
     fun getAllFavourites(): PagingSource<Int, AnimeFavorite>
 
     @Query("select favourite from anime where animeSlugId == :animeSlugId")
@@ -24,7 +24,7 @@ interface FavouriteDao {
 @Dao
 interface HistoryDao : BaseDao<VideoHistory> {
 
-    @Query("select a.animeslug, a.animeSlugId as animeSlugId, a.name as title, e.episodeSlug, e.episodeSlugId as episodeSlugId, a.image, e.sector, e.name as episodeNumber,lastPlayed from video_history v, anime a, episode e where (v.episodeSlugId = e.episodeSlugId and e.animeId = a.animeId) order by lastPlayed desc")
+    @Query("select a.animeSlug, a.animeSlugId as animeSlugId, a.name as title, e.episodeSlug, e.episodeSlugId as episodeSlugId, a.image, e.sector, e.name as episodeNumber,lastPlayed from video_history v, anime a, episode e where (v.episodeSlugId = e.episodeSlugId and e.animeId = a.animeId) order by lastPlayed desc")
     fun getLatestWatchedVideos(): PagingSource<Int, AnimeHistory>
 
     @Query("select timestamp from video_history where episodeSlugId = :episodeSlugId")

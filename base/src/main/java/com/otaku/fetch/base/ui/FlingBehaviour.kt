@@ -11,8 +11,8 @@ import com.google.android.material.appbar.AppBarLayout
 class FlingBehavior : AppBarLayout.Behavior {
     private var isPositive = false
 
-    constructor() {}
-    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {}
+    constructor()
+    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
 
     override fun onNestedFling(
         coordinatorLayout: CoordinatorLayout,

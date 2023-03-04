@@ -1,5 +1,6 @@
 package com.otaku.kickassanime.utils
 
+import com.google.common.hash.Hashing.sha256
 import com.otaku.kickassanime.api.model.*
 import com.otaku.kickassanime.db.models.entity.AnimeEntity
 import com.otaku.kickassanime.db.models.entity.EpisodeEntity
@@ -10,7 +11,7 @@ fun AnimeResponse.asAnimeEntity(): AnimeEntity {
     return AnimeEntity(
         animeId = this.animeId?.toInt() ?: 0,
         animeSlugId = this.slug?.substringAfterLast("-")?.toInt() ?: 0,
-        animeslug = this.slug?.removeSuffix("/anime/")?.substringBeforeLast("-"),
+        animeSlug = this.slug?.removeSuffix("/anime/")?.substringBeforeLast("-"),
         description = this.description,
         name = this.name,
         image = this.poster
@@ -18,21 +19,30 @@ fun AnimeResponse.asAnimeEntity(): AnimeEntity {
 }
 
 fun Anime.asAnimeEntity(): AnimeEntity {
+    val slug = this.title
+
     return AnimeEntity(
-        animeSlugId = this.slug?.substringBeforeLast("/")?.substringAfterLast("-")?.toInt() ?: 0,
-        animeslug = this.slug?.removeSuffix("/anime/")?.substringBeforeLast("/"),
-        name = this.name,
-        image = this.poster
+        animeSlugId = HashUtils.sha256(slug),
+        animeSlug = slug,
+        name = this.title,
+        image = this.poster?.hq?.name?.removeSuffix("hq") ?:
+        this.poster?.sm?.name?.removeSuffix("sm")
     )
 }
 
 fun Anime.asEpisodeEntity(): EpisodeEntity {
     return EpisodeEntity(
         episodeSlug = this.slug,
-        episodeSlugId = this.slug?.substringAfterLast("-")?.toInt() ?: 0,
-        name = this.episode,
-        createdDate = this.episodeDate?.let { Utils.parseDateTime(it) },
-        sector = this.type
+        episodeSlugId = HashUtils.sha256(slug),
+        name = this.episodeNumber?.toString() ?: "NULL",
+        createdDate = this.lastUpdate?.let { Utils.parseDateTime(it) },
+        sector = if (this.isSubbed == true && this.isDubbed == true) {
+            Constraints.Sector.SUB_DUB
+        } else if (this.isDubbed == true) {
+            Constraints.Sector.DUB
+        } else {
+            Constraints.Sector.SUB
+        }
     )
 }
 
@@ -138,10 +148,5 @@ fun EpisodeEntity.asVideoHistory(): VideoHistory {
 }
 
 fun AnimeSearchResponse.asAnimeEntity(): AnimeEntity {
-    return AnimeEntity(image = image, name = name, animeslug = slug, animeSlugId = slugId?.toIntOrNull() ?: 0)
-}
-
-private object Constants {
-    @JvmStatic
-    val regex = Regex("Dub", RegexOption.IGNORE_CASE)
+    return AnimeEntity(image = image, name = name, animeSlug = slug, animeSlugId = slugId?.toIntOrNull() ?: 0)
 }

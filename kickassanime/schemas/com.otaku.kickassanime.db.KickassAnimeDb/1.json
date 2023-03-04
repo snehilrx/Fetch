@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "f14e6e0c0980a4a47bbf6e557a4f23b5",
+    "identityHash": "b2406709ae72e4e86f13072fa9404d24",
     "entities": [
       {
         "tableName": "anime",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`animeId` INTEGER, `malId` INTEGER, `simklId` INTEGER, `animeSlugId` INTEGER NOT NULL, `name` TEXT, `enTitle` TEXT, `animeslug` TEXT, `description` TEXT, `status` TEXT, `image` TEXT, `startdate` TEXT, `enddate` TEXT, `broadcastDay` TEXT, `broadcastTime` TEXT, `source` TEXT, `duration` TEXT, `site` TEXT, `infoLink` TEXT, `createddate` TEXT, `type` TEXT, `rating` INTEGER, `favourite` INTEGER NOT NULL, PRIMARY KEY(`animeSlugId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`animeId` INTEGER, `malId` INTEGER, `simklId` INTEGER, `animeSlugId` INTEGER NOT NULL, `name` TEXT, `enTitle` TEXT, `animeSlug` TEXT, `description` TEXT, `status` TEXT, `image` TEXT, `startdate` TEXT, `enddate` TEXT, `broadcastDay` TEXT, `broadcastTime` TEXT, `source` TEXT, `duration` TEXT, `site` TEXT, `infoLink` TEXT, `createddate` TEXT, `type` TEXT, `rating` INTEGER, `favourite` INTEGER NOT NULL, PRIMARY KEY(`animeSlugId`))",
         "fields": [
           {
             "fieldPath": "animeId",
@@ -45,8 +45,8 @@
             "notNull": false
           },
           {
-            "fieldPath": "animeslug",
-            "columnName": "animeslug",
+            "fieldPath": "animeSlug",
+            "columnName": "animeSlug",
             "affinity": "TEXT",
             "notNull": false
           },
@@ -142,10 +142,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "animeSlugId"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -274,10 +274,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "episodeSlugId"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [
           {
@@ -322,11 +322,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "animeId",
             "filterId"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -349,11 +349,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "animeId",
             "genreId"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -382,11 +382,11 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "episodeSlugId",
             "animeSlugId"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [],
         "foreignKeys": []
@@ -415,10 +415,10 @@
           }
         ],
         "primaryKey": {
+          "autoGenerate": false,
           "columnNames": [
             "episodeSlugId"
-          ],
-          "autoGenerate": false
+          ]
         },
         "indices": [],
         "foreignKeys": [
@@ -439,7 +439,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f14e6e0c0980a4a47bbf6e557a4f23b5')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b2406709ae72e4e86f13072fa9404d24')"
     ]
   }
 }

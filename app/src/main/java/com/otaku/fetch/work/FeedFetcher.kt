@@ -9,7 +9,6 @@ import com.otaku.fetch.AppModule
 import com.otaku.fetch.base.TAG
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
-import javax.inject.Inject
 import javax.inject.Named
 
 @HiltWorker

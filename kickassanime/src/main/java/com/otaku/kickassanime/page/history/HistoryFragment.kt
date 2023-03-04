@@ -9,6 +9,7 @@ import androidx.paging.PagingData
 import androidx.paging.map
 import androidx.recyclerview.widget.GridLayoutManager
 import com.otaku.fetch.base.isLandscape
+import com.otaku.fetch.base.ui.setOnClick
 import com.otaku.fetch.data.ITileData
 import com.otaku.kickassanime.R
 import com.otaku.kickassanime.databinding.FragmentAnimeListBinding
@@ -16,6 +17,8 @@ import com.otaku.kickassanime.databinding.ItemHistoryBinding
 import com.otaku.kickassanime.db.models.AnimeHistory
 import com.otaku.kickassanime.page.frontpage.list.ListFragment
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 @AndroidEntryPoint
 class HistoryFragment : ListFragment<ItemHistoryBinding>() {
@@ -32,10 +35,10 @@ class HistoryFragment : ListFragment<ItemHistoryBinding>() {
 
     override val onBind: (ItemHistoryBinding, ITileData) -> Unit = { itemHistoryBinding: ItemHistoryBinding, iTileData: ITileData ->
         itemHistoryBinding.history = iTileData
-        itemHistoryBinding.root.setOnClickListener { onItemClick(iTileData) }
+        itemHistoryBinding.root.setOnClick { onItemClick(iTileData) }
     }
 
-    override fun getList(): LiveData<PagingData<ITileData>> = historyViewModel.recents.map {
+    override fun getList(): Flow<PagingData<ITileData>> = historyViewModel.recent.map {
         pagingData -> pagingData.map { it }
     }
 

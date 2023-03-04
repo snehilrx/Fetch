@@ -1,55 +1,61 @@
 package com.otaku.kickassanime.page.episodepage
 
 import android.annotation.SuppressLint
-import android.app.Dialog
+import android.app.AlertDialog
 import android.content.ActivityNotFoundException
 import android.content.Intent
-import android.content.pm.ActivityInfo
 import android.net.Uri
 import android.os.Bundle
-import android.view.View
-import android.view.ViewGroup
-import android.widget.AdapterView
-import android.widget.ImageButton
-import android.widget.Toast
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
+import android.view.KeyEvent
+import android.widget.*
 import androidx.activity.viewModels
-import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.os.bundleOf
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsControllerCompat
-import androidx.core.view.isVisible
-import androidx.lifecycle.LiveData
+import androidx.core.os.postDelayed
+import androidx.core.view.*
+import androidx.media3.cast.CastPlayer
 import androidx.media3.common.*
+import androidx.media3.common.MediaItem.SubtitleConfiguration
+import androidx.media3.common.util.RepeatModeUtil
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.database.StandaloneDatabaseProvider
-import androidx.media3.datasource.DataSource
 import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.FileDataSource
 import androidx.media3.datasource.cache.*
 import androidx.media3.datasource.okhttp.OkHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.dash.DashMediaSource
 import androidx.media3.exoplayer.hls.HlsMediaSource
-import androidx.media3.exoplayer.source.ConcatenatingMediaSource
+import androidx.media3.exoplayer.source.*
 import androidx.media3.exoplayer.trackselection.AdaptiveTrackSelection
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
-import androidx.media3.ui.PlayerView
+import androidx.media3.ui.PlayerControlView
 import androidx.navigation.navArgs
+import com.google.android.gms.cast.MediaQueueItem
+import com.google.android.gms.cast.MediaTrack
+import com.google.android.gms.cast.framework.CastButtonFactory
+import com.google.android.gms.cast.framework.CastContext
+import com.google.android.gms.dynamite.DynamiteModule.LoadingException
+import com.otaku.fetch.base.TAG
 import com.otaku.fetch.base.livedata.State
 import com.otaku.fetch.base.ui.BindingActivity
+import com.otaku.fetch.base.ui.setOnClick
 import com.otaku.fetch.base.utils.UiUtils.loadBitmapFromUrl
 import com.otaku.fetch.base.utils.UiUtils.showError
 import com.otaku.kickassanime.R
+import com.otaku.kickassanime.api.model.CommonSubtitle
 import com.otaku.kickassanime.databinding.ActivityEpisodeBinding
+import com.otaku.kickassanime.db.models.CommonVideoLink
 import com.otaku.kickassanime.db.models.entity.AnimeEntity
 import com.otaku.kickassanime.db.models.entity.EpisodeEntity
 import com.otaku.kickassanime.page.animepage.AnimeActivity
-import com.otaku.kickassanime.utils.TrackSelectionDialog
 import dagger.hilt.android.AndroidEntryPoint
 import okhttp3.OkHttpClient
 import java.io.File
-import java.lang.ref.WeakReference
 import javax.inject.Inject
 
 
@@ -57,60 +63,63 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activity_episode) {
 
-    private lateinit var mFullScreenDialog: Dialog
-    private val viewModel: EpisodeViewModel by viewModels()
 
+    private var castContext: CastContext? = null
+
+    // region Threading stuff
+    private val handler = Handler(Looper.getMainLooper())
+    private var timeSkipLoop: Runnable? = null
+    private var delayedPlayBack: Runnable? = null
+    // endregion
+
+    private lateinit var playerViewUiHelper: PlayerViewUiHelper
+    private val viewModel: EpisodeViewModel by viewModels()
     private lateinit var args: EpisodeActivityArgs
 
-    private val hlsMediaSource by lazy { HlsMediaSource.Factory(buildCacheDataSourceFactory()) }
-
-    private val mediaSources = ConcatenatingMediaSource()
-
-    private lateinit var episodeLD : LiveData<EpisodeEntity?>
-    private lateinit var animeLD : LiveData<AnimeEntity?>
-
+    // region Media stuff
+    private val cachingDataSourceFactory by lazy {
+        val cache = getDownloadCache()
+        val cacheSink = CacheDataSink.Factory()
+            .setCache(cache)
+        val upstreamFactory = DefaultDataSource.Factory(this, OkHttpDataSource.Factory(okhttp))
+        return@lazy CacheDataSource.Factory()
+            .setCache(cache)
+            .setCacheWriteDataSinkFactory(cacheSink)
+            .setCacheReadDataSourceFactory(FileDataSource.Factory())
+            .setUpstreamDataSourceFactory(upstreamFactory)
+            .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
+    }
+    private val hlsMediaSource by lazy { HlsMediaSource.Factory(cachingDataSourceFactory) }
+    private val dashMediaSource by lazy { DashMediaSource.Factory(cachingDataSourceFactory) }
     private val trackSelector by lazy {
-        DefaultTrackSelector(this, AdaptiveTrackSelection.Factory())
-    }
-
-    private fun showPlayerError(error: Exception){
-        showError(error, this@EpisodeActivity, "retry") {
-            binding.playerView.player?.prepare()
+        DefaultTrackSelector(this, AdaptiveTrackSelection.Factory()).apply {
+            setParameters(
+                DefaultTrackSelector.Parameters.Builder(this@EpisodeActivity)
+                    .setPreferredTextLanguage("en")
+            )
         }
     }
-
-    private val playerListener = object : Player.Listener {
-
-        val weakReference = WeakReference(this@EpisodeActivity)
-
-        override fun onPlayerError(error: PlaybackException) {
-            super.onPlayerError(error)
-            weakReference.get()?.showPlayerError(error)
-        }
-
-        override fun onIsPlayingChanged(isPlaying: Boolean) {
-            weakReference.get()?.viewModel?.setIsPlaying(isPlaying)
-        }
-
-        override fun onPlaybackStateChanged(playbackState: Int) {
-            super.onPlaybackStateChanged(playbackState)
-            val binding = weakReference.get()?.binding ?: return
-            if (playbackState == ExoPlayer.STATE_ENDED) {
-                binding.episodeDetails?.episodeSlugId?.let { viewModel.addToFavourites(it) }
-            }
-            binding.playerView.keepScreenOn =
-                !(playbackState == Player.STATE_IDLE || playbackState == Player.STATE_ENDED)
-        }
-    }
+    private val mediaSource = ArrayList<MediaSource>()
+    private val subtitleSources = ArrayList<CommonSubtitle>()
+    private val playerListener by lazy { PlayerListener(binding, viewModel, this::showPlayerError) }
+    // endregion
 
     @Inject
     lateinit var okhttp: OkHttpClient
 
     override fun onBind(binding: ActivityEpisodeBinding, savedInstanceState: Bundle?) {
         args = navArgs<EpisodeActivityArgs>().value
-        mFullScreenDialog = Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
-        mFullScreenDialog.setOnDismissListener {
-            exitFullScreen()
+        fetchRemote()
+        playerViewUiHelper = PlayerViewUiHelper(
+            this,
+            binding.playerView,
+            binding.aspectRatioFrameLayout,
+            isFullscreen()
+        )
+        playerViewUiHelper.onSelectStream = {
+            onSelectStream {
+                loadLink(it)
+            }
         }
         initAppbar(
             binding.appbarImageView,
@@ -120,72 +129,16 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
         initializeWebView()
         setTransparentStatusBar()
         showBackButton()
-        binding.appbarLayout.setPaddingRelative(0, _statusBarHeight, 0, 0)
+        binding.appbarLayout.setPaddingRelative(0, mStatusBarHeight, 0, 0)
     }
 
-    private fun exitFullScreen() {
-        requestedOrientation = viewModel.orientation
-        (binding.playerView.parent as ViewGroup).removeView(binding.playerView)
-        binding.aspectRatioFrameLayout.addView(
-            binding.playerView,
-            ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-            )
-        )
-        showSystemUI()
-        mFullScreenDialog.dismiss()
-    }
-
-    // This snippet hides the system bars.
-    private fun hideSystemUI() {
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-        mFullScreenDialog.window?.decorView?.let {
-            WindowInsetsControllerCompat(window, it).let { controller ->
-                controller.hide(WindowInsetsCompat.Type.systemBars())
-                controller.systemBarsBehavior =
-                    WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-            }
-        }
-    }
-
-    // This snippet shows the system bars. It does this by removing all the flags
-    // except for the ones that make the content appear under the system bars.
-    private fun showSystemUI() {
-        WindowCompat.setDecorFitsSystemWindows(window, true)
-        mFullScreenDialog.window?.decorView?.let {
-            WindowInsetsControllerCompat(
-                window,
-                it
-            ).show(WindowInsetsCompat.Type.systemBars())
-        }
-    }
-
-    @SuppressLint("PrivateResource")
-    private fun enterFullScreen() {
-        viewModel.orientation = resources.configuration.orientation
-        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
-        (binding.playerView.parent as ViewGroup).removeView(binding.playerView)
-        mFullScreenDialog.addContentView(
-            binding.playerView,
-            ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-            )
-        )
-        binding.playerView.findViewById<ImageButton>(androidx.media3.ui.R.id.exo_fullscreen)
-            ?.setImageDrawable(
-                ContextCompat.getDrawable(
-                    this,
-                    androidx.media3.ui.R.drawable.exo_ic_fullscreen_exit
-                )
-            )
-        mFullScreenDialog.show()
-        hideSystemUI()
+    private fun isFullscreen(): Boolean {
+        return binding.playerView.parent != binding.aspectRatioFrameLayout
     }
 
     private fun initPlayer() {
         val player = ExoPlayer.Builder(this)
+            .setUsePlatformDiagnostics(true)
             .setTrackSelector(trackSelector)
             .build()
         trackSelector.setParameters(
@@ -193,9 +146,13 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
                 .buildUponParameters()
                 .setAllowVideoMixedMimeTypeAdaptiveness(true)
         )
-        player.repeatMode = ExoPlayer.REPEAT_MODE_OFF
-        binding.playerView.player = player
-        binding.playerView.setShowBuffering(PlayerView.SHOW_BUFFERING_ALWAYS)
+        castContext = try {
+            CastContext.getSharedInstance(applicationContext)
+        } catch (e: RuntimeException) {
+            Log.e(TAG, "creating media cast context failed", e)
+            null
+        }
+        initCastHelper(player)
         binding.playerView.setKeepContentOnPlayerReset(true)
         binding.animeDetails?.getImageUrl()?.let {
             loadBitmapFromUrl(
@@ -211,30 +168,113 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
             }
         }
         initPlayerControls()
+
+        binding.playerView.setRepeatToggleModes(RepeatModeUtil.REPEAT_TOGGLE_MODE_NONE)
         player.addListener(playerListener)
+        playerViewUiHelper.showLoading()
+    }
+
+    private fun initCastHelper(player: ExoPlayer) {
+        val playerView = binding.playerView
+        val castHelper = CastHelper(castContext, player, playerView)
+        castHelper.setCurrentPlayer = { currentPlayer ->
+            val oldPlayer = playerView.player
+            playerView.player = currentPlayer
+            playerView.controllerHideOnTouch = currentPlayer === player
+
+            // Player state management.
+            var playbackPositionMs = C.TIME_UNSET
+            var playWhenReady = false
+
+            if (oldPlayer != null) {
+                // Save state from the previous player.
+                val playbackState = oldPlayer.playbackState
+                if (playbackState != Player.STATE_ENDED) {
+                    playbackPositionMs = oldPlayer.currentPosition
+                    playWhenReady = oldPlayer.playWhenReady
+                }
+                oldPlayer.stop()
+                oldPlayer.clearMediaItems()
+            }
+
+            if (currentPlayer === player) {
+                // exoplayer
+                playerView.controllerShowTimeoutMs = PlayerControlView.DEFAULT_SHOW_TIMEOUT_MS
+                playerView.defaultArtwork = null
+                playMedia()
+                currentPlayer.seekTo(playbackPositionMs)
+            } else if (currentPlayer is CastPlayer) {
+                // cast player
+                playerView.controllerShowTimeoutMs = 0
+                playerView.showController()
+                playerView.defaultArtwork = ResourcesCompat.getDrawable(
+                    playerView.context.resources,
+                    androidx.media3.cast.R.drawable.cast_album_art_placeholder,
+                    null
+                )
+                currentPlayer.clearMediaItems()
+
+                val subs = subtitleSources.map {
+                    SubtitleConfiguration.Builder(Uri.parse(it.getLink()))
+                        .setMimeType(it.getFormat())
+                        .setLanguage(it.getLanguage())
+                        .build()
+                }
+                val mediaItems =  mediaSource.map {
+                    it.mediaItem.buildUpon()
+                        .setSubtitleConfigurations(subs)
+                        .build()
+                }
+                currentPlayer.setMediaItems(mediaItems,
+                    oldPlayer?.currentMediaItemIndex ?: C.INDEX_UNSET,
+                    oldPlayer?.currentPosition ?: C.TIME_UNSET)
+                oldPlayer?.trackSelectionParameters?.let {
+                    currentPlayer.trackSelectionParameters = it
+                }
+                currentPlayer.seekTo(playbackPositionMs)
+                currentPlayer.playWhenReady = playWhenReady
+                currentPlayer.prepare()
+            }
+        }
+        val controls = binding.episodeDetailsContainer
+        CastButtonFactory.setUpMediaRouteButton(applicationContext, controls.mediaCast)
+        controls.castBtn.setOnClick { controls.mediaCast.performClick() }
+
     }
 
     private fun initPlayerControls() {
-        val settingButton =
-            binding.playerView.findViewById<ImageButton>(androidx.media3.ui.R.id.exo_settings)
-        settingButton.setOnClickListener {
-            binding.playerView.player?.let { it1 ->
-                TrackSelectionDialog.createForPlayer(it1) {}.show(this)
+        viewModel.getTimeSkip().observe(this) { timestamps ->
+            timeSkipLoop?.let { handler.removeCallbacks(it) }
+            timeSkipLoop = object : Runnable {
+                override fun run() {
+                    val currentPos = binding.playerView.player?.currentPosition
+                    for (i in 0..timestamps.size - 2) {
+                        if (currentPos != null && currentPos >= timestamps[i] && currentPos <= timestamps[i + 1]) {
+                            playerViewUiHelper.skipIntroButton.isVisible = true
+                            playerViewUiHelper.skipIntroButton.setOnClick {
+                                binding.playerView.player?.seekTo(
+                                    timestamps[i] + 1
+                                )
+                            }
+                        } else {
+                            playerViewUiHelper.skipIntroButton.isVisible = false
+                        }
+                    }
+                    handler.postDelayed(this, 2000)
+                }
             }
+            timeSkipLoop?.let { handler.postDelayed(timeSkipLoop as Runnable, 2000) }
         }
-        val fullscreen =
-            binding.playerView.findViewById<View>(androidx.media3.ui.R.id.exo_fullscreen)
-        fullscreen.isVisible = true
-        binding.playerView.setFullscreenButtonClickListener {
-            if (it)
-                enterFullScreen()
-            else
-                exitFullScreen()
-        }
+    }
+
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        // If the event was not handled then see if the player view can handle it.
+        return super.dispatchKeyEvent(event) || binding.playerView.dispatchKeyEvent(event)
     }
 
     override fun onPause() {
         super.onPause()
+        timeSkipLoop?.let { handler.removeCallbacks(it) }
         binding.playerView.player?.currentPosition?.let {
             binding.episodeDetails?.episodeSlugId?.let { episodeSlugId ->
                 viewModel.updatePlayBackTime(
@@ -243,57 +283,95 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
                 )
             }
         }
-        binding.playerView.player?.stop()
+        val player = binding.playerView.player
+        if (player is ExoPlayer) {
+            player.stop()
+        }
     }
 
 
     override fun onDestroy() {
         destroyWebView()
-        releasePlayer()
+        val player = binding.playerView.player
+        if (player is ExoPlayer) {
+            releasePlayer()
+        }
         super.onDestroy()
     }
 
     private fun releasePlayer() {
-        playerListener.weakReference.clear()
+        mediaSource.clear()
+        subtitleSources.clear()
+        binding.playerView.player?.clearMediaItems()
         binding.playerView.player?.removeListener(playerListener)
         binding.playerView.player?.release()
         binding.playerView.player = null
     }
 
-    private fun addLink(url: String) {
+    private fun loadLink(item: CommonVideoLink) {
+        Log.i(TAG, "DataLink ${item.getLink()}")
         val mediaItem = MediaItem.Builder()
             .setMediaMetadata(
                 MediaMetadata.Builder().setTitle("${args.title} ${binding.episodeDetails?.title}")
                     .build()
             )
-            .setUri(url)
+            .setUri(item.getLink())
             .setMimeType(
-                MimeTypes.APPLICATION_M3U8
+                when (item.getVideoType()) {
+                    CommonVideoLink.HLS -> MimeTypes.APPLICATION_M3U8
+                    CommonVideoLink.DASH -> MimeTypes.APPLICATION_MPD
+                    else -> return
+                }
             ).build()
-        val mediaSource = hlsMediaSource.createMediaSource(mediaItem)
-        mediaSources.addMediaSource(mediaSource)
-        binding.progress = 100
-        (binding.playerView.player as? ExoPlayer)?.let { player ->
-            if (mediaSources.size == 1) {
-                player.playWhenReady = true
-                player.addMediaSource(mediaSources)
-                player.prepare()
+        mediaSource.add(
+            when (item.getVideoType()) {
+                CommonVideoLink.HLS -> hlsMediaSource.createMediaSource(
+                    mediaItem
+                )
+                CommonVideoLink.DASH -> {
+                    dashMediaSource.createMediaSource(mediaItem)
+                }
+                else -> return
             }
+        )
+        playMedia()
+    }
+
+    private fun playMedia() {
+        (binding.playerView.player as? ExoPlayer)?.let { player ->
+            player.clearMediaItems()
+            val subs = subtitleSources.filter { it.getLink().isNotEmpty() }.map {
+                SingleSampleMediaSource.Factory(cachingDataSourceFactory)
+                    .createMediaSource(
+                        SubtitleConfiguration.Builder(Uri.parse(it.getLink()))
+                            .setMimeType(it.getFormat()).setLanguage(it.getLanguage())
+                            .build(), C.TIME_UNSET
+                    )
+            }
+            val mergingMediaSource =
+                MergingMediaSource(*mediaSource.toTypedArray(), *subs.toTypedArray())
+            player.addMediaSource(
+                mergingMediaSource
+            )
+            player.playWhenReady = true
+            player.prepare()
+            delayedPlayBack?.let { handler.removeCallbacks(it) }
+            delayedPlayBack = handler.postDelayed(600) {
+                weakReference.get()?.playerView?.player?.play()
+                viewModel.getPlaybackTime().value?.let {
+                    player.seekTo(it)
+                }
+            }
+
         }
     }
 
-
-    private fun buildCacheDataSourceFactory(): DataSource.Factory {
-        val cache = getDownloadCache()
-        val cacheSink = CacheDataSink.Factory()
-            .setCache(cache)
-        val upstreamFactory = DefaultDataSource.Factory(this, OkHttpDataSource.Factory(okhttp))
-        return CacheDataSource.Factory()
-            .setCache(cache)
-            .setCacheWriteDataSinkFactory(cacheSink)
-            .setCacheReadDataSourceFactory(FileDataSource.Factory())
-            .setUpstreamDataSourceFactory(upstreamFactory)
-            .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
+    private fun addSubtitle(commonSubtitle: List<CommonSubtitle>) {
+        if (commonSubtitle.isNotEmpty()) {
+            subtitleSources.clear()
+            subtitleSources.addAll(commonSubtitle)
+            playMedia()
+        }
     }
 
     @Synchronized
@@ -316,10 +394,24 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
 
     private fun initialize() {
         initPlayer()
-        fetchRemote()
-        viewModel.getIsPlaying().observe(this) {
-            if (it) binding.playerView.player?.play()
+        initObservers()
+    }
+
+    private fun initializeWebView() {
+        binding.webView.videoLinksCallback = {
+            viewModel.handleVideoLinks(it)
         }
+    }
+
+    private fun destroyWebView() {
+        binding.webView.videoLinksCallback = null
+    }
+
+    private fun fetchRemote() {
+        viewModel.fetchEpisode(args.animeSlugId, args.episodeSlugId)
+    }
+
+    private fun initLoadingState() {
         viewModel.getLoadState().observe(this) {
             when (it) {
                 is State.FAILED -> {
@@ -335,87 +427,81 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
                 }
             }
         }
-        initObservers()
     }
-
-    private fun initializeWebView() {
-        binding.webView.videoLinksCallback = {
-            viewModel.handleVideoLinks(it)
-        }
-        binding.webView.onProgressChanged = {
-            binding.progress = it
-        }
-    }
-
-    private fun destroyWebView() {
-        binding.webView.videoLinksCallback = null
-        binding.webView.onProgressChanged = null
-    }
-
-    private fun fetchRemote() {
-        viewModel.fetchEpisode(args.animeSlugId, args.episodeSlugId)
-    }
-
 
     private fun initObservers() {
-        episodeLD = viewModel.getEpisode(args.episodeSlugId)
-        animeLD = viewModel.getAnime(args.animeSlugId)
-        episodeLD.observe(this) { episode ->
-            if (episode != null) {
-                setAppbarEpisodeNumber(binding, "EP: ${episode.name}")
-                binding.episodeDetails = episode
-                animeLD.value?.let { initDetails(episode, it) }
-            }
-        }
-        animeLD.observe(this) { anime ->
-            if (anime != null) {
-                binding.animeDetails = anime
-                binding.collapsingToolbar.title = anime.name
-                episodeLD.value?.let { initDetails(it, anime) }
-            }
+        initLoadingState()
+        viewModel.getIsPlaying().observe(this) {
+            if (it) binding.playerView.player?.play()
         }
 
+        viewModel.getEpisodeWithAnime(args.episodeSlugId, args.animeSlugId)
+            .observe(this) { item ->
+                val episode = item?.first
+                val anime = item?.second
+                if (episode != null && anime != null) {
+                    val title = buildString {
+                        append("Episode ")
+                        append(episode.name)
+                    }
+                    setAppbarEpisodeNumber(binding, title)
+                    binding.episodeDetails = episode
+                    playerViewUiHelper.subtitle.text = title
+                    playerViewUiHelper.enableNextPrevEpisodeButtons(episode.next, episode.prev)
+                    binding.animeDetails = anime
+                    binding.collapsingToolbar.title = anime.name
+                    playerViewUiHelper.title.text = anime.name
+                    initDetails(episode, anime)
+                }
+            }
+
         viewModel.getCurrentServer().observe(this) {
-            mediaSources.clear()
+            mediaSource.clear()
             binding.webView.loadUrl(it)
         }
 
-        viewModel.getVideoLink().observe(this) {
-            addLink(it)
+        viewModel.getVideoLink().observe(this) { videoLinks ->
+            if (videoLinks.isNotEmpty()) {
+                loadLink(videoLinks[0])
+            }
+        }
+
+        viewModel.getSubtitle().observe(this) {
+            addSubtitle(it)
         }
     }
 
 
     private fun initDetails(episode: EpisodeEntity, anime: AnimeEntity) {
-        binding.episodeDetailsContainer.anime.setOnClickListener {
+        binding.episodeDetailsContainer.anime.setOnClick {
             startActivity(
                 AnimeActivity.newInstance(this, anime)
                     .addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
             )
         }
-        binding.playerView.findViewById<View>(androidx.media3.ui.R.id.exo_next).setOnClickListener {
+        playerViewUiHelper.next.setOnClick {
             openNextEpisode(episode)
         }
-        binding.playerView.findViewById<View>(androidx.media3.ui.R.id.exo_prev).setOnClickListener {
+        playerViewUiHelper.prev.setOnClick {
             openPrevEpisode(episode)
         }
-        binding.episodeDetailsContainer.next.setOnClickListener {
+        binding.episodeDetailsContainer.next.setOnClick {
             openNextEpisode(episode)
         }
-        binding.episodeDetailsContainer.previous.setOnClickListener {
+        binding.episodeDetailsContainer.previous.setOnClick {
             openPrevEpisode(episode)
         }
-        binding.episodeDetailsContainer.mal.setOnClickListener {
+        binding.episodeDetailsContainer.mal.setOnClick {
             openLink(
                 "https://myanimelist.net/anime/${
                     episode.episodeSlugId
                 }"
             )
         }
-        binding.episodeDetailsContainer.links.setOnClickListener {
+        binding.episodeDetailsContainer.links.setOnClick {
             val link = viewModel.getVideoLink().value
             if (link != null) {
-                openLink(link)
+                onSelectStream { openLink(it.getLink()) }
             } else {
                 Toast.makeText(this, "No Link was found", Toast.LENGTH_SHORT).show()
             }
@@ -438,7 +524,7 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
                     }
                 binding.episodeDetailsContainer.servers.setText(list[0].serverName)
                 viewModel.setCurrentServer(list[0].link)
-            } else {
+            } else if (links !is LinkedHashSet) {
                 showError(Exception("No servers found"), this)
             }
         }
@@ -474,29 +560,29 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
 
     private fun openEpisode(episodeSlugId: Int) {
         releasePlayer()
-        animeLD.removeObservers(this)
-        episodeLD.removeObservers(this)
-        viewModel.removeObservers(this)
         viewModel.clearServers()
         val newActivityIntent = Intent(this, this.javaClass).apply {
             flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
         }
-        newActivityIntent.putExtras(bundleOf(
-            "title" to args.title,
-            "episodeSlugId" to episodeSlugId,
-            "animeSlugId" to args.animeSlugId
-        ))
+        newActivityIntent.putExtras(
+            bundleOf(
+                "title" to args.title,
+                "episodeSlugId" to episodeSlugId,
+                "animeSlugId" to args.animeSlugId
+            )
+        )
         startActivity(newActivityIntent)
     }
 
     @SuppressLint("MissingSuperCall")
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        binding.playerView.player = null
+        releasePlayer()
+        viewModel.clearServers()
         showLoading()
         intent.extras?.let { args = EpisodeActivityArgs.fromBundle(it) }
-        mediaSources.clear()
-        initialize()
+        fetchRemote()
+        initPlayer()
     }
 
 
@@ -515,6 +601,29 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
     private fun setAppbarEpisodeNumber(binding: ActivityEpisodeBinding, name: String?) {
         binding.episodeNumber.isVisible = true
         binding.episodeNumber.text = name
+    }
+
+    private fun onSelectStream(operation: (link: CommonVideoLink) -> Unit) {
+        val chooseStream = AlertDialog.Builder(this)
+        val streamList = viewModel.getVideoLink().value ?: return
+        chooseStream.setTitle("Choose Stream")
+        chooseStream.setItems(streamList.map {
+            try {
+                Uri.parse(it.getLink()).host ?: "Kick Server"
+            } catch (e: NullPointerException) {
+                "Kick Server"
+            }
+        }.toTypedArray()) { _, which ->
+            operation(streamList[which])
+        }
+        chooseStream.create()?.show()
+    }
+
+
+    private fun showPlayerError(error: Exception) {
+        showError(error, this@EpisodeActivity, "retry") {
+            binding.playerView.player?.prepare()
+        }
     }
 
     companion object {

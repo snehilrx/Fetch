@@ -1,7 +1,8 @@
+package com.otaku.kickassanime.api
+
 import com.fetch.cloudflarebypass.CloudflareHTTPClient
 import com.google.gson.GsonBuilder
 import com.otaku.kickassanime.Strings
-import com.otaku.kickassanime.api.KickassAnimeService
 import com.otaku.kickassanime.api.conveter.FindJsonInTextConverterFactory
 import kotlinx.coroutines.runBlocking
 import org.junit.Before

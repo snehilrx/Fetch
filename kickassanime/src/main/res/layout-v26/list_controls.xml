@@ -19,7 +19,7 @@
 
         <TextView
             android:id="@+id/emptyList"
-            android:text="NOTHING\nFOUND"
+            android:text="@string/nothing_found"
             android:autoSizeTextType="uniform"
             android:autoSizeMaxTextSize="64sp"
             android:autoSizeStepGranularity="0.5sp"
