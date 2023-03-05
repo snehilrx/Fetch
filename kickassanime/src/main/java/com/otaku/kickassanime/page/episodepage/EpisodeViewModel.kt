@@ -1,12 +1,18 @@
 package com.otaku.kickassanime.page.episodepage
 
 import android.net.Uri
+import android.util.Log
+import androidx.core.net.UriCompat
 import androidx.lifecycle.*
+import androidx.paging.DEBUG
 import com.google.gson.Gson
+import com.moczul.ok2curl.CommandComponent
 import com.otaku.fetch.base.livedata.SingleLiveEvent
 import com.otaku.fetch.base.livedata.State
+import com.otaku.kickassanime.BuildConfig
 import com.otaku.kickassanime.Strings
 import com.otaku.kickassanime.Strings.KAAST1
+import com.otaku.kickassanime.Strings.KAA_VID
 import com.otaku.kickassanime.api.model.CommonSubtitle
 import com.otaku.kickassanime.api.model.ServerLinks
 import com.otaku.kickassanime.db.models.CommonVideoLink
@@ -21,6 +27,7 @@ import com.otaku.kickassanime.utils.asVideoHistory
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.launch
+import java.net.URL
 import java.util.concurrent.atomic.AtomicReference
 import javax.inject.Inject
 import javax.inject.Named
@@ -70,6 +77,7 @@ class EpisodeViewModel @Inject constructor(
                 }
                 loadState.postValue(State.SUCCESS())
             } catch (e: Exception) {
+                Log.e("Episode", "cannot fetch", e)
                 loadState.postValue(State.FAILED(e))
             }
         }
@@ -163,15 +171,14 @@ class EpisodeViewModel @Inject constructor(
     private fun loadDustUrls(link1: String?) {
         viewModelScope.launch {
             link1?.let { link ->
-                val hashCode = link1.hashCode()
+                val hashCode = link.hashCode()
+                val host = Uri.parse(link).host ?: "UNKNOWN"
                 if (!atomicHash.get().contains(hashCode)) {
-                    val dustLinks = episodeRepository.fetchDustLinks(link) ?: return@launch
-                    val map =
-                        dustLinks.data.filter { !it.src.isNullOrEmpty() && !it.name.isNullOrEmpty() }
-                            .map {
-                                ServerLinks(it.name!!, it.src!!)
-                            }
-                    serverLinksLD.postValue(serverLinks.apply { addAll(map) })
+                    serverLinksLD.postValue(serverLinks.apply {
+                        add(
+                            ServerLinks(host, link)
+                        )
+                    })
                 }
                 atomicHash.get().add(hashCode)
             }
@@ -202,7 +209,7 @@ class EpisodeViewModel @Inject constructor(
             Strings.MAVERICKKI_URL -> {
                 fetchMaverickki(uri.toString())
             }
-            Strings.ADD_KAA, KAAST1 -> {
+            Strings.ADD_KAA, KAAST1, KAA_VID  -> {
                 fetchADDKAA(uri.toString())
             }
         }

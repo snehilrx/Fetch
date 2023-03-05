@@ -455,9 +455,13 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
                 }
             }
 
+        var oldUrl: String? = null
         viewModel.getCurrentServer().observe(this) {
-            mediaSource.clear()
-            binding.webView.loadUrl(it)
+            if (oldUrl == null || oldUrl != it) {
+                mediaSource.clear()
+                binding.webView.loadUrl(it)
+                oldUrl = it
+            }
         }
 
         viewModel.getVideoLink().observe(this) { videoLinks ->
@@ -558,20 +562,8 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
         }
     }
 
-    private fun openEpisode(episodeSlugId: Int) {
-        releasePlayer()
-        viewModel.clearServers()
-        val newActivityIntent = Intent(this, this.javaClass).apply {
-            flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
-        }
-        newActivityIntent.putExtras(
-            bundleOf(
-                "title" to args.title,
-                "episodeSlugId" to episodeSlugId,
-                "animeSlugId" to args.animeSlugId
-            )
-        )
-        startActivity(newActivityIntent)
+    private fun openEpisode(episodeSlug: String) {
+        // todo
     }
 
     @SuppressLint("MissingSuperCall")

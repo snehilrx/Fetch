@@ -5,7 +5,6 @@ buildscript {
     dependencies {
         classpath "com.google.dagger:hilt-android-gradle-plugin:$versions.hilt"
         classpath "androidx.navigation:navigation-safe-args-gradle-plugin:$versions.nav"
-        classpath ('com.tencent.tinker:tinker-patch-gradle-plugin:1.9.14.25.1')
     }
     repositories {
         google()

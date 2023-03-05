@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.GridLayoutManager.SpanSizeLookup
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.carouselrecyclerview.CarouselRecyclerview
+import com.google.android.material.transition.MaterialContainerTransform
 import com.lapism.search.widget.MaterialSearchBar
 import com.lapism.search.widget.MaterialSearchView
 import com.otaku.fetch.base.TAG

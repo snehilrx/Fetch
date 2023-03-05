@@ -21,8 +21,8 @@ class FrontPageRepository @Inject constructor(
     fun getFrontDubPage() = database.frontPageEpisodesDao().getFirstFrontPageEpisodesDub()
 
     suspend fun fetchAll() {
-        val sub = kickassAnimeService.getFrontPageAnimeListSub(1)
-        val dub = kickassAnimeService.getFrontPageAnimeListDub(1)
+        val sub = kickassAnimeService.getFrontPageAnimeListSub(0)
+        val dub = kickassAnimeService.getFrontPageAnimeListDub(0)
         val response = ArrayList<Anime>()
         response.addAll(sub)
         response.addAll(dub)

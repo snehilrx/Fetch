@@ -10,7 +10,7 @@ import com.otaku.kickassanime.db.models.entity.*
 
 @Database(
     entities = [AnimeEntity::class, EpisodeEntity::class, AnimeFilter::class, AnimeGenre::class, FrontPageEpisodes::class, VideoHistory::class],
-    version = 2,
+    version = 4,
     exportSchema = true
 )
 @TypeConverters(Converters::class)

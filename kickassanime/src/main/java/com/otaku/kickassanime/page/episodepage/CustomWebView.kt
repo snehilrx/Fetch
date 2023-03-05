@@ -6,13 +6,16 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
+import android.text.TextUtils
 import android.util.AttributeSet
 import android.util.Log
 import android.webkit.*
+import androidx.core.text.TextUtilsCompat
 import com.otaku.kickassanime.Strings.ADD_KAA
 import com.otaku.kickassanime.Strings.KAA2_URL
 import com.otaku.kickassanime.Strings.KAAST1
 import com.otaku.kickassanime.Strings.KAA_URL
+import com.otaku.kickassanime.Strings.KAA_VID
 import com.otaku.kickassanime.Strings.MAVERICKKI_URL
 
 
@@ -88,8 +91,10 @@ class CustomWebView : WebView {
                                 ))
                             ) videoLinksCallback?.invoke(requestUrl)
                         }
-                        ADD_KAA, KAAST1 -> {
-                            if (it.pathSegments?.get(0) == "Sapphire-Duck" && it.pathSegments?.get(1) == "player.php" && it.getQueryParameter("action") != null) {
+                        ADD_KAA, KAAST1, KAA_VID -> {
+                            if ("Sapphire-Duck".equals(requestUrl.pathSegments?.get(0), ignoreCase = true) &&
+                                (it.pathSegments?.get(1) == "player.php" || it.pathSegments?.get(1) == "config.php" )
+                                && (it.getQueryParameter("action") != null)) {
                                 videoLinksCallback?.invoke(requestUrl)
                                 return WebResourceResponse(
                                     mimeType,

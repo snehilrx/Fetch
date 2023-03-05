@@ -29,7 +29,7 @@ class FrontPageListMediator(
             val endPaging = MediatorResult.Success(endOfPaginationReached = true)
             val continuePaging = MediatorResult.Success(endOfPaginationReached = false)
             val loadKey = when (loadType) {
-                LoadType.REFRESH -> 1
+                LoadType.REFRESH -> 0
                 LoadType.PREPEND -> return endPaging
                 LoadType.APPEND -> {
                     val lastItem = state.lastItemOrNull()
@@ -42,7 +42,7 @@ class FrontPageListMediator(
             }
             Log.i(TAG, "Page No, Load Key: $loadKey")
 
-            val response = networkFetch(loadKey+1)
+            val response = networkFetch(loadKey)
 
             Log.i(TAG, "Fetch ${response?.size} anime tiles, ${loadType.name}")
             Utils.saveResponse(response, database, loadKey)

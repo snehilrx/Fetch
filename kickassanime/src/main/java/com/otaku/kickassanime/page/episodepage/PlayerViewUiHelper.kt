@@ -254,7 +254,7 @@ internal class PlayerViewUiHelper(
         return materialTextView
     }
 
-    fun enableNextPrevEpisodeButtons(next: Int?, prev: Int?) {
+    fun enableNextPrevEpisodeButtons(next: String?, prev: String?) {
         this.prev.isEnabled = prev != null
         this.next.isEnabled = next != null
     }

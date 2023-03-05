@@ -59,7 +59,7 @@ class PackageModule @Inject constructor(
 
     override suspend fun triggerNotification(context: Context) {
         Log.d(TAG, "Started notification fetch")
-        val newEpisodes = kickassAnimeService.getFrontPageAnimeList(1)
+        val newEpisodes = kickassAnimeService.getFrontPageAnimeList(0)
         val newHash = HashUtils.hash64(newEpisodes)
         val oldHash = context.getSharedPreferences(context.packageName, Context.MODE_PRIVATE)
             .getLong(PREF_KEY, -1)

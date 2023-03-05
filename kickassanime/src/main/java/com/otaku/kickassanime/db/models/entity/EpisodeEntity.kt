@@ -38,8 +38,8 @@ data class EpisodeEntity(
     var sector: String? = null,
     @Serializable(with = LocalDateTimeSerializable::class)
     var createdDate: LocalDateTime? = null,
-    var next: Int? = null,
-    var prev: Int? = null,
+    var next: String? = null,
+    var prev: String? = null,
     var episodeId: Int? = null,
     var rating: Int? = null,
     var votes: String? = null,

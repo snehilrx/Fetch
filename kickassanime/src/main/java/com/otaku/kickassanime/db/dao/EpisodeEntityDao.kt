@@ -22,6 +22,6 @@ interface EpisodeEntityDao : BaseDao<EpisodeEntity> {
     fun getEpisode(slugId: Int): EpisodeEntity?
 
     @Query("SELECT name as title, episodeSlugId as id FROM episode where animeId is :animeId order by cast(name as unsigned)  desc")
-    fun listEpisodes(animeId: Int): Flow<List<EpisodeAdapter.Episode>>
+    fun listEpisodes(animeId: String): Flow<List<EpisodeAdapter.Episode>>
 
 }

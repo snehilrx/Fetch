@@ -14,7 +14,7 @@ import org.threeten.bp.LocalDateTime
 )
 @Parcelize
 data class AnimeEntity(
-    var animeId: Int? = null,
+    var animeId: String? = null,
     var malId: Int? = null,
     var simklId: Int? = null,
     @PrimaryKey
@@ -39,7 +39,7 @@ data class AnimeEntity(
     var favourite: Boolean = false
 ) : Parcelable {
     fun getImageUrl(): String {
-        return "${KICKASSANIME_URL}uploads/$image"
+        return "${KICKASSANIME_URL}images/poster/$image"
     }
 
     //    since enTitle can be blank or null, we will return name if enTitle is null

@@ -16,5 +16,5 @@ interface BaseDao<T> {
     suspend fun delete(vararg obj: T)
 
     @Update(onConflict = IGNORE)
-    suspend fun updateAll(vararg episode: T)
+    suspend fun updateAll(vararg obj: T)
 }

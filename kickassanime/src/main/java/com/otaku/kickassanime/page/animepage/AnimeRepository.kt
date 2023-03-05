@@ -34,7 +34,7 @@ class AnimeRepository @Inject constructor(private val kickassAnimeDb: KickassAni
     }
 
     fun getEpisodeList(
-        animeId: Int
+        animeId: String
     ): Flow<List<EpisodeAdapter.Episode>> {
         return episodeDao.listEpisodes(animeId)
     }

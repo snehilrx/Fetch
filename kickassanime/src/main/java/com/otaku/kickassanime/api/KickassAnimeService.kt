@@ -37,13 +37,9 @@ interface KickassAnimeService {
     @JsonInText("animes")
     suspend fun search(@Query("q") query: String): List<AnimeSearchResponse>
 
-    @GET("{slug}")
-    @JsonInText
+    @GET("/api/watch/{slug}")
     suspend fun getAnimeEpisode(
-        @Path(
-            "slug",
-            encoded = true
-        ) path: String
+        @Path("slug") path: String
     ): AnimeAndEpisodeInformation
 
     @GET("/api/watch/{slug}")

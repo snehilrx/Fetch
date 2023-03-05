@@ -31,7 +31,7 @@ class AnimeViewModel @Inject constructor(private val animeRepository: AnimeRepos
         return animeRepository.getAnime(animeSlugId).asLiveData(viewModelScope.coroutineContext)
     }
 
-    fun getEpisodeList(animeId: Int): LiveData<List<EpisodeAdapter.Episode>> {
+    fun getEpisodeList(animeId: String): LiveData<List<EpisodeAdapter.Episode>> {
         return animeRepository.getEpisodeList(animeId).asLiveData(viewModelScope.coroutineContext)
     }
 

@@ -12,11 +12,12 @@ data class Anime(
     @SerializedName("slug"          ) var slug          : String? ,
     @SerializedName("episodeNumber" ) var episodeNumber : Int?,
     @SerializedName("title"         ) var title         : String?,
-    @SerializedName("poster"        ) var poster        : Poster?,
+    @SerializedName("poster"        ) var poster        : Images?,
     @SerializedName("lastUpdate"    ) var lastUpdate    : String?,
     @SerializedName("updatedString" ) var updatedString : String? 
 )
 
+@Keep
 data class Image (
     @SerializedName("name"    ) var name    : String?,
     @SerializedName("formats" ) var formats : ArrayList<String> = arrayListOf(),
@@ -25,7 +26,7 @@ data class Image (
 )
 
 @Keep
-data class Poster (
+data class Images (
     @SerializedName("sm" ) var sm : Image?,
     @SerializedName("hq" ) var hq : Image?
 )

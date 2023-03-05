@@ -10,7 +10,7 @@ data class AddKaa (
 
     @SerializedName("subtitles" ) var subtitles : ArrayList<SubtitlesAdd> = arrayListOf(),
     @SerializedName("streams"   ) var streams   : ArrayList<Streams>   = arrayListOf(),
-    @SerializedName("thumbnail" ) var thumbnail : Thumbnail?           = Thumbnail()
+    @SerializedName("thumbnail" ) var thumbnail : KThumbnail?           = KThumbnail()
 
 )
 @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
@@ -32,7 +32,7 @@ data class SubtitlesAdd (
 
 }
 
-data class Thumbnail (
+data class KThumbnail (
 
     @SerializedName("width"  ) var width  : Int?    = null,
     @SerializedName("height" ) var height : Int?    = null,

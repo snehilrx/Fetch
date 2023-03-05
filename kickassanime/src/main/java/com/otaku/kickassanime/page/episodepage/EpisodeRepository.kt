@@ -32,14 +32,11 @@ class EpisodeRepository @Inject constructor(
     suspend fun fetchRemote(animeSlugId: Int, episodeSlugId: Int) : Pair<EpisodeEntity?, AnimeEntity?>? {
         val episode = kickassAnimeDb.episodeEntityDao().getEpisode(episodeSlugId) ?: return null
         val episodeSlug = episode.episodeSlug ?: return null
+        // watch api returns information about anime and episode
         val animeEpisode = kickassAnimeService.getAnimeEpisode(episodeSlug)
         val anime = kickassAnimeDb.animeEntityDao().getAnime(animeSlugId)
-        val animeEntity = animeEpisode.anime?.asAnimeEntity(anime)
-        animeEntity?.let { kickassAnimeDb.animeEntityDao().updateAll(it) }
+        val animeEntity = animeEpisode.asAnimeEntity(anime)
         val episodeEntity = animeEpisode.asEpisodeEntity(episode)
-        episodeEntity?.let { kickassAnimeDb.episodeEntityDao().insert(it) }
-        val episodes = animeEpisode.asEpisodeEntity().filter { it.episodeSlug != episodeSlug }
-        kickassAnimeDb.episodeEntityDao().insertAll(episodes)
         if (animeEntity != null) {
             kickassAnimeDb.animeEntityDao().updateAll(animeEntity)
         }
