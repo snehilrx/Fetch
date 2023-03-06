@@ -1,144 +1,112 @@
 package com.otaku.fetch
 
-import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.ProgressBar
-import android.widget.TextView
-import androidx.activity.addCallback
-import androidx.core.view.isVisible
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.lapism.search.widget.MaterialSearchView
-import com.lapism.search.widget.NavigationIconCompat
-import com.otaku.fetch.base.ui.BindingActivity
-import com.otaku.fetch.base.ui.SearchInterface
-import com.otaku.fetch.databinding.ActivityMainBinding
+import androidx.activity.compose.setContent
+import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.otaku.fetch.base.R
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
-import javax.inject.Named
-
 
 @AndroidEntryPoint
-class MainActivity : BindingActivity<ActivityMainBinding>(R.layout.activity_main), SearchInterface {
+class MainActivity : AppCompatActivity() {
 
-    inner class SearchComponents(
-        val suggestionsList: RecyclerView,
-        val errorLabel: TextView,
-        val progressBar: ProgressBar
+    private val sohen = FontFamily(
+        Font(R.font.sohne_fett, FontWeight.Bold)
     )
-
-    private lateinit var searchUi: SearchComponents
-
-    @Inject
-    @Named("kickassanime")
-    lateinit var kissanimeModule: AppModule
-
-    private lateinit var modulesList: List<AppModule>
-
-    private lateinit var currentModule: AppModule
-
-    override fun onBind(binding: ActivityMainBinding, savedInstanceState: Bundle?) {
-        super.onBind(binding, savedInstanceState)
-        modulesList = listOf(
-            kissanimeModule
-        )
-        currentModule = kissanimeModule
-        setTransparentStatusBar()
-        initSearchView(binding)
-    }
-
-    @SuppressLint("PrivateResource")
-    private fun initSearchView(binding: ActivityMainBinding) {
-        val searchView = binding.searchView
-        val callback = this.onBackPressedDispatcher.addCallback {
-            searchView.clearFocus()
-        }
-        searchView.setOnFocusChangeListener(object :
-            MaterialSearchView.OnFocusChangeListener {
-            override fun onFocusChange(hasFocus: Boolean) {
-                callback.isEnabled = hasFocus
+    @OptIn(ExperimentalMaterial3Api::class)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent() {
+            MaterialTheme {
+                    Scaffold() {contentPadding ->
+                        // Screen content
+                        Box(modifier = Modifier.padding(contentPadding)) {
+                            Column(modifier = Modifier.padding(16.dp, 24.dp), verticalArrangement = Arrangement.Center) {
+                                Row(horizontalArrangement = Arrangement.Center) {
+                                    Text(text = "Fetch!",
+                                        fontFamily = sohen,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 42.sp)
+                                }
+                                Row(horizontalArrangement = Arrangement.Center,
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.fillMaxSize()) {
+                                    ModuleGrid()
+                                }
+                            }
+                        }
+                    }
             }
-        })
-        val params = ViewGroup.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT,
-            ViewGroup.LayoutParams.WRAP_CONTENT
-        )
-        val searchSuggestionsList = RecyclerView(searchView.context).apply { layoutParams = params }
-        searchSuggestionsList.layoutManager = LinearLayoutManager(searchView.context)
+        }
+    }
 
-        val label = LayoutInflater.from(searchView.context)
-            .inflate(
-                com.google.android.material.R.layout.m3_auto_complete_simple_item,
-                searchView,
-                false
-            ) as TextView
-
-        val progressBar = ProgressBar(searchView.context).apply { layoutParams = params }
-
-        label.isVisible = false
-        progressBar.isVisible = false
-
-        searchUi = SearchComponents(searchSuggestionsList, label, progressBar)
-
-        searchView.apply {
-            findViewById<View>(com.lapism.search.R.id.search_view_background)
-                ?.setPaddingRelative(0, mStatusBarHeight, 0, 0)
-            addView(searchSuggestionsList)
-            addView(label)
-            addView(progressBar)
-            navigationIconCompat = NavigationIconCompat.ARROW
-            setNavigationOnClickListener {
-                clearFocus()
+    @Preview(showBackground = true, widthDp = 320, heightDp = 320)
+    @Composable
+    private fun ModuleGrid() {
+        val modules = ModuleRegistry.getModulesList().toMutableList()
+        LazyColumn(
+            verticalArrangement = Arrangement.Center
+        ) {
+            items(modules.size,
+                key = { modules[it].displayName }
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(paddingValues = PaddingValues(32.dp, 0.dp))
+                        .background(Color.Transparent)
+                        .clickable {
+                            launchModule(modules[it])
+                        }
+                ) {
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        modules[it].displayIcon?.let { icon ->
+                            Image(
+                                painter = painterResource(id = icon),
+                                contentDescription = modules[it].displayName,
+                                contentScale = ContentScale.Fit,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(24.dp)
+                                    .align(Alignment.CenterHorizontally)
+                            )
+                        }
+                    }
+                }
             }
-            setHint(getString(com.otaku.kickassanime.R.string.search_anime))
         }
-        val searchEdit =
-            searchView.findViewById<View>(com.lapism.search.R.id.search_view_edit_text)
-        val oldFocus = searchEdit.onFocusChangeListener
-        searchEdit?.setOnFocusChangeListener{ v, b ->
-            binding.fragmentContainerView.findViewById<View>(com.otaku.kickassanime.R.id.front)?.isVisible = !b
-            oldFocus.onFocusChange(v, b)
-        }
-
     }
 
-
-    override fun openSearch() {
-        binding.searchView.requestFocus()
+    private fun launchModule(data: ModuleRegistry.ModuleData) {
+        val moduleIntent = Intent(this, ModuleActivity::class.java)
+        moduleIntent.putExtra(ModuleActivity.ARG_MODULE_GRAPH, data.appModule?.getNavigationGraph())
+        startActivity(moduleIntent)
     }
 
-    override fun closeSearch() {
-        binding.searchView.clearFocus()
-    }
-
-    override fun setSuggestions(adapter: RecyclerView.Adapter<*>) {
-        searchUi.suggestionsList.adapter = adapter
-    }
-
-    override fun showError(e: Throwable) {
-        searchUi.errorLabel.isVisible = true
-        searchUi.progressBar.isVisible = false
-        searchUi.suggestionsList.isVisible = false
-        searchUi.errorLabel.text = e.message
-    }
-
-    override fun showLoading() {
-        searchUi.errorLabel.isVisible = false
-        searchUi.progressBar.isVisible = true
-        searchUi.suggestionsList.isVisible = false
-    }
-
-    override fun showContent() {
-        searchUi.errorLabel.isVisible = false
-        searchUi.progressBar.isVisible = false
-        searchUi.suggestionsList.isVisible = true
-    }
-
-    override fun setQueryListener(listener: MaterialSearchView.OnQueryTextListener) {
-        binding.searchView.setOnQueryTextListener(listener)
-    }
 
 }

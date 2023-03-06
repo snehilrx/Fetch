@@ -18,7 +18,7 @@ fun AnimeResponse.asAnimeEntity(): AnimeEntity {
 }
 
 fun Anime.asAnimeEntity(): AnimeEntity {
-    val slug = this.title
+    val slug = this.slug?.substringBefore("-ep")
     return AnimeEntity(
         animeSlugId = HashUtils.sha256(slug),
         animeSlug = slug,

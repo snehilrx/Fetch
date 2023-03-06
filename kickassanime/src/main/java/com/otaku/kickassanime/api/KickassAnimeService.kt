@@ -42,8 +42,8 @@ interface KickassAnimeService {
         @Path("slug") path: String
     ): AnimeAndEpisodeInformation
 
-    @GET("/api/watch/{slug}")
-    suspend fun getAnimeInformation(@Path("slug", encoded = true) path: String): AnimeInformation
+    @GET("/api/anime/{slug}")
+    suspend fun getAnimeInformation(@Path("slug") path: String): AnimeInformation
 
     @GET
     suspend fun urlToText(@Url link: String) : String

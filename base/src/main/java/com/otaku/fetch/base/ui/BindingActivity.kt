@@ -1,5 +1,6 @@
 package com.otaku.fetch.base.ui
 
+import android.app.Activity
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
@@ -24,6 +25,12 @@ import com.otaku.fetch.bindings.ImageViewBindings
 import java.lang.ref.WeakReference
 
 
+/**
+ * Base activity class that initializes binding
+ *
+ * @param layoutRes layout xml associated with the binding
+ * @author snehil
+ * */
 open class BindingActivity<T : ViewDataBinding>(@LayoutRes private val layoutRes: Int) :
     AppCompatActivity() {
 

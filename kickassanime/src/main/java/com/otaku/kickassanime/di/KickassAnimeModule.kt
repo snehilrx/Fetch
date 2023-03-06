@@ -2,12 +2,9 @@ package com.otaku.kickassanime.di
 
 import android.annotation.SuppressLint
 import android.content.Context
-import androidx.media3.common.util.UnstableApi
 import androidx.room.Room
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import com.otaku.fetch.AppModule
-import com.otaku.kickassanime.PackageModule
 import com.otaku.kickassanime.api.AnimeSkipService
 import com.otaku.kickassanime.api.KickassAnimeService
 import com.otaku.kickassanime.db.KickassAnimeDb
@@ -24,12 +21,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object KickassAnimeModule {
-
-    @Provides
-    @Singleton
-    @Named("kickassanime")
-    @UnstableApi
-    fun kickassAnime(kickassAnimeDb: KickassAnimeDb, kickassAnimeService: KickassAnimeService): AppModule = PackageModule(kickassAnimeService, kickassAnimeDb)
 
     @Provides
     @Singleton

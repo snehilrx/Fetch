@@ -13,7 +13,6 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.graphics.drawable.IconCompat
 import androidx.core.os.bundleOf
 import androidx.media3.common.util.UnstableApi
-import androidx.navigation.fragment.NavHostFragment
 import com.mikepenz.iconics.IconicsColor
 import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.typeface.library.fontawesome.FontAwesome
@@ -24,7 +23,6 @@ import com.otaku.fetch.base.utils.UiUtils
 import com.otaku.kickassanime.api.KickassAnimeService
 import com.otaku.kickassanime.api.model.Anime
 import com.otaku.kickassanime.db.KickassAnimeDb
-import com.otaku.kickassanime.page.MainFragment
 import com.otaku.kickassanime.page.episodepage.EpisodeActivity
 import com.otaku.kickassanime.utils.HashUtils
 import com.otaku.kickassanime.utils.Utils
@@ -36,12 +34,10 @@ import javax.inject.Inject
 const val PREF_KEY = "KickassAnime/lastUpdateHash"
 
 @UnstableApi
-class PackageModule @Inject constructor(
+class KickassAppModule @Inject constructor(
     val kickassAnimeService: KickassAnimeService,
-    val kickassAnimeDb: KickassAnimeDb
+    private val kickassAnimeDb: KickassAnimeDb
 ) : AppModule {
-
-    private var mainFragment: MainFragment = MainFragment()
 
     override val name: String
         get() = "Kickass Anime"
@@ -53,8 +49,8 @@ class PackageModule @Inject constructor(
     override fun initialize(query: String?, link: String) {
     }
 
-    override fun getMainFragment(): NavHostFragment {
-        return mainFragment
+    override fun getNavigationGraph(): Int {
+        return R.navigation.navigation_kickassanime
     }
 
     override suspend fun triggerNotification(context: Context) {

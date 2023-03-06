@@ -7,7 +7,6 @@ import androidx.work.WorkManager
 import com.otaku.fetch.work.AnimeNotifier
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
-import javax.inject.Named
 
 
 @HiltAndroidApp
@@ -22,13 +21,26 @@ class FetchApplication() : MultiDexApplication(), Configuration.Provider {
             .build()
     }
 
-    @Inject
-    @Named("kickassanime")
-    lateinit var kissanimeModule: AppModule
-
 
     override fun onCreate() {
         super.onCreate()
+        findModules()
         AnimeNotifier().schedulePeriodicWork(WorkManager.getInstance(this.applicationContext))
+    }
+
+    private fun findModules() {
+        var count = 0
+        while (true) {
+            try {
+                val loadClass = classLoader.loadClass("$packageName.ModuleRegistration$count")
+                val newInstance = loadClass.newInstance()
+                if (newInstance is ModuleLoaders) {
+                    newInstance.load(this)
+                }
+                count++
+            } catch (e: ClassNotFoundException) {
+                break
+            }
+        }
     }
 }
