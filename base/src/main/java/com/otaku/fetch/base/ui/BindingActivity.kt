@@ -32,7 +32,7 @@ import java.lang.ref.WeakReference
  * @author snehil
  * */
 open class BindingActivity<T : ViewDataBinding>(@LayoutRes private val layoutRes: Int) :
-    AppCompatActivity() {
+    Activity() {
 
     var mStatusBarHeight: Int = 0
     lateinit var weakReference: WeakReference<T>
