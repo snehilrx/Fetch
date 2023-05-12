@@ -6,19 +6,19 @@ import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import com.otaku.fetch.base.TAG
-import com.otaku.kickassanime.api.model.Anime
+import com.otaku.kickassanime.api.model.BaseApiResponse
 import com.otaku.kickassanime.db.KickassAnimeDb
 import com.otaku.kickassanime.db.models.AnimeTile
 import com.otaku.kickassanime.utils.Constraints.cacheTimeoutInHours
-import com.otaku.kickassanime.utils.Utils
 import org.threeten.bp.LocalDateTime
 import retrofit2.HttpException
 import java.io.IOException
 
 @OptIn(ExperimentalPagingApi::class)
-class FrontPageListMediator(
+class RecentMediator<T>(
     private val database: KickassAnimeDb,
-    private val networkFetch: suspend (Int) -> List<Anime>?
+    private val networkFetch: suspend (Int) -> BaseApiResponse<T>,
+    private val save: suspend (List<T>, KickassAnimeDb, Int) -> Unit
 ) : RemoteMediator<Int, AnimeTile>() {
 
     override suspend fun load(
@@ -42,14 +42,14 @@ class FrontPageListMediator(
             }
             Log.i(TAG, "Page No, Load Key: $loadKey")
 
-            val response = networkFetch(loadKey)
+            val response = networkFetch(loadKey + 1)
 
-            Log.i(TAG, "Fetch ${response?.size} anime tiles, ${loadType.name}")
-            Utils.saveResponse(response, database, loadKey)
-            val empty = response?.isEmpty()
-            return if (empty == true) {
+            val empty = response.result.isEmpty()
+            return if (empty) {
                 endPaging
             } else {
+                Log.i(TAG, "Fetch ${response.result.size} anime tiles, ${loadType.name}")
+                save(response.result, database, loadKey + 1)
                 continuePaging
             }
         } catch (e: IOException) {
@@ -63,7 +63,7 @@ class FrontPageListMediator(
 
     override suspend fun initialize(): InitializeAction {
         val lastUpdate =
-            database.frontPageEpisodesDao().lastUpdate()?.minusHours(cacheTimeoutInHours)
+            database.lastUpdateDao().lastUpdate()?.minusHours(cacheTimeoutInHours)
         return if (lastUpdate?.isAfter(LocalDateTime.now()) == true) {
             InitializeAction.SKIP_INITIAL_REFRESH
         } else {

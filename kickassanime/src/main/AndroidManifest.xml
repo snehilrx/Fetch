@@ -1,18 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-	xmlns:tools="http://schemas.android.com/tools">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-	<uses-permission
-		android:name="android.permission.INTERNET"
-		android:required="true" />
+    <uses-permission
+            android:name="android.permission.INTERNET"
+            android:required="true" />
 
-	<uses-sdk tools:overrideLibrary="com.lapism.search" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
-	<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
-	<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-
-	<application>
+    <application>
 		<provider android:name=".page.search.AnimeSuggestionProvider"
 			android:authorities="com.otaku.kickassanime.page.search.AnimeSuggestionProvider"
 			android:exported="false" />
@@ -20,12 +17,11 @@
 		<activity
 			android:name=".page.animepage.AnimeActivity"
 			android:exported="false" />
-		<activity
-			android:name=".page.episodepage.EpisodeActivity"
-			android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|screenLayout|smallestScreenSize|uiMode"
-			android:exported="true"
-			android:supportsPictureInPicture="true"
-			tools:targetApi="n" />
+        <activity
+                android:name=".page.episodepage.EpisodeActivity"
+                android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|screenLayout|smallestScreenSize|uiMode"
+                android:exported="true"
+                android:supportsPictureInPicture="true" />
 	</application>
 
 </manifest>

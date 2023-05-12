@@ -6,23 +6,18 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
-import android.text.TextUtils
 import android.util.AttributeSet
 import android.util.Log
 import android.webkit.*
-import androidx.core.text.TextUtilsCompat
-import com.otaku.kickassanime.Strings.ADD_KAA
-import com.otaku.kickassanime.Strings.KAA2_URL
-import com.otaku.kickassanime.Strings.KAAST1
-import com.otaku.kickassanime.Strings.KAA_URL
-import com.otaku.kickassanime.Strings.KAA_VID
-import com.otaku.kickassanime.Strings.MAVERICKKI_URL
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
+import java.util.*
 
 
 class CustomWebView : WebView {
 
     var onPageFinished: (() -> Unit)? = null
     var videoLinksCallback: ((url: Uri) -> Unit)? = null
+    var crunchyRollCallback: ((json: String) -> Unit)? = null
 
     constructor(context: Context) : super(context)
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
@@ -66,6 +61,9 @@ class CustomWebView : WebView {
         settings.displayZoomControls = false
         settings.cacheMode = WebSettings.LOAD_CACHE_ELSE_NETWORK
         settings.userAgentString = "Android"
+        addJavascriptInterface(KAACrunchyInterface {
+            crunchyRollCallback?.invoke(it)
+        }, "android")
 
         webViewClient = object : WebViewClient() {
             override fun shouldInterceptRequest(
@@ -77,62 +75,65 @@ class CustomWebView : WebView {
                 val urlString = requestUrl.toString()
                 val extension = MimeTypeMap.getFileExtensionFromUrl(urlString)
                 val mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension)
-                requestUrl?.let {
-                    when (it.host) {
-                        MAVERICKKI_URL -> {
-                            if (it.pathSegments?.get(0) == "api" && it.pathSegments?.get(1) == "source") {
-                                videoLinksCallback?.invoke(requestUrl)
-                                return null
-                            }
-                        }
-                        KAA_URL, KAA2_URL -> {
-                            if (mimeType != null && (mimeType.startsWith("video/") || mimeType.startsWith(
-                                    "audio/"
-                                ))
-                            ) videoLinksCallback?.invoke(requestUrl)
-                        }
-                        ADD_KAA, KAAST1, KAA_VID -> {
-                            if ("Sapphire-Duck".equals(requestUrl.pathSegments?.get(0), ignoreCase = true) &&
-                                (it.pathSegments?.get(1) == "player.php" || it.pathSegments?.get(1) == "config.php" )
-                                && (it.getQueryParameter("action") != null)) {
-                                videoLinksCallback?.invoke(requestUrl)
-                                return WebResourceResponse(
-                                    mimeType,
-                                    "UTF-8",
-                                    null
-                                )
-                            }
-                        }
-                    }
+                if (blockedLinks.contains(urlString)
+                    || mimeType?.startsWith("font") == true
+                    || mimeType?.startsWith("image") == true
+                ) {
+                    return WebResourceResponse(
+                        mimeType,
+                        "UTF-8",
+                        null
+                    )
                 }
-
                 if (mimeType != null && extension != "html") {
                     // check if any of the requestUrls contain the url of a video file
                     if (mimeType.startsWith("video/") || mimeType.startsWith("audio/")) {
-                        return WebResourceResponse(
-                            mimeType,
-                            "UTF-8",
-                            null
-                        )
-                    } else if (mimeType.startsWith("text/")) {
+                        videoLinksCallback?.invoke(requestUrl)
                         return WebResourceResponse(
                             mimeType,
                             "UTF-8",
                             null
                         )
                     }
-
+                }
+                if (urlString.contains("player.php", true)) {
+                    return injectToIframe(urlString)
                 }
                 return super.shouldInterceptRequest(view, request)
+            }
+
+            private fun injectToIframe(url: String): WebResourceResponse? {
+                val httpURL = url.toHttpUrlOrNull() ?: return null
+                val content = httpURL.toUrl().readText()
+
+                val scriptToInject = "\n<script>\n" +
+                        "   (function() {\n" +
+                        "     setTimeout(function send(){try{var item = player.getPlaylistItem(); if(item == undefined) {setTimeout(send, 200)} else { android.inject(JSON.stringify(item))}}catch(e){setTimeout(send, 200)}},500);\n" +
+                        "   })()\n" +
+                        "</script>\n"
+                val split = content.split("</head>")
+                val newContent = "${split[0]}${scriptToInject}</head>${split[1]}"
+                val inStream = newContent.byteInputStream()
+                val statusCode = 200
+                val reasonPhase = "OK"
+                val responseHeaders: MutableMap<String, String> = HashMap()
+                return WebResourceResponse(
+                    "text/html",
+                    "utf-8",
+                    statusCode,
+                    reasonPhase,
+                    responseHeaders,
+                    inStream
+                )
             }
 
             override fun shouldOverrideUrlLoading(
                 view: WebView?,
                 request: WebResourceRequest?
             ): Boolean {
-                if(request?.url?.toString()?.equals("about:blank") == true)
-                {
-                    val randomTimeOut = Math.random() * 500 + Math.random() * 2000 + Math.random() * 500
+                if (request?.url?.toString()?.equals("about:blank") == true) {
+                    val randomTimeOut =
+                        Math.random() * 500 + Math.random() * 2000 + Math.random() * 500
                     Log.i("about:blank", "random timeout = $randomTimeOut")
                     Thread.sleep(randomTimeOut.toLong())
                     return true
@@ -154,6 +155,15 @@ class CustomWebView : WebView {
         }
         settings.loadsImagesAutomatically = false
         settings.blockNetworkImage = true
+    }
+
+    class KAACrunchyInterface(
+        private val callback: (String) -> Unit
+    ) {
+        @JavascriptInterface
+        fun inject(jsonData: String) {
+            callback(jsonData)
+        }
     }
 
     override fun onSaveInstanceState(): Parcelable {
@@ -181,4 +191,17 @@ class CustomWebView : WebView {
             }
         }
     }
+
+    companion object {
+        @JvmStatic
+        private val blockedLinks = arrayOf(
+            "doctorenticeflashlights.com",
+            "kickassanime.disqus.com",
+            "simplewebanalysis",
+            "google",
+            "manifest",
+            "/api/show/"
+        )
+    }
 }
+

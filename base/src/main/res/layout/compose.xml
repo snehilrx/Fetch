@@ -1,13 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout  xmlns:android="http://schemas.android.com/apk/res/android">
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:id="@+id/refresh"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-        <androidx.compose.ui.platform.ComposeView
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <androidx.compose.ui.platform.ComposeView
             android:id="@+id/compose"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
-        </androidx.compose.ui.platform.ComposeView>
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+            android:layout_height="match_parent"></androidx.compose.ui.platform.ComposeView>
 </layout>

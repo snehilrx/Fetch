@@ -111,44 +111,18 @@
 					tools:context=".page.episodepage.EpisodeActivity">
 
 					<TextView
-						android:id="@+id/textView"
-						android:layout_width="0dp"
-						android:layout_height="wrap_content"
-						android:layout_marginStart="16dp"
-						android:layout_marginTop="24dp"
-						android:layout_marginEnd="16dp"
-						android:text="@{animeDetails.getDisplayTitle}"
-						android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
-						app:layout_constraintEnd_toEndOf="parent"
-						app:layout_constraintStart_toStartOf="parent"
-						app:layout_constraintTop_toTopOf="parent"
-						tools:text="Demon Slayer" />
-
-					<TextView
-						android:id="@+id/textView2"
-						android:layout_width="wrap_content"
-						android:layout_height="wrap_content"
-						android:layout_marginTop="16dp"
-						android:text="@{animeDetails.status}"
-						android:textAllCaps="true"
-						android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
-						app:layout_constraintStart_toStartOf="@+id/textView"
-						app:layout_constraintTop_toBottomOf="@+id/textView"
-						tools:text="ongoing" />
-
-					<TextView
-						android:id="@+id/textView3"
-						android:layout_width="0dp"
-						android:layout_height="wrap_content"
-						android:layout_marginStart="16dp"
-						android:layout_marginTop="16dp"
-						android:text="@{episodeDetails.timeAgo}"
-						android:textAllCaps="true"
-						android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
-						app:layout_constraintEnd_toEndOf="@+id/textView"
-						app:layout_constraintStart_toEndOf="@+id/textView2"
-						app:layout_constraintTop_toBottomOf="@+id/textView"
-						tools:text="Uploaded : 0 mins ago" />
+                            android:id="@+id/textView2"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginTop="16dp"
+                            android:text="@{episodeDetails.timeAgo}"
+                            android:textAllCaps="true"
+                            android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            tools:text="Uploaded : 0 mins ago" />
 
 					<include
 						android:id="@+id/episodeDetailsContainer"
@@ -179,11 +153,11 @@
 				</androidx.constraintlayout.widget.ConstraintLayout>
 			</androidx.core.widget.NestedScrollView>
 
-			<com.otaku.kickassanime.page.episodepage.CustomWebView
-				android:id="@+id/webView"
-				android:visibility="gone"
-				android:layout_width="0dp"
-				android:layout_height="0dp" />
+            <com.otaku.kickassanime.page.episodepage.CustomWebView
+                    android:id="@+id/webView"
+                    android:visibility="gone"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
 		</androidx.coordinatorlayout.widget.CoordinatorLayout>
 	</FrameLayout>
 

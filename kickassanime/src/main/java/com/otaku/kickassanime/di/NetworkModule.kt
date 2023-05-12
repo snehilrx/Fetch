@@ -35,14 +35,15 @@ class NetworkModule {
     @Provides
     @Singleton
     @Named("animeskip")
-    fun animeskip(gson: Gson, okHttpClient: OkHttpClient, logger: HttpLoggingInterceptor): Retrofit = Retrofit.Builder()
+    fun animeskip(logger: HttpLoggingInterceptor): Retrofit = Retrofit.Builder()
         .addConverterFactory(ScalarsConverterFactory.create())
         .client(OkHttpClient.Builder().addInterceptor(logger)
             .addInterceptor {
-            return@addInterceptor it.proceed(
-                it.request().newBuilder().addHeader("X-Client-ID", "3LqFWBqcnwlyruQE8QSvEX6X2KjDrIun").build()
-            )
-        }.addInterceptor(CurlInterceptor(object : Logger {
+                return@addInterceptor it.proceed(
+                    it.request().newBuilder()
+                        .addHeader("X-Client-ID", "3LqFWBqcnwlyruQE8QSvEX6X2KjDrIun").build()
+                )
+            }.addInterceptor(CurlInterceptor(object : Logger {
                 override fun log(message: String) {
                     Log.v("Ok2Curl", message)
                 }

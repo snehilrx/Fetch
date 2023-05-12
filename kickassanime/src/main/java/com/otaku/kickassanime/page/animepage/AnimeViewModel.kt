@@ -1,11 +1,18 @@
 package com.otaku.kickassanime.page.animepage
 
-import androidx.lifecycle.*
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import com.otaku.fetch.base.livedata.State
 import com.otaku.kickassanime.db.models.entity.AnimeEntity
-import com.otaku.kickassanime.page.adapters.EpisodeAdapter
+import com.otaku.kickassanime.db.models.entity.AnimeLanguageEntity
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -13,31 +20,47 @@ import javax.inject.Inject
 class AnimeViewModel @Inject constructor(private val animeRepository: AnimeRepository) :
     ViewModel() {
 
-    val state = MutableLiveData<State>()
+    var animeLanguageState by mutableStateOf<State>(State.LOADING())
 
-    fun fetchAnime(animeSlug: String) {
-        state.postValue(State.LOADING())
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                animeRepository.invalidateAnime(animeSlug)
-                state.postValue(State.SUCCESS())
-            } catch (e: Exception) {
-                state.postValue(State.FAILED(e))
+    fun getAnime(animeSlug: String): Flow<AnimeEntity?> {
+        return animeRepository.getAnime(animeSlug)
+    }
+
+
+    private val pagers = HashMap<Pair<String, String>, Flow<PagingData<EpisodeTile>>>()
+    fun getEpisodeList(
+        animeSlug: String,
+        language: String?
+    ): Flow<PagingData<EpisodeTile>> {
+        return if (language == null) {
+            emptyFlow()
+        } else {
+            pagers.getOrPut(Pair(animeSlug, language)) {
+                animeRepository.getEpisodes(animeSlug, language).flow
+                    .cachedIn(viewModelScope)
             }
         }
     }
 
-    fun getAnime(animeSlugId: Int): LiveData<AnimeEntity?> {
-        return animeRepository.getAnime(animeSlugId).asLiveData(viewModelScope.coroutineContext)
-    }
-
-    fun getEpisodeList(animeId: String): LiveData<List<EpisodeAdapter.Episode>> {
-        return animeRepository.getEpisodeList(animeId).asLiveData(viewModelScope.coroutineContext)
-    }
-
-    fun setFavourite(animeId: Int, checked: Boolean) {
+    fun setFavourite(animeSlug: String, checked: Boolean) {
         viewModelScope.launch {
-            animeRepository.setFavourite(animeId, checked)
+            animeRepository.setFavourite(animeSlug, checked)
+        }
+    }
+
+
+    fun getLanguages(animeSlug: String?): Flow<List<AnimeLanguageEntity>> {
+        return animeSlug?.let { animeRepository.getAnimeLanguage(it) } ?: emptyFlow()
+    }
+
+    fun fetchLanguages(animeSlug: String) {
+        viewModelScope.launch {
+            animeLanguageState = try {
+                animeRepository.fetchLanguage(animeSlug)
+                State.SUCCESS()
+            } catch (e: Exception) {
+                State.FAILED(e)
+            }
         }
     }
 

@@ -47,5 +47,13 @@ class TestFakeDependencies {
 
     @Provides
     @Singleton
+    @Named("animeskip")
+    fun retrofitSkip(gson: Gson): Retrofit = retrofit
+        .addConverterFactory(FindJsonInTextConverterFactory.create(gson))
+        .addConverterFactory(GsonConverterFactory.create(gson))
+        .build()
+
+    @Provides
+    @Singleton
     fun mockServer() = mockWebServer
 }

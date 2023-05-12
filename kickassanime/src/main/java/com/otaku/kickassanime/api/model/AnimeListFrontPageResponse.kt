@@ -4,29 +4,35 @@ import androidx.annotation.Keep
 import com.google.gson.annotations.SerializedName
 
 @Keep
-data class Anime(
-    @SerializedName("isSimulcast"   ) var isSimulcast   : Boolean?,
-    @SerializedName("isSubbed"      ) var isSubbed      : Boolean?,
-    @SerializedName("isDubbed"      ) var isDubbed      : Boolean?,
-    @SerializedName("year"          ) var year          : Int?,
-    @SerializedName("slug"          ) var slug          : String? ,
-    @SerializedName("episodeNumber" ) var episodeNumber : Int?,
-    @SerializedName("title"         ) var title         : String?,
-    @SerializedName("poster"        ) var poster        : Images?,
-    @SerializedName("lastUpdate"    ) var lastUpdate    : String?,
-    @SerializedName("updatedString" ) var updatedString : String? 
+class RecentApiResponse : BaseApiResponse<Recent>()
+
+@Keep
+data class Recent(
+    @SerializedName("language") var language: String? = null,
+    var duration: Long = 0,
+    @SerializedName("created_at") var createdAt: String? = null,
+    @SerializedName("locales") var locales: ArrayList<String> = arrayListOf(),
+    @SerializedName("title") var title: String? = null,
+    @SerializedName("title_en") var titleEn: String? = null,
+    @SerializedName("synopsis") var synopsis: String? = null,
+    @SerializedName("episode_title") var episodeTitle: String? = null,
+    @SerializedName("episode_number") var episodeNumber: Float? = null,
+    @SerializedName("episode_string") var episodeString: String? = null,
+    @SerializedName("poster") var poster: Images? = null,
+    @SerializedName("type") var type: String? = null,
+    @SerializedName("year") var year: Int? = null,
+    @SerializedName("rating") var rating: String? = null,
+    @SerializedName("slug") var slug: String? = null,
+    @SerializedName("watch_uri") var watchUri: String? = null
 )
 
 @Keep
-data class Image (
-    @SerializedName("name"    ) var name    : String?,
-    @SerializedName("formats" ) var formats : ArrayList<String> = arrayListOf(),
-    @SerializedName("width"   ) var width   : Int?,
-    @SerializedName("height"  ) var height  : Int?
+data class Images(
+    @SerializedName("sm") var sm: String?,
+    @SerializedName("hq") var hq: String?
 )
 
-@Keep
-data class Images (
-    @SerializedName("sm" ) var sm : Image?,
-    @SerializedName("hq" ) var hq : Image?
+open class BaseApiResponse<T>(
+    @SerializedName("hadNext") var hasNext: Boolean = false,
+    var result: ArrayList<T> = arrayListOf()
 )

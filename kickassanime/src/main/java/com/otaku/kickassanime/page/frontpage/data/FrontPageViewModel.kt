@@ -1,11 +1,14 @@
 package com.otaku.kickassanime.page.frontpage.data
 
 import android.util.Log
-import androidx.lifecycle.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.asLiveData
+import androidx.lifecycle.viewModelScope
 import com.otaku.fetch.base.TAG
 import com.otaku.fetch.base.livedata.State
-import com.otaku.kickassanime.api.model.AnimeSearchResponse
-import com.otaku.kickassanime.db.models.AnimeTile
+import com.otaku.kickassanime.db.models.AnimeSearchResult
 import com.otaku.kickassanime.page.search.SearchRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
@@ -16,17 +19,20 @@ import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 
 @HiltViewModel
-class FrontPageViewModel @Inject constructor(private val frontPageRepository: FrontPageRepository, private val searchRepository: SearchRepository) :
-    ViewModel() {
+class FrontPageViewModel @Inject constructor(
+    private val frontPageRepository: FrontPageRepository,
+    private val searchRepository: SearchRepository
+) : ViewModel() {
+    private fun recentLimited() = frontPageRepository.getFirst30RecentItems()
+    private fun recentSubLimited() = frontPageRepository.getFirst30RecentSubItems()
+    private fun recentDubLimited() = frontPageRepository.getFirst30RecentDubItems()
 
-    private val all = frontPageRepository.getFrontAllPage()
-    private val sub = frontPageRepository.getFrontSubPage()
-    private val dub = frontPageRepository.getFrontDubPage()
-
-    val zipped = all.zip(sub) { x, y -> Pair(x, y) }.zip(dub) { x, y -> FrontPageData(x.first, x.second, y) }.asLiveData(viewModelScope.coroutineContext, )
+    fun zipped() = recentLimited().zip(recentSubLimited()) { x, y -> Pair(x, y) }
+        .zip(recentDubLimited()) { x, y -> Triple(x.first, x.second, y) }
+        .asLiveData(viewModelScope.coroutineContext)
 
     private val isLoading = MutableLiveData<State>()
-    private val searchSuggestions =  MutableLiveData<List<AnimeSearchResponse>>()
+    private val searchSuggestions = MutableLiveData<List<AnimeSearchResult>>()
     private val searchIsLoading = MutableLiveData<State>()
 
     init {
@@ -60,17 +66,19 @@ class FrontPageViewModel @Inject constructor(private val frontPageRepository: Fr
     private val lock = AtomicBoolean(false)
     private var query = ""
     fun querySearchSuggestions(query: String) {
-        if(this.query == query) return
+        if (this.query == query) return
         this.query = query
-        if(lock.get()) return
+        if (lock.get()) return
         viewModelScope.launch {
             lock.set(true)
             searchIsLoading.postValue(State.LOADING())
             try {
-                val suggestions = searchRepository.search(this@FrontPageViewModel.query)
+                val suggestions = searchRepository.search(this@FrontPageViewModel.query).map {
+                    AnimeSearchResult(it)
+                }
                 searchSuggestions.postValue(suggestions)
                 searchIsLoading.postValue(State.SUCCESS())
-            } catch (e: Exception){
+            } catch (e: Exception) {
                 searchIsLoading.postValue(State.FAILED(e))
             }
             delay(100)
@@ -78,11 +86,9 @@ class FrontPageViewModel @Inject constructor(private val frontPageRepository: Fr
         }
     }
 
-    fun getSearchSuggestions() : LiveData<List<AnimeSearchResponse>> = searchSuggestions
+    fun getSearchSuggestions(): LiveData<List<AnimeSearchResult>> = searchSuggestions
 
     fun getSearchHistory(): List<String> {
         return searchRepository.getSearchHistory()
     }
-
-    class FrontPageData(val all: List<AnimeTile>, val sub: List<AnimeTile>, val dub: List<AnimeTile>)
 }

@@ -6,17 +6,24 @@ import com.fetch.cloudflarebypass.uam.UAMSettings
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
-import okhttp3.*
+import okhttp3.FormBody
+import okhttp3.Headers
 import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.Interceptor
+import okhttp3.Request
+import okhttp3.Response
 
 class CloudflareInterceptor(private val log: Log, private val uamSettings: UAMSettings) : Interceptor {
 
     override fun intercept(chain: Interceptor.Chain): Response {
         val oldRequest: Request = chain.request()
+
         val request = oldRequest.newBuilder()
             .headers(headers)
-            .get()
-            .build()
+            .let {
+                if ("GET" == oldRequest.method) it.get().build()
+                else it.build()
+            }
 
         val response = chain.proceed(request)
         log.i(TAG, "intercept: $response")

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:tools="http://schemas.android.com/tools"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <data>
+
+        <import type="android.view.View" />
+
+        <variable
+                name="anime"
+                type="com.otaku.fetch.data.ITileData" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+        <ImageView
+                android:layout_width="100dp"
+                android:layout_height="120dp"
+                tools:srcCompat="@tools:sample/avatars"
+                android:id="@+id/cover"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:layout_marginStart="16dp"
+                android:layout_marginBottom="8dp"
+                android:layout_marginTop="8dp"
+                app:imageUrl="@{anime.imageUrl}"
+                android:contentDescription="@string/default_icon"
+                app:layout_constraintBottom_toBottomOf="parent" />
+
+        <TextView
+                tools:text="TextView"
+                android:text="@{anime.title}"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:lines="2"
+                android:maxLines="4"
+                android:id="@+id/title"
+                app:layout_constraintStart_toEndOf="@+id/cover"
+                app:layout_constraintTop_toTopOf="@+id/cover"
+                android:layout_marginStart="16dp"
+                android:textAppearance="@style/TextAppearance.KickassAnime.TitleMedium"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:autoSizeTextType="uniform"
+                android:layout_marginEnd="16dp"
+                android:autoSizeMaxTextSize="18sp" />
+
+        <TextView
+                tools:text="TextView"
+                android:text="@{anime.tags[0]}"
+                android:textColor="@android:color/white"
+                android:background="@drawable/black_chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/tag1"
+                app:layout_constraintStart_toStartOf="@+id/title"
+                android:ellipsize="end"
+                android:textSize="10sp"
+                app:layout_constraintTop_toBottomOf="@+id/title" />
+
+        <TextView
+                tools:text="TextView"
+                android:text="@{anime.tags[1]}"
+                android:textColor="@android:color/white"
+                android:background="@drawable/black_chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/tag2"
+                app:layout_constraintBottom_toBottomOf="@+id/tag3"
+                android:ellipsize="end"
+                app:layout_constraintStart_toEndOf="@+id/tag3"
+                android:layout_marginStart="2dp"
+                android:textAllCaps="true"
+                android:textSize="10sp" />
+
+        <TextView
+                tools:text="TextView"
+                android:text="@{anime.tags[2]}"
+                android:textColor="@android:color/white"
+                android:background="@drawable/black_chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/tag3"
+                app:layout_constraintBottom_toBottomOf="@+id/tag1"
+                app:layout_constraintStart_toEndOf="@+id/tag1"
+                android:layout_marginStart="2dp"
+                android:ellipsize="end"
+                android:textAllCaps="true"
+                android:textSize="10sp" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

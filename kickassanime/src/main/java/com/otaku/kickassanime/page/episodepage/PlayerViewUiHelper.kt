@@ -17,15 +17,13 @@ import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.CaptionStyleCompat
 import androidx.media3.ui.PlayerControlView
 import androidx.media3.ui.PlayerView
-import androidx.mediarouter.app.MediaRouteButton
 import com.anggrayudi.materialpreference.PreferenceManager
-import com.google.android.gms.cast.framework.CastButtonFactory
 import com.google.android.material.textview.MaterialTextView
+import com.otaku.fetch.base.media.TrackSelectionDialog
 import com.otaku.fetch.base.ui.setOnClick
 import com.otaku.fetch.base.utils.UiUtils.toPxInt
 import com.otaku.kickassanime.R
 import com.otaku.kickassanime.page.settings.Pref
-import com.otaku.kickassanime.utils.TrackSelectionDialog
 
 
 @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
@@ -52,13 +50,13 @@ internal class PlayerViewUiHelper(
         playerView.children.filter { it is PlayerControlView }.first() as ViewGroup
 
     init {
-        skipIntroButton = createButton("Skip", controlsContainer.context, Gravity.BOTTOM)
-        chooseServerButton = createButton("Choose Server", controlsContainer.context, Gravity.TOP)
         val skipContainer =
             playerView.findViewById<FrameLayout>(androidx.media3.ui.R.id.exo_ad_overlay)
+        skipIntroButton = createButton("Skip", skipContainer.context, Gravity.BOTTOM)
+        chooseServerButton = createButton("Choose Server", controlsContainer.context, Gravity.TOP)
 
         skipContainer.addView(skipIntroButton)
-        skipContainer.isVisible = false
+        skipIntroButton.isVisible = false
         controlsContainer.addView(chooseServerButton)
         chooseServerButton.setOnClick {
             onSelectStream?.invoke()
@@ -128,7 +126,7 @@ internal class PlayerViewUiHelper(
 
         playerView.subtitleView?.setPadding(
             0, 0, 0,
-            activity.resources.getDimension(com.lapism.search.R.dimen.tooltip_horizontal_padding)
+            activity.resources.getDimension(com.lapism.search.R.dimen.search_dp_8)
                 .toInt()
         )
         playerView.subtitleView?.setFixedTextSize(

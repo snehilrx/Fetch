@@ -5,15 +5,15 @@ import org.threeten.bp.LocalDateTime
 
 @Entity(
     tableName = "video_history",
-    primaryKeys = ["episodeSlugId"],
+    primaryKeys = ["episodeSlug"],
     foreignKeys = [androidx.room.ForeignKey(
         entity = EpisodeEntity::class,
-        parentColumns = ["episodeSlugId"],
-        childColumns = ["episodeSlugId"]
+        parentColumns = ["episodeSlug"],
+        childColumns = ["episodeSlug"]
     )]
 )
 data class VideoHistory(
-    val episodeSlugId: Int,
+    val episodeSlug: String,
     val timestamp: Long,
     val lastPlayed: LocalDateTime
 )

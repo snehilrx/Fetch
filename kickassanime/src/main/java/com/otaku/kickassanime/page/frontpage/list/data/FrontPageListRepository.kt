@@ -6,6 +6,7 @@ import androidx.paging.PagingConfig
 import com.otaku.kickassanime.api.KickassAnimeService
 import com.otaku.kickassanime.db.KickassAnimeDb
 import com.otaku.kickassanime.utils.Constraints
+import com.otaku.kickassanime.utils.Utils
 import javax.inject.Inject
 
 class FrontPageListRepository @Inject constructor(
@@ -14,45 +15,48 @@ class FrontPageListRepository @Inject constructor(
 ) {
 
     @OptIn(ExperimentalPagingApi::class)
-    fun getFrontPageAllPager() = Pager(
+    fun getRecentPager() = Pager(
         config = PagingConfig(
             pageSize = Constraints.NETWORK_PAGE_SIZE,
             enablePlaceholders = true
         ),
-        remoteMediator = FrontPageListMediator(
+        remoteMediator = RecentMediator(
             database,
-            kickassAnimeService::getFrontPageAnimeList
+            kickassAnimeService::getFrontPageAnimeList,
+            Utils::saveRecent
         ),
     ) {
-        database.frontPageEpisodesDao().getFrontPageEpisodes()
+        database.recentDao().getRecent()
     }
 
     @OptIn(ExperimentalPagingApi::class)
-    fun getFrontPageDubPager() = Pager(
+    fun getSubPager() = Pager(
         config = PagingConfig(
             pageSize = Constraints.NETWORK_PAGE_SIZE,
             enablePlaceholders = true,
         ),
-        remoteMediator = FrontPageListMediator(
+        remoteMediator = RecentMediator(
             database,
-            kickassAnimeService::getFrontPageAnimeListDub
+            kickassAnimeService::getFrontPageAnimeListSub,
+            Utils::saveRecent
         ),
     ) {
-        database.frontPageEpisodesDao().getFrontPageEpisodesDub()
+        database.recentDao().getRecentSub()
     }
 
     @OptIn(ExperimentalPagingApi::class)
-    fun getFrontPageSubPager() = Pager(
+    fun getDubPager() = Pager(
         config = PagingConfig(
             pageSize = Constraints.NETWORK_PAGE_SIZE,
-            enablePlaceholders = true,
+            enablePlaceholders = true
         ),
-        remoteMediator = FrontPageListMediator(
+        remoteMediator = RecentMediator(
             database,
-            kickassAnimeService::getFrontPageAnimeListSub
+            kickassAnimeService::getFrontPageAnimeListDub,
+            Utils::saveRecent
         ),
     ) {
-        database.frontPageEpisodesDao().getFrontPageEpisodesSub()
+        database.recentDao().getRecentDub()
     }
 
 

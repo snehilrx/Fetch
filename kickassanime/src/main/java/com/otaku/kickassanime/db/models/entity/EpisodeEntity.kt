@@ -17,32 +17,29 @@ import org.threeten.bp.ZoneOffset
     tableName = "episode",
     foreignKeys = [ForeignKey(
         entity = AnimeEntity::class,
-        parentColumns = ["animeId"],
-        childColumns = ["animeId"]
+        parentColumns = ["animeSlug"],
+        childColumns = ["animeSlug"]
     )],
 )
 @Parcelize
 data class EpisodeEntity(
-    val name: String? = null,
+    val episodeNumber: Float? = null,
     var title: String? = null,
-    val episodeSlug: String? = null,
+    val duration: Long? = null,
     @PrimaryKey
-    val episodeSlugId: Int,
-    val dub: String? = null,
+    val episodeSlug: String,
+    @ColumnInfo(index = true)
+    var animeSlug: String?,
     var link1: String? = null,
     var link2: String? = null,
     var link3: String? = null,
     var link4: String? = null,
-    @ColumnInfo(index = true)
-    var animeId: String? = null,
-    var sector: String? = null,
     @Serializable(with = LocalDateTimeSerializable::class)
     var createdDate: LocalDateTime? = null,
     var next: String? = null,
     var prev: String? = null,
-    var episodeId: Int? = null,
-    var rating: Int? = null,
-    var votes: String? = null,
+    var language: String? = null,
+    var thumbnail: String? = null,
     var favourite: Boolean? = null
 ) : Parcelable {
     val timeAgo: String
@@ -56,3 +53,12 @@ data class EpisodeEntity(
             return "Uploaded : $relativeTimeSpanString"
         }
 }
+
+@Entity(
+    tableName = "episode_page",
+    primaryKeys = ["episodeSlug"]
+)
+data class EpisodePageEntity(
+    val episodeSlug: String,
+    val pageNo: Int
+)

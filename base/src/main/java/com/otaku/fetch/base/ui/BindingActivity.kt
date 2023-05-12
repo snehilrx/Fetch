@@ -1,12 +1,10 @@
 package com.otaku.fetch.base.ui
 
-import android.app.Activity
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
 import android.view.ViewGroup
-import android.view.WindowInsets
 import android.view.WindowManager
 import android.widget.ImageView
 import androidx.annotation.LayoutRes
@@ -32,7 +30,7 @@ import java.lang.ref.WeakReference
  * @author snehil
  * */
 open class BindingActivity<T : ViewDataBinding>(@LayoutRes private val layoutRes: Int) :
-    Activity() {
+    AppCompatActivity() {
 
     var mStatusBarHeight: Int = 0
     lateinit var weakReference: WeakReference<T>
@@ -69,7 +67,7 @@ open class BindingActivity<T : ViewDataBinding>(@LayoutRes private val layoutRes
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             android.R.id.home -> {
-                onBackPressed()
+                onBackPressedDispatcher.onBackPressed()
                 return true
             }
         }
@@ -78,11 +76,6 @@ open class BindingActivity<T : ViewDataBinding>(@LayoutRes private val layoutRes
 
     fun showBackButton() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-    }
-
-    protected fun initShineView(shineView: ShineView, appbarLayout: AppBarLayout) {
-        shineView.statusbarHeight = mStatusBarHeight.toFloat()
-        appbarLayout.addOnOffsetChangedListener(shineView)
     }
 
     protected fun AppBarLayout.getAppBarBehavior() =
@@ -152,6 +145,7 @@ open class BindingActivity<T : ViewDataBinding>(@LayoutRes private val layoutRes
 
     override fun onDestroy() {
         super.onDestroy()
+        setSupportActionBar(null)
         if (this::weakReference.isInitialized) weakReference.clear()
     }
 }

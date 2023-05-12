@@ -1,45 +1,55 @@
 package com.otaku.kickassanime.page.animepage
 
-import androidx.room.withTransaction
+import androidx.paging.ExperimentalPagingApi
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
 import com.otaku.kickassanime.api.KickassAnimeService
 import com.otaku.kickassanime.db.KickassAnimeDb
 import com.otaku.kickassanime.db.dao.AnimeEntityDao
-import com.otaku.kickassanime.db.dao.EpisodeEntityDao
+import com.otaku.kickassanime.db.dao.AnimeLanguageDao
 import com.otaku.kickassanime.db.dao.FavouriteDao
 import com.otaku.kickassanime.db.models.entity.AnimeEntity
-import com.otaku.kickassanime.page.adapters.EpisodeAdapter
-import com.otaku.kickassanime.utils.asAnimeEntity
-import com.otaku.kickassanime.utils.asEpisodeEntity
+import com.otaku.kickassanime.db.models.entity.AnimeLanguageEntity
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 
-class AnimeRepository @Inject constructor(private val kickassAnimeDb: KickassAnimeDb,  private val kickassAnimeService: KickassAnimeService) {
+class AnimeRepository @Inject constructor(
+    private val kickassAnimeDb: KickassAnimeDb, private val kickassAnimeService: KickassAnimeService
+) {
     private val animeDao: AnimeEntityDao = kickassAnimeDb.animeEntityDao()
-    private val episodeDao: EpisodeEntityDao = kickassAnimeDb.episodeEntityDao()
     private val favouriteDao: FavouriteDao = kickassAnimeDb.favouritesDao()
+    private val animeLanguageDao: AnimeLanguageDao = kickassAnimeDb.animeLanguageDao()
 
-    fun getAnime(slugId: Int): Flow<AnimeEntity?> {
-        return animeDao.getAnimeFlowable(slugId)
+
+    @OptIn(ExperimentalPagingApi::class)
+    fun getEpisodes(animeSlug: String, languageId: String) = Pager(
+        config = PagingConfig(
+            pageSize = 100,
+            enablePlaceholders = true,
+        ),
+        remoteMediator = EpisodeRemoteMediator(
+            animeSlug, languageId, kickassAnimeService, kickassAnimeDb
+        ),
+    ) {
+        kickassAnimeDb.episodeEntityDao().getEpisodes(animeSlug, languageId)
     }
 
-    suspend fun invalidateAnime(slug: String) {
-        val animeInformation = kickassAnimeService.getAnimeInformation(slug)
-        val slugId = animeInformation.slugId?.toIntOrNull() ?: return
-        val animeEntity = animeDao.getAnime(slugId) ?: return
-        kickassAnimeDb.withTransaction {
-            animeDao.updateAll(animeInformation.asAnimeEntity(animeEntity))
-            episodeDao.insertAll(animeInformation.asEpisodeEntity())
-        }
+    fun getAnime(animeSlug: String): Flow<AnimeEntity?> {
+        return animeDao.getAnimeFlowable(animeSlug)
     }
 
-    fun getEpisodeList(
-        animeId: String
-    ): Flow<List<EpisodeAdapter.Episode>> {
-        return episodeDao.listEpisodes(animeId)
+    fun getAnimeLanguage(animeSlug: String): Flow<List<AnimeLanguageEntity>> {
+        return animeLanguageDao.getLanguage(animeSlug)
     }
 
-    suspend fun setFavourite(animeId: Int, checked: Boolean) {
-        favouriteDao.setFavourite(animeId, if(checked) 1 else 0)
+    suspend fun setFavourite(animeSlug: String, checked: Boolean) {
+        favouriteDao.setFavourite(animeSlug, if (checked) 1 else 0)
+    }
+
+    suspend fun fetchLanguage(animeSlug: String) {
+        val language = kickassAnimeService.getLanguage(animeSlug)
+        kickassAnimeDb.animeLanguageDao()
+            .insertAll(language.result.map { AnimeLanguageEntity(it, animeSlug) })
     }
 }

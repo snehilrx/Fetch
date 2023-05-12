@@ -6,4 +6,5 @@ import dagger.hilt.android.components.ServiceComponent
 
 @Module
 @InstallIn(ServiceComponent::class)
+@Suppress("unused")
 object ServiceModule

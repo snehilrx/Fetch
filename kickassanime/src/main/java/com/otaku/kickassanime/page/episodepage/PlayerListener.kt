@@ -24,7 +24,7 @@ internal class PlayerListener(
     override fun onPlaybackStateChanged(playbackState: Int) {
         super.onPlaybackStateChanged(playbackState)
         if (playbackState == ExoPlayer.STATE_ENDED) {
-            binding.episodeDetails?.episodeSlugId?.let { viewModel.addToFavourites(it) }
+            binding.episodeDetails?.animeSlug?.let { viewModel.addToFavourites(it) }
         }
         binding.playerView.keepScreenOn =
             !(playbackState == Player.STATE_IDLE || playbackState == Player.STATE_ENDED)

@@ -51,25 +51,11 @@
                 android:lineSpacingExtra="2sp"
                 android:padding="8dp"
                 android:text="@{history.title}"
-                android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
-                app:layout_constraintBottom_toTopOf="@+id/guideline8"
+                    android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
+                    app:layout_constraintBottom_toTopOf="@+id/guideline8"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/image"
                 app:layout_constraintTop_toTopOf="parent"
-                tools:text="The Rising of the Shield Hero Season 2" />
-
-            <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/subtitle0"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:lineSpacingExtra="2sp"
-                android:padding="8dp"
-                android:text="@{history.tags.get(0)}"
-                android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/guideline9"
-                app:layout_constraintStart_toEndOf="@+id/image"
-                app:layout_constraintTop_toTopOf="@+id/guideline8"
                 tools:text="The Rising of the Shield Hero Season 2" />
 
 
@@ -78,13 +64,13 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:lineSpacingExtra="2sp"
-                android:padding="8dp"
-                android:text="@{history.tags.get(1)}"
-                android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
+                    android:padding="8dp"
+                    android:text="@{history.tags.get(0)}"
+                    android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/subtitle2"
-                app:layout_constraintStart_toEndOf="@+id/subtitle0"
-                app:layout_constraintTop_toTopOf="@+id/guideline8"
+                    app:layout_constraintEnd_toStartOf="@+id/subtitle2"
+                    app:layout_constraintStart_toEndOf="@+id/image"
+                    app:layout_constraintTop_toTopOf="@+id/guideline8"
                 tools:text="The Rising of the Shield Hero Season 2" />
 
 
@@ -93,9 +79,9 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:lineSpacingExtra="2sp"
-                android:padding="8dp"
-                android:text="@{history.tags.get(2)}"
-                android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
+                    android:padding="8dp"
+                    android:text="@{history.tags.get(1)}"
+                    android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="@+id/guideline10"

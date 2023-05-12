@@ -26,18 +26,24 @@ object ImageViewBindings {
                     view.context.theme
                 ) as AnimatedVectorDrawable
             animatedVectorDrawable.start()
-            val urls = arrayOf("${url}hq.webp", "${url}hq.jpg", "${url}hq.jpeg",
-                "${url}hq.webp", "${url}hq.jpg", "${url}hq.jpeg")
+            val urls = arrayOf(
+                "${url}-hq.webp", "${url}-hq.jpg", "${url}-hq.jpeg",
+                "${url}-hq.webp", "${url}-hq.jpg", "${url}-hq.jpeg"
+            )
             try {
                 Glide.with(view.context)
                     .load(urls[0])
-                    .error(Glide.with(view.context)
-                        .load(urls[1])
-                        .error(Glide.with(view.context)
-                            .load(urls[2])
-                            .error(Glide.with(view.context)
-                                .load(urls[3])
-                                .error(Glide.with(view.context)
+                    .error(
+                        Glide.with(view.context)
+                            .load(urls[1])
+                            .error(
+                                Glide.with(view.context)
+                                    .load(urls[2])
+                                    .error(
+                                        Glide.with(view.context)
+                                            .load(urls[3])
+                                            .error(
+                                                Glide.with(view.context)
                                     .load(urls[4])
                                     .error(
                                         Glide.with(view.context)

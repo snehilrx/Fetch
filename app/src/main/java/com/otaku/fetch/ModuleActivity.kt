@@ -1,16 +1,18 @@
 package com.otaku.fetch
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.activity.addCallback
 import androidx.core.view.isVisible
-import androidx.navigation.createGraph
 import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.setupWithNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.lapism.search.widget.MaterialSearchView
@@ -41,12 +43,14 @@ class ModuleActivity :
     }
 
     private fun initNavigationView() {
-        val graph = intent.extras?.getInt(ARG_MODULE_GRAPH) ?: return
+        val appModule = (application as? FetchApplication)?.currentModule ?: return
         val navHostFragment = binding.fragmentContainerView.getFragment<NavHostFragment>()
-        navHostFragment.navController.setGraph(graph)
+        navHostFragment.navController.setGraph(appModule.getNavigationGraph())
+        binding.bottomNavigation.inflateMenu(appModule.getBottomNavigationMenu())
+        binding.bottomNavigation.setupWithNavController(navHostFragment.navController)
     }
 
-    @SuppressLint("PrivateResource")
+    @SuppressLint("PrivateResource", "ClickableViewAccessibility")
     private fun initSearchView(binding: ActivityModuleBinding) {
         val searchView = binding.searchView
         val callback = this.onBackPressedDispatcher.addCallback {
@@ -60,11 +64,14 @@ class ModuleActivity :
         })
         val params = ViewGroup.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT,
-            ViewGroup.LayoutParams.WRAP_CONTENT
+            ViewGroup.LayoutParams.MATCH_PARENT
         )
         val searchSuggestionsList = RecyclerView(searchView.context).apply { layoutParams = params }
         searchSuggestionsList.layoutManager = LinearLayoutManager(searchView.context)
-
+        searchSuggestionsList.setOnTouchListener { view, _ ->
+            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+            imm?.hideSoftInputFromWindow(view.windowToken, 0) ?: false
+        }
         val label = LayoutInflater.from(searchView.context)
             .inflate(
                 com.google.android.material.R.layout.m3_auto_complete_simple_item,
@@ -72,7 +79,12 @@ class ModuleActivity :
                 false
             ) as TextView
 
-        val progressBar = ProgressBar(searchView.context).apply { layoutParams = params }
+        val progressBar = ProgressBar(searchView.context).apply {
+            layoutParams = params.apply {
+                height =
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+            }
+        }
 
         label.isVisible = false
         progressBar.isVisible = false
@@ -94,8 +106,9 @@ class ModuleActivity :
         val searchEdit =
             searchView.findViewById<View>(com.lapism.search.R.id.search_view_edit_text)
         val oldFocus = searchEdit.onFocusChangeListener
-        searchEdit?.setOnFocusChangeListener{ v, b ->
-            binding.fragmentContainerView.findViewById<View>(com.otaku.kickassanime.R.id.front)?.isVisible = !b
+        searchEdit?.setOnFocusChangeListener { v, b ->
+            binding.fragmentContainerView.findViewById<View>(com.otaku.kickassanime.R.id.front)?.isVisible =
+                !b
             oldFocus.onFocusChange(v, b)
         }
 
@@ -135,9 +148,5 @@ class ModuleActivity :
 
     override fun setQueryListener(listener: MaterialSearchView.OnQueryTextListener) {
         binding.searchView.setOnQueryTextListener(listener)
-    }
-
-    companion object {
-        const val ARG_MODULE_GRAPH = "module"
     }
 }

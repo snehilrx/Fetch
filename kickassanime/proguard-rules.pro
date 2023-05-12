@@ -31,3 +31,15 @@
 -keep public class androidx.media3.cast.DefaultCastOptionsProvider {
     public *;
 }
+
+-keep public class com.lapism.search.R {
+    public *;
+}
+-keep public class com.otaku.fetch.ModuleRegistration0 {
+    public *;
+}
+
+-dontwarn com.lapism.search.R$dimen
+-dontwarn com.lapism.search.R$styleable
+-dontwarn com.otaku.fetch.base.R*
+-dontwarn java.lang.invoke.*

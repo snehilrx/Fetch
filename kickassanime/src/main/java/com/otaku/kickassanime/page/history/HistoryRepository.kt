@@ -12,17 +12,17 @@ class HistoryRepository @Inject constructor(private val db: KickassAnimeDb) {
         db.historyDao().insert(videoHistory)
     }
 
-    suspend fun getCurrentPlaytime(episodeSlugId: Int): Long {
-        return db.historyDao().getPlaytime(episodeSlugId)
+    suspend fun getCurrentPlaytime(episodeSlug: String): Long {
+        return db.historyDao().getPlaytime(episodeSlug)
     }
 
-    suspend fun setPlaytime(episodeSlugId: Int, time: Long) {
-        db.historyDao().setPlaytime(episodeSlugId, time)
+    suspend fun setPlaytime(episodeSlug: String, time: Long) {
+        db.historyDao().setPlaytime(episodeSlug, time)
     }
 
     val recents = Pager(
         PagingConfig(30)
-    ){
+    ) {
         db.historyDao().getLatestWatchedVideos()
     }
 }

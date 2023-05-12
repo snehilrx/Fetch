@@ -50,7 +50,7 @@ internal class FeedFetcherTest {
         // Enqueue periodic request
         val instance = WorkManager.getInstance(context)
         instance
-            .enqueueUniquePeriodicWork(TAG, ExistingPeriodicWorkPolicy.REPLACE, request)
+            .enqueueUniquePeriodicWork(TAG, ExistingPeriodicWorkPolicy.UPDATE, request)
 
         // Initialize testDriver
         val testDriver: TestDriver? = WorkManagerTestInitHelper.getTestDriver(context)

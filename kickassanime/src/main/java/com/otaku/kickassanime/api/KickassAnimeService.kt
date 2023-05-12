@@ -1,50 +1,52 @@
 package com.otaku.kickassanime.api
 
-import com.otaku.kickassanime.api.conveter.JsonInText
 import com.otaku.kickassanime.api.model.*
-import com.otaku.kickassanime.utils.Constraints.NETWORK_PAGE_SIZE
 import retrofit2.http.*
 
 
 interface KickassAnimeService {
 
-    @POST("/api/recent_update?episodeType=all&&perPage=${NETWORK_PAGE_SIZE}")
+    @GET("/api/show/recent?type=all")
     suspend fun getFrontPageAnimeList(
         @Query("page") pageNo: Int
-    ): List<Anime>
+    ): RecentApiResponse
 
 
-    @POST("/api/recent_update?episodeType=sub&perPage=${NETWORK_PAGE_SIZE}")
+    @GET("/api/show/recent?type=sub")
     suspend fun getFrontPageAnimeListSub(
         @Query("page") pageNo: Int
-    ): List<Anime>
+    ): RecentApiResponse
 
 
-    @POST("/api/recent_update?episodeType=dub&perPage=${NETWORK_PAGE_SIZE}")
+    @GET("/api/show/recent?type=dub")
     suspend fun getFrontPageAnimeListDub(
         @Query("page") pageNo: Int
-    ): List<Anime>
+    ): RecentApiResponse
 
-    @GET("/anime-list")
-    @JsonInText("animes")
-    suspend fun getAllAnimeEntries(): List<AnimeResponse>
+    @GET("api/show/filters")
+    suspend fun getFilters(): Filters
 
-    @GET("/new-season")
-    @JsonInText("animes")
-    suspend fun getNewSeasonAnimeEntries(): List<AnimeResponse>
+    @POST("/api/fsearch")
+    suspend fun search(@Body query: SearchRequest): AnimeSearchResponse
 
-    @POST("/search")
-    @JsonInText("animes")
-    suspend fun search(@Query("q") query: String): List<AnimeSearchResponse>
+    @POST("/api/search")
+    suspend fun searchHints(@Body query: SearchRequest): List<SearchItem>
 
-    @GET("/api/watch/{slug}")
-    suspend fun getAnimeEpisode(
+
+    @GET("/api/episode/{slug}")
+    suspend fun getEpisode(
         @Path("slug") path: String
-    ): AnimeAndEpisodeInformation
+    ): EpisodeApiResponse
 
-    @GET("/api/anime/{slug}")
-    suspend fun getAnimeInformation(@Path("slug") path: String): AnimeInformation
+    @GET("/api/show/{slug}/episodes")
+    suspend fun getEpisodes(
+        @Path("slug") path: String,
+        @Query("lang") language: String,
+        @Query("page") page: Int
+    ): EpisodesResponse
 
-    @GET
-    suspend fun urlToText(@Url link: String) : String
+    @GET("/api/show/{slug}/language")
+    suspend fun getLanguage(
+        @Path("slug") path: String
+    ): BaseApiResponse<String>
 }

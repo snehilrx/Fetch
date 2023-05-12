@@ -30,7 +30,6 @@ class FavouritesFragment : ListFragment<ItemFavoriteBinding>() {
         val fav = item as? AnimeFavorite ?: return
         FavouritesFragmentDirections.actionFavouritesFragmentToAnimeActivity(
             AnimeEntity(
-                animeSlugId = fav.animeSlugId,
                 animeSlug = fav.animeSlug
             )
         )
@@ -47,14 +46,13 @@ class FavouritesFragment : ListFragment<ItemFavoriteBinding>() {
                     val actionFavouritesFragmentToAnimeActivity =
                         FavouritesFragmentDirections.actionFavouritesFragmentToAnimeActivity(
                             AnimeEntity(
-                                animeSlugId = iTileData.animeSlugId,
                                 animeSlug = iTileData.animeSlug,
                             )
                         )
                     findNavController().navigate(actionFavouritesFragmentToAnimeActivity)
                 }
                 itemFavoriteBinding.favorite.setOnClick {
-                    viewModel.removeFavourite(iTileData.animeSlugId)
+                    viewModel.removeFavourite(iTileData.animeSlug)
                 }
                 itemFavoriteBinding.root.setOnClick {
                     onItemClick(iTileData)

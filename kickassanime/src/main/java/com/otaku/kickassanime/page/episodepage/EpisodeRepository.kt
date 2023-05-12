@@ -1,11 +1,10 @@
 package com.otaku.kickassanime.page.episodepage
 
-import android.util.Log
+import android.text.TextUtils
+import androidx.room.withTransaction
 import com.google.gson.Gson
-import com.otaku.fetch.base.TAG
 import com.otaku.kickassanime.api.AnimeSkipService
 import com.otaku.kickassanime.api.KickassAnimeService
-import com.otaku.kickassanime.api.model.Dust
 import com.otaku.kickassanime.db.KickassAnimeDb
 import com.otaku.kickassanime.db.models.EpisodeAnime
 import com.otaku.kickassanime.db.models.Timeline
@@ -13,10 +12,13 @@ import com.otaku.kickassanime.db.models.entity.AnimeEntity
 import com.otaku.kickassanime.db.models.entity.EpisodeEntity
 import com.otaku.kickassanime.utils.asAnimeEntity
 import com.otaku.kickassanime.utils.asEpisodeEntity
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
 import javax.inject.Inject
+import kotlin.math.abs
 
 class EpisodeRepository @Inject constructor(
     private val kickassAnimeDb: KickassAnimeDb,
@@ -25,54 +27,81 @@ class EpisodeRepository @Inject constructor(
     private val gson: Gson
 ) {
 
-    fun getEpisodeWithAnime(episodeSlugId: Int, animeSlugId: Int): Flow<EpisodeAnime?> {
-        return kickassAnimeDb.episodeEntityDao().getEpisodeWithAnime(episodeSlugId, animeSlugId)
+    fun getEpisodeWithAnime(episodeSlug: String, animeSlug: String): Flow<EpisodeAnime?> {
+        return kickassAnimeDb.episodeEntityDao().getEpisodeWithAnime(episodeSlug, animeSlug)
     }
 
-    suspend fun fetchRemote(animeSlugId: Int, episodeSlugId: Int) : Pair<EpisodeEntity?, AnimeEntity?>? {
-        val episode = kickassAnimeDb.episodeEntityDao().getEpisode(episodeSlugId) ?: return null
-        val episodeSlug = episode.episodeSlug ?: return null
+    suspend fun fetchRemote(
+        animeSlug: String,
+        episodeSlug: String
+    ): Pair<EpisodeEntity?, AnimeEntity?>? {
+        val episode = kickassAnimeDb.episodeEntityDao().getEpisode(episodeSlug) ?: return null
         // watch api returns information about anime and episode
-        val animeEpisode = kickassAnimeService.getAnimeEpisode(episodeSlug)
-        val anime = kickassAnimeDb.animeEntityDao().getAnime(animeSlugId)
-        val animeEntity = animeEpisode.asAnimeEntity(anime)
-        val episodeEntity = animeEpisode.asEpisodeEntity(episode)
-        if (animeEntity != null) {
+        return withContext(Dispatchers.IO) {
+            val watchApiResponse = kickassAnimeService.getEpisode(episodeSlug)
+            val anime = kickassAnimeDb.withTransaction {
+                kickassAnimeDb.animeEntityDao().getAnime(animeSlug)
+            }
+            val animeFromDb = anime ?: return@withContext null
+            if (TextUtils.isEmpty(watchApiResponse.showSlug)) {
+                return@withContext null
+            }
+            val animeEntity = watchApiResponse.asAnimeEntity(animeFromDb.apply {
+                this.animeSlug = animeSlug
+            })
+            val episodeEntity = watchApiResponse.asEpisodeEntity(episode)
             kickassAnimeDb.animeEntityDao().updateAll(animeEntity)
-        }
-        if (episodeEntity != null) {
             kickassAnimeDb.episodeEntityDao().updateAll(episodeEntity)
-        }
-        return Pair(episodeEntity, animeEntity)
-    }
-
-    suspend fun fetchDustLinks(link: String): Dust? {
-        try {
-            val text = kickassAnimeService.urlToText(link)
-            val find = jsText.find(text)?.value ?: return null
-            return gson.fromJson("{\"data\": $find}", Dust::class.java)
-        } catch (e: Exception){
-            Log.e(TAG, e.message, e)
-            return null
+            return@withContext Pair(episodeEntity, animeEntity)
         }
     }
 
-    suspend fun fetchAnimeSkipTime(animeName: String, episodeNumber: Int): List<Float?>? {
-        val idJson = animeSkip.gql("{\"query\":\"query{searchShows(search:\\\"$animeName\\\",limit:1){id}}\",\"variables\":{}}".toRequestBody(contentType = "application/json".toMediaTypeOrNull()))
-        val showId = if(idJson.length < 67) return null else idJson.subSequence(31, 67)
-        val timestampJson = animeSkip.gql("{\"query\":\"query{findShow(showId:\\\"$showId\\\"){episodes{timestamps{at}}}}\",\"variables\":{}}".toRequestBody(contentType = "application/json".toMediaTypeOrNull()))
-        Log.e(TAG, timestampJson)
-        val episodes = gson.fromJson(timestampJson, Timeline::class.java)?.data?.findShow?.episodes ?: return null
-        if (episodeNumber >= episodes.size) return null
-        return episodes[episodeNumber].timestamps.map {
-            it.at
+    /**
+     * Returns timestamp in seconds
+     * */
+    suspend fun fetchAnimeSkipTime(
+        animeName: String,
+        episodeNumber: Float
+    ): List<Pair<Long, String?>>? {
+        val idJson = animeSkip.gql(
+            "{\"query\":\"query{searchShows(search:\\\"$animeName\\\",limit:1){id}}\",\"variables\":{}}".toRequestBody(
+                contentType = "application/json".toMediaTypeOrNull()
+            )
+        )
+        val showId = if (idJson.length < 67) return null else idJson.subSequence(31, 67)
+        val timestampJson = animeSkip.gql(
+            "{\"query\":\"query{findEpisodesByShowId(showId:\\\"$showId\\\"){number,timestamps{at,type{name}}}}\",\"variables\":{}}".toRequestBody(
+                contentType = "application/json".toMediaTypeOrNull()
+            )
+        )
+        val episodes =
+            gson.fromJson(timestampJson, Timeline::class.java)?.data?.episodes ?: return null
+        var closestEpisode = episodes.firstOrNull() ?: return null
+        var closestEpisodeNumber = closestEpisode.number?.toFloatOrNull()
+        episodes.forEach {
+            val currentEpisode = it.number?.toIntOrNull()
+            if (closestEpisodeNumber == null || (currentEpisode != null && abs(currentEpisode - episodeNumber) < abs(
+                    (closestEpisodeNumber ?: Float.MAX_VALUE) - episodeNumber
+                )) && it.timestamps.isNotEmpty()
+            ) {
+                closestEpisode = it
+                closestEpisodeNumber = it.number?.toFloatOrNull()
+            }
+        }
+        return closestEpisode.timestamps.filter { it.at != null }.map {
+            Pair(
+                it.at!!.toLong() * 1000L,
+                it.type.name
+            )
         }
     }
 
-    companion object{
-        @JvmStatic
-        private val jsText = "\\[\\{.*\\}\\]".toRegex()
+    suspend fun fetchLocal(
+        animeSlug: String,
+        episodeSlug: String
+    ): Pair<EpisodeEntity?, AnimeEntity?>? {
+        val episode = kickassAnimeDb.episodeEntityDao().getEpisode(episodeSlug) ?: return null
+        val anime = kickassAnimeDb.animeEntityDao().getAnime(animeSlug)
+        return Pair(episode, anime)
     }
-
-
 }

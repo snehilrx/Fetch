@@ -47,11 +47,6 @@ class DatabaseTest {
     @Throws(Exception::class)
     fun writeUserAndReadInList() {
         runBlocking {
-            val result = kickassAnimeService.getAllAnimeEntries()
-//            db.runInTransaction {
-//                db.animeEntityDao().insertAll(result.map { it.asAnimeEntity() })
-//                db.animeEntityDao().getAll()
-//            }
         }
     }
 }

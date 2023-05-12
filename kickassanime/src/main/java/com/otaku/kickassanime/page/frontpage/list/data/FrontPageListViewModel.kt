@@ -1,12 +1,9 @@
 package com.otaku.kickassanime.page.frontpage.list.data
 
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import androidx.paging.liveData
 import androidx.paging.map
 import com.otaku.fetch.data.ITileData
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,15 +17,18 @@ class FrontPageListViewModel @Inject constructor(
 ) : ViewModel() {
 
     @Suppress("USELESS_CAST")
-    val all: Flow<PagingData<ITileData>> =
-        repository.getFrontPageAllPager().flow.map { it.map { animeTile -> animeTile as ITileData } }.cachedIn(viewModelScope)
+    val recent: Flow<PagingData<ITileData>> =
+        repository.getRecentPager().flow.map { it.map { animeTile -> animeTile as ITileData } }
+            .cachedIn(viewModelScope)
 
     @Suppress("USELESS_CAST")
-    val sub: Flow<PagingData<ITileData>> =
-        repository.getFrontPageSubPager().flow.map { it.map { animeTile -> animeTile as ITileData } }.cachedIn(viewModelScope)
+    val trending: Flow<PagingData<ITileData>> =
+        repository.getSubPager().flow.map { it.map { animeTile -> animeTile as ITileData } }
+            .cachedIn(viewModelScope)
 
     @Suppress("USELESS_CAST")
-    val dub: Flow<PagingData<ITileData>> =
-        repository.getFrontPageDubPager().flow.map { it.map { animeTile -> animeTile as ITileData } }.cachedIn(viewModelScope)
+    val popular: Flow<PagingData<ITileData>> =
+        repository.getDubPager().flow.map { it.map { animeTile -> animeTile as ITileData } }
+            .cachedIn(viewModelScope)
 
 }

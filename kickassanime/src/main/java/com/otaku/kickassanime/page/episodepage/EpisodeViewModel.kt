@@ -2,32 +2,26 @@ package com.otaku.kickassanime.page.episodepage
 
 import android.net.Uri
 import android.util.Log
-import androidx.core.net.UriCompat
 import androidx.lifecycle.*
-import androidx.paging.DEBUG
 import com.google.gson.Gson
-import com.moczul.ok2curl.CommandComponent
 import com.otaku.fetch.base.livedata.SingleLiveEvent
 import com.otaku.fetch.base.livedata.State
-import com.otaku.kickassanime.BuildConfig
 import com.otaku.kickassanime.Strings
-import com.otaku.kickassanime.Strings.KAAST1
-import com.otaku.kickassanime.Strings.KAA_VID
+import com.otaku.kickassanime.Strings.KICKASSANIME_URL
 import com.otaku.kickassanime.api.model.CommonSubtitle
 import com.otaku.kickassanime.api.model.ServerLinks
 import com.otaku.kickassanime.db.models.CommonVideoLink
 import com.otaku.kickassanime.db.models.EpisodeAnime
 import com.otaku.kickassanime.db.models.LinkVideoObject
-import com.otaku.kickassanime.db.models.entity.AnimeEntity
 import com.otaku.kickassanime.db.models.entity.EpisodeEntity
 import com.otaku.kickassanime.page.favourtites.FavouritesRepository
 import com.otaku.kickassanime.page.history.HistoryRepository
+import com.otaku.kickassanime.pojo.CrunchyRoll
 import com.otaku.kickassanime.utils.Utils
 import com.otaku.kickassanime.utils.asVideoHistory
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.launch
-import java.net.URL
 import java.util.concurrent.atomic.AtomicReference
 import javax.inject.Inject
 import javax.inject.Named
@@ -51,27 +45,33 @@ class EpisodeViewModel @Inject constructor(
     private val thumbnailLink = SingleLiveEvent<String>()
     private val posterLink = SingleLiveEvent<String>()
     private val serverLinks = hashSetOf<ServerLinks>()
-    private val timeSkips = MutableLiveData<List<Long>>()
+    private val timeSkips = MutableLiveData<List<Pair<Long, String?>>>()
     private val subtitleLinks = MutableLiveData<List<CommonSubtitle>>()
 
-    fun fetchEpisode(animeSlugId: Int, episodeSlugId: Int) {
+    fun fetchEpisode(animeSlug: String, episodeSlug: String, useOffline: Boolean) {
         viewModelScope.launch(io) {
             loadState.postValue(State.LOADING())
             try {
-                val currentPlaytime = historyRepository.getCurrentPlaytime(episodeSlugId)
+                val currentPlaytime = historyRepository.getCurrentPlaytime(episodeSlug)
                 playTime.postValue(currentPlaytime)
             } catch (e: Exception) {
                 //noop
             }
             try {
-                val data = episodeRepository.fetchRemote(animeSlugId, episodeSlugId)
+                val data = if (useOffline) {
+                    episodeRepository.fetchLocal(animeSlug, episodeSlug)
+                } else {
+                    episodeRepository.fetchRemote(animeSlug, episodeSlug)
+                }
                 val episode = data?.first
                 val anime = data?.second
                 if (episode != null && anime != null) {
                     addToHistory(episode)
-                    loadDustUrls(episode.link1)
-                    loadMobile2Urls(episode.link4)
-                    fetchIntroTimestamp(anime.name, episode.name)
+                    if (!useOffline) {
+                        loadDustUrls("$KICKASSANIME_URL$animeSlug/$episodeSlug")
+                        loadMobile2Urls(episode.link4)
+                        fetchIntroTimestamp(anime.name, episode.episodeNumber ?: 1f)
+                    }
                 } else {
                     throw Exception("No episode found!")
                 }
@@ -83,30 +83,35 @@ class EpisodeViewModel @Inject constructor(
         }
     }
 
-    private fun fetchIntroTimestamp(displayTitle: String?, episodeNumber: String?) {
+    private fun fetchIntroTimestamp(displayTitle: String?, episodeNumber: Float) {
         viewModelScope.launch(io) {
-            if (displayTitle != null && episodeNumber != null) {
-                val fetchAnimeSkipTime = episodeRepository.fetchAnimeSkipTime(
-                    displayTitle,
-                    Integer.valueOf(episodeNumber)
-                )
-                viewModelScope.launch(default) {
-                    fetchAnimeSkipTime?.filterNotNull()?.map { it.toLong() * 1000 }?.let {
-                        timeSkips.postValue(it)
+            if (displayTitle != null) {
+                try {
+                    val fetchAnimeSkipTime = episodeRepository.fetchAnimeSkipTime(
+                        displayTitle,
+                        episodeNumber
+                    )
+                    viewModelScope.launch(default) {
+                        fetchAnimeSkipTime?.let {
+                            timeSkips.postValue(it)
+                        }
                     }
+                } catch (e: Exception) {
+                    Log.e("anime-skip", "api call failed", e)
                 }
             }
         }
     }
 
-    fun getEpisodeWithAnime(episodeSlugId: Int, animeSlugId: Int): LiveData<EpisodeAnime?> =
-        episodeRepository.getEpisodeWithAnime(episodeSlugId, animeSlugId).asLiveData(viewModelScope.coroutineContext)
+    fun getEpisodeWithAnime(episodeSlugId: String, animeSlugId: String): LiveData<EpisodeAnime?> =
+        episodeRepository.getEpisodeWithAnime(episodeSlugId, animeSlugId)
+            .asLiveData(viewModelScope.coroutineContext)
 
     fun getVideoLink(): LiveData<List<CommonVideoLink>> = videoLink
 
     fun getThumbnailLink(): LiveData<String> = thumbnailLink
 
-    fun getTimeSkip(): LiveData<List<Long>> = timeSkips
+    fun getTimeSkip(): LiveData<List<Pair<Long, String?>>> = timeSkips
 
     fun getSubtitle(): LiveData<List<CommonSubtitle>> = subtitleLinks
 
@@ -116,7 +121,7 @@ class EpisodeViewModel @Inject constructor(
         videoLink.postValue(newList)
     }
 
-    private fun addServerLinks( links: List<CommonVideoLink>) {
+    private fun addServerLinks(links: List<CommonVideoLink>) {
         val newList = ArrayList<CommonVideoLink>(videoLink.value ?: emptyList())
         newList.addAll(links)
         videoLink.postValue(newList)
@@ -126,12 +131,13 @@ class EpisodeViewModel @Inject constructor(
         viewModelScope.launch(io) {
             try {
                 val data = Utils.parseMaverickkiLink(link, gson) ?: return@launch
-                data.link()?.let { link -> addServerLinks(LinkVideoObject(link, CommonVideoLink.HLS)) }
+                data.link()
+                    ?.let { link -> addServerLinks(LinkVideoObject(link, CommonVideoLink.HLS)) }
                 data.thumbnail.let { poster -> posterLink.postValue(poster) }
                 data.timelineThumbnail.let { thumbnail -> thumbnailLink.postValue(thumbnail) }
                 data.subtitles.let { subtitles -> subtitleLinks.postValue(subtitles) }
             } catch (e: Exception) {
-                loadState.postValue(State.FAILED(e, false))
+                loadState.postValue(State.FAILED(e))
             }
         }
     }
@@ -144,9 +150,9 @@ class EpisodeViewModel @Inject constructor(
         isPlaying.postValue(playing)
     }
 
-    fun addToFavourites(animeSlugId: Int) {
+    fun addToFavourites(animeSlug: String) {
         viewModelScope.launch {
-            favoriteRepository.addToFavourites(animeSlugId)
+            favoriteRepository.addToFavourites(animeSlug)
         }
     }
 
@@ -156,9 +162,9 @@ class EpisodeViewModel @Inject constructor(
         }
     }
 
-    fun updatePlayBackTime(episodeSlugId: Int, time: Long) {
+    fun updatePlayBackTime(episodeSlug: String, time: Long) {
         viewModelScope.launch {
-            historyRepository.setPlaytime(episodeSlugId, time)
+            historyRepository.setPlaytime(episodeSlug, time)
         }
     }
 
@@ -198,39 +204,23 @@ class EpisodeViewModel @Inject constructor(
     private val videoLinks = hashSetOf<Uri>()
 
     fun handleVideoLinks(uri: Uri) {
-        if  (videoLinks.contains(uri)) {
+        if (videoLinks.contains(uri)) {
             return
         }
         videoLinks.add(uri)
         when (uri.host) {
-            Strings.KAA_URL, Strings.KAA2_URL -> {
+            Strings.VRV -> {
+                // hardcode video format
                 addServerLinks(LinkVideoObject(uri.toString(), CommonVideoLink.HLS))
             }
+
+            Strings.KAA_URL, Strings.KAA2_URL -> {
+                // hardcode video format
+                addServerLinks(LinkVideoObject(uri.toString(), CommonVideoLink.HLS))
+            }
+
             Strings.MAVERICKKI_URL -> {
                 fetchMaverickki(uri.toString())
-            }
-            Strings.ADD_KAA, KAAST1, KAA_VID  -> {
-                fetchADDKAA(uri.toString())
-            }
-        }
-    }
-
-    private fun fetchADDKAA(url: String) {
-        viewModelScope.launch(io) {
-            try {
-                val data = Utils.parseAddKaaLink(url, gson) ?: return@launch
-
-                viewModelScope.launch(default) {
-                    val videoLinks = data.streams.filter { link ->
-                        val linkUrl = link.url
-                        linkUrl != null && linkUrl.isNotBlank() && linkUrl.isNotEmpty()
-                    }
-                    addServerLinks(videoLinks)
-                }
-                data.thumbnail?.url?.let { poster -> posterLink.postValue(poster) }
-                data.subtitles.let { subtitles -> subtitleLinks.postValue(subtitles) }
-            } catch (e: Exception) {
-                loadState.postValue(State.FAILED(e, false))
             }
         }
     }
@@ -255,5 +245,12 @@ class EpisodeViewModel @Inject constructor(
     override fun onCleared() {
         super.onCleared()
         clearServers()
+    }
+
+    fun handleCrunchyRoll(json: String) {
+        viewModelScope.launch {
+            val crunchyRoll = gson.fromJson(json, CrunchyRoll::class.java)
+            addServerLinks(crunchyRoll.streams)
+        }
     }
 }

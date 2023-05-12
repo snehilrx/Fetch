@@ -9,6 +9,7 @@ import com.google.android.gms.cast.MediaInfo
 import com.google.android.gms.cast.MediaMetadata
 import com.google.android.gms.cast.MediaQueueItem
 import com.google.android.gms.cast.MediaTrack
+import com.google.common.collect.ImmutableList
 
 @UnstableApi
 internal class EnhancedMediaItemConverter(private val defaultConverter: DefaultMediaItemConverter = DefaultMediaItemConverter()) :
@@ -25,12 +26,12 @@ internal class EnhancedMediaItemConverter(private val defaultConverter: DefaultM
         val movieMetadata = MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE)
         movieMetadata.putString(MediaMetadata.KEY_TITLE, item.mediaMetadata.title.toString())
 
-        val mediaInfoBuilder = MediaInfo.Builder(item.playbackProperties?.uri.toString())
+        val mediaInfoBuilder = MediaInfo.Builder(item.localConfiguration?.uri.toString())
             .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
-            .setContentType(item.playbackProperties?.mimeType ?: MimeTypes.VIDEO_UNKNOWN)
+            .setContentType(item.localConfiguration?.mimeType ?: MimeTypes.VIDEO_UNKNOWN)
             .setMetadata(movieMetadata)
 
-        item.playbackProperties?.subtitles?.let { subtitles ->
+        item.localConfiguration?.subtitleConfigurations?.let { subtitles ->
             mediaInfoBuilder.setMediaTracks(createSubtitleMediaTracks(subtitles))
         }
 
@@ -38,7 +39,7 @@ internal class EnhancedMediaItemConverter(private val defaultConverter: DefaultM
     }
 
     companion object {
-        private fun createSubtitleMediaTracks(subtitles: List<MediaItem.Subtitle>): ArrayList<MediaTrack> {
+        private fun createSubtitleMediaTracks(subtitles: ImmutableList<MediaItem.SubtitleConfiguration>): ArrayList<MediaTrack> {
             val subtitleMediaTracks = ArrayList<MediaTrack>()
 
             subtitles.forEachIndexed { index, subtitle ->

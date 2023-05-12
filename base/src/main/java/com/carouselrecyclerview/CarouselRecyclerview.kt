@@ -146,6 +146,7 @@ class CarouselRecyclerview : RecyclerView {
         return bundle
     }
 
+    @Suppress("deprecation")
     override fun onRestoreInstanceState(state: Parcelable?) {
         if (state is Bundle) {
             layoutManagerState = state.getParcelable(SAVE_LAYOUT_MANAGER)

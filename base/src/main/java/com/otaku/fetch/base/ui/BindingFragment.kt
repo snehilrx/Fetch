@@ -77,7 +77,7 @@ open class BindingFragment<T : ViewDataBinding>(@LayoutRes private val layoutRes
         )
     }
 
-    protected fun initShineView(
+    private fun initShineView(
         shineView: ShineView?,
         appbarLayout: AppBarLayout?
     ) {
@@ -85,7 +85,7 @@ open class BindingFragment<T : ViewDataBinding>(@LayoutRes private val layoutRes
         appbarLayout?.addOnOffsetChangedListener(shineView)
     }
 
-    protected fun initAppbar(
+    private fun initAppbar(
         imageView: ImageView?,
         toolbar: Toolbar?,
         collapsingToolbar: CollapsingToolbarLayout?,
@@ -104,7 +104,7 @@ open class BindingFragment<T : ViewDataBinding>(@LayoutRes private val layoutRes
         )
     }
 
-    protected fun setAppbarBackground(imageView: ImageView, image: String?) {
+    private fun setAppbarBackground(imageView: ImageView, image: String?) {
         if (image.isNullOrEmpty()) return
         ImageViewBindings.imageUrl(
             imageView, image
@@ -184,6 +184,7 @@ open class BindingFragment<T : ViewDataBinding>(@LayoutRes private val layoutRes
 
     override fun onDestroy() {
         super.onDestroy()
+        (activity as AppCompatActivity).setSupportActionBar(null)
         if (this::weakReference.isInitialized) {
             weakReference.clear()
         }

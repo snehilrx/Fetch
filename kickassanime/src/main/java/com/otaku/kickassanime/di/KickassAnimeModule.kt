@@ -45,5 +45,5 @@ object KickassAnimeModule {
         Room.databaseBuilder(
             context, KickassAnimeDb::class.java, "kick.db"
         ).fallbackToDestructiveMigration()
-            .setAutoCloseTimeout(10000, TimeUnit.DAYS).build()
+            .setAutoCloseTimeout(1, TimeUnit.HOURS).build()
 }

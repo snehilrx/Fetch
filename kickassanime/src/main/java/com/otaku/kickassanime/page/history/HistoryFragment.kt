@@ -2,8 +2,6 @@ package com.otaku.kickassanime.page.history
 
 import android.os.Bundle
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.map
 import androidx.navigation.fragment.findNavController
 import androidx.paging.PagingData
 import androidx.paging.map
@@ -50,8 +48,8 @@ class HistoryFragment : ListFragment<ItemHistoryBinding>() {
             val actionHistoryFragmentToEpisodeActivity =
                 HistoryFragmentDirections.actionHistoryFragmentToEpisodeActivity(
                     title = item.title,
-                    episodeSlugId = item.episodeSlugId,
-                    animeSlugId = item.animeSlugId
+                    episodeSlug = item.episodeSlug,
+                    animeSlug = item.animeSlug
                 )
             findNavController().navigate(actionHistoryFragmentToEpisodeActivity)
         }

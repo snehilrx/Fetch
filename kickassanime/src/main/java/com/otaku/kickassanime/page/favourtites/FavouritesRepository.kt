@@ -6,17 +6,17 @@ import com.otaku.kickassanime.db.KickassAnimeDb
 import javax.inject.Inject
 
 class FavouritesRepository @Inject constructor(private val kickassAnimeDb: KickassAnimeDb){
-    suspend fun removeFavourite(animeSlugId: Int) {
-        kickassAnimeDb.favouritesDao().setFavourite(animeSlugId, 0)
+    suspend fun removeFavourite(animeSlug: String) {
+        kickassAnimeDb.favouritesDao().setFavourite(animeSlug, 0)
     }
 
-    suspend fun addToFavourites(animeSlugId: Int) {
-        kickassAnimeDb.favouritesDao().setFavourite(animeSlugId, 1)
+    suspend fun addToFavourites(animeSlug: String) {
+        kickassAnimeDb.favouritesDao().setFavourite(animeSlug, 1)
     }
 
     val pager = Pager(
         PagingConfig(30)
-    ){
+    ) {
         kickassAnimeDb.favouritesDao().getAllFavourites()
     }.flow
 }

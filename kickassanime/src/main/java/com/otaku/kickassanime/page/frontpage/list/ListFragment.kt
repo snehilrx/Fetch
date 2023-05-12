@@ -1,10 +1,12 @@
 package com.otaku.kickassanime.page.frontpage.list
 
 import android.os.Bundle
+import android.util.Log
 import androidx.core.view.isVisible
 import androidx.databinding.ViewDataBinding
-import androidx.lifecycle.LiveData
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
@@ -32,6 +34,7 @@ abstract class ListFragment<Binding: ViewDataBinding> : BindingFragment<Fragment
         )
         initFrontPageList(animeAdapter)
         initFlow(animeAdapter)
+        filter(binding)
     }
 
     protected abstract val layoutId: Int
@@ -47,9 +50,11 @@ abstract class ListFragment<Binding: ViewDataBinding> : BindingFragment<Fragment
     private fun initFlow(
         animeAdapter: AnimeTileAdapter<*>
     ) {
-        lifecycleScope.launchWhenCreated {
-            getList().collectLatest {
-                animeAdapter.submitData(lifecycle, it)
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.CREATED) {
+                getList().collectLatest {
+                    animeAdapter.submitData(lifecycle, it)
+                }
             }
         }
         lifecycleScope.launch {
@@ -72,19 +77,22 @@ abstract class ListFragment<Binding: ViewDataBinding> : BindingFragment<Fragment
         }
         val isListEmpty =
             loadState.refresh is LoadState.NotLoading && adapter.itemCount == 0
+        val isRefreshing = loadState.mediator?.refresh is LoadState.Loading
 
         // show empty list
         listControlsBinding.emptyList.isVisible = isListEmpty
         // Show loading spinner during initial load or refresh.
-        listControlsBinding.progressBar.isVisible = loadState.mediator?.refresh is LoadState.Loading
+        listControlsBinding.progressBar.isVisible = isRefreshing
         // Only show the list if refresh succeeds, either from the local db or the remote.
-        list.isVisible =
-            loadState.source.refresh is LoadState.NotLoading || loadState.mediator?.refresh is LoadState.NotLoading
+        list.isVisible = !(isListEmpty && isRefreshing)
+        Log.e("debug", "$isListEmpty and $isRefreshing")
         // Show the retry state if initial load or refresh fails.
         listControlsBinding.retryBtn.isVisible =
             loadState.mediator?.refresh is LoadState.Error && adapter.itemCount == 0
 
     }
+
+    protected open fun filter(binding: FragmentAnimeListBinding) {}
 
     abstract fun getList(): Flow<PagingData<ITileData>>
 
