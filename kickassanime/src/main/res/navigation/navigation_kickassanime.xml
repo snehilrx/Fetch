@@ -1,10 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/navigation_kickassanime"
-    app:startDestination="@id/frontPageFragment">
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/navigation_kickassanime"
+        app:startDestination="@id/home">
     <fragment
-        android:id="@+id/frontPageFragment"
-        android:name="com.otaku.kickassanime.page.frontpage.FrontPageFragment"
-        android:label="FrontPageFragment" />
+            tools:layout="@layout/fragment_front_page"
+            android:id="@+id/home"
+            android:name="com.otaku.kickassanime.page.home.HomeFragment"
+            android:label="@string/module_name" />
+    <activity
+            android:id="@+id/episodeActivity"
+            android:name="com.otaku.kickassanime.page.episodepage.EpisodeActivity"
+            android:label="{title}"
+            tools:layout="@layout/activity_episode">
+        <argument
+                android:name="title"
+                app:argType="string" />
+        <argument
+                android:name="episodeSlug"
+                app:argType="string" />
+        <argument
+                android:name="animeSlug"
+                app:argType="string" />
+        <argument
+                android:name="mediaItem"
+                app:argType="android.os.Bundle"
+                app:nullable="true"
+                android:defaultValue="@null" />
+    </activity>
+	<fragment
+            android:id="@+id/favourites"
+            android:name="com.otaku.kickassanime.page.favourtites.FavouritesFragment"
+		android:label="Favourites"
+		tools:layout="@layout/fragment_favourites" >
+		<action
+			android:id="@+id/action_favouritesFragment_to_animeActivity"
+			app:destination="@id/animeActivity" />
+	</fragment>
+	<activity
+		android:id="@+id/animeActivity"
+		android:name="com.otaku.kickassanime.page.animepage.AnimeActivity"
+		android:label="AnimeActivity" >
+		<argument
+			android:name="anime_args"
+                app:argType="com.otaku.kickassanime.db.models.entity.AnimeEntity" />
+    </activity>
+    <fragment
+            android:id="@+id/history"
+            android:name="com.otaku.kickassanime.page.history.HistoryFragment"
+            android:label="Recents">
+        <action
+                android:id="@+id/action_historyFragment_to_episodeActivity"
+                app:destination="@id/episodeActivity" />
+    </fragment>
+    <fragment
+            android:id="@+id/settings"
+            android:name="com.otaku.fetch.base.ui.ComposeFragment"
+            android:label="ComposeFragment">
+        <argument
+                android:name="destination"
+                app:argType="string"
+                android:defaultValue="settings" />
+    </fragment>
+    <fragment
+            android:id="@+id/downloads"
+            android:name="com.otaku.fetch.base.ui.ComposeFragment"
+            android:label="ComposeFragment">
+        <argument
+                android:name="destination"
+                app:argType="string"
+                android:defaultValue="downloads" />
+    </fragment>
+    <include app:graph="@navigation/navigation_home" />
 </navigation>

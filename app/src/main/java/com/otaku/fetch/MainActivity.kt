@@ -1,93 +1,117 @@
 package com.otaku.fetch
 
-import android.graphics.Color
+import android.content.Intent
 import android.os.Bundle
-import android.view.WindowManager
+import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
-import androidx.fragment.app.commit
-import com.otaku.fetch.base.ui.ShineView
-import com.otaku.fetch.base.ui.UiUtils
-import com.otaku.kickassanime.PackageModule
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.otaku.fetch.base.R
+import com.otaku.kickassanime.ui.theme.KickassAnimeTheme
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
-
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
-    private var shineBar: ShineView? = null
-    private var toolbar: Toolbar? = null
-
-    private var _statusBarHeight: Int = 0
-
-    @Inject
-    lateinit var kissanimeModule: PackageModule
-
-    private lateinit var modulesList: List<AppModule>
-
-    private lateinit var currentModule: AppModule
-
-
+    private val sohen = FontFamily(
+        Font(R.font.sohne_fett, FontWeight.Bold)
+    )
+    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        modulesList = listOf(
-            kissanimeModule
-        )
-        currentModule = kissanimeModule
-        _statusBarHeight = getStatusBarHeight()
-        setContentView(R.layout.activity_main)
-        setTransparentStatusBar()
-        toolbar = findViewById(R.id.toolbar)
-        shineBar = findViewById(R.id.shineView)
-        setSupportActionBar(toolbar)
-        setupToolbar()
-        initializeShineBar()
-        initializeModule()
-    }
-
-    private fun initializeShineBar() {
-        shineBar?.appBarIdRes = R.id.appbar
-        shineBar?.statusbarHeight = _statusBarHeight.toFloat()
-    }
-
-    private fun initializeModule() {
-        initializeAppModuleIcon()
-        supportFragmentManager.commit {
-            replace(R.id.host, currentModule.getMainFragment())
+        setContent {
+            KickassAnimeTheme {
+                Scaffold { contentPadding ->
+                    // Screen content
+                    Box(modifier = Modifier.padding(contentPadding)) {
+                        Column(
+                            modifier = Modifier.padding(16.dp, 24.dp),
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Row(horizontalArrangement = Arrangement.Center) {
+                                Text(
+                                    text = "Fetch!",
+                                    fontFamily = sohen,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 42.sp
+                                )
+                            }
+                            Row(
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                ModuleGrid()
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
-    private fun setupToolbar() {
-        toolbar?.layoutParams = toolbar?.layoutParams?.apply {
-            height += _statusBarHeight
+    @Preview(showBackground = true, widthDp = 320, heightDp = 320)
+    @Composable
+    private fun ModuleGrid() {
+        val modules = ModuleRegistry.getModulesList().toMutableList()
+        LazyColumn(
+            verticalArrangement = Arrangement.Center
+        ) {
+            items(modules.size,
+                key = { modules[it].displayName }
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(paddingValues = PaddingValues(32.dp, 0.dp))
+                        .background(Color.Transparent)
+                        .clickable {
+                            launchModule(modules[it])
+                        }
+                ) {
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        modules[it].displayIcon?.let { icon ->
+                            Image(
+                                painter = painterResource(id = icon),
+                                contentDescription = modules[it].displayName,
+                                contentScale = ContentScale.Fit,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(24.dp)
+                                    .align(Alignment.CenterHorizontally)
+                            )
+                        }
+                    }
+                }
+            }
         }
-        toolbar?.apply {
-            setPadding(paddingLeft, paddingTop + _statusBarHeight, paddingRight, paddingBottom)
-        }
-        toolbar?.elevation = 0f
     }
 
-    private fun getStatusBarHeight(): Int {
-        var result = 0
-        val resourceId = resources.getIdentifier("status_bar_height", "dimen", "android")
-        if (resourceId > 0) {
-            result = resources.getDimensionPixelSize(resourceId)
-        }
-        return result
+    private fun launchModule(data: ModuleRegistry.ModuleData) {
+        (application as? FetchApplication)?.currentModule = data.appModule
+        val moduleIntent = Intent(this, ModuleActivity::class.java)
+        startActivity(moduleIntent)
     }
 
-    private fun setTransparentStatusBar() {
-        window.setFlags(
-            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
-            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
-        )
-        window.statusBarColor = Color.TRANSPARENT
-    }
 
-    private fun initializeAppModuleIcon() {
-        UiUtils.getColor(currentModule.icon(resources)) {
-            shineBar?.shineColor = it
-        }
-    }
 }

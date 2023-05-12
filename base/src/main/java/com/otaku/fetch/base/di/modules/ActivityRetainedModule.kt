@@ -6,4 +6,5 @@ import dagger.hilt.android.components.ActivityRetainedComponent
 
 @Module
 @InstallIn(ActivityRetainedComponent::class)
+@Suppress("UNUSED")
 object ActivityRetainedModule

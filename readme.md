@@ -1,5 +1,3 @@
-# Fetch
+# Kickass anime android client ;-
 
-Fetch is an android application watch any type of video content. Each module represents a site.
-
-# Contribution
+Fetch is a kickassanime client to watch anime online for free.

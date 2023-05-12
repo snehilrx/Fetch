@@ -1,11 +1,4 @@
 <resources>
 
-    <style name="Theme.Fetch.NoActionBar">
-        <item name="windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
-    </style>
 
-    <style name="Theme.Fetch.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
-
-    <style name="Theme.Fetch.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 </resources>

@@ -8,7 +8,7 @@ import com.otaku.kickassanime.Strings
     AnnotationTarget.PROPERTY_GETTER,
     AnnotationTarget.PROPERTY_SETTER
 )
-@kotlin.annotation.Retention(AnnotationRetention.RUNTIME)
+@Retention(AnnotationRetention.RUNTIME)
 annotation class JsonInText(
     val field: String = Strings.NONE
 )

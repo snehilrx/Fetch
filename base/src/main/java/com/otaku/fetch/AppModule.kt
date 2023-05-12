@@ -1,15 +1,28 @@
 package com.otaku.fetch
 
-import android.content.res.Resources
-import android.graphics.drawable.Drawable
-import androidx.fragment.app.Fragment
+import android.content.Context
+import androidx.compose.runtime.Composable
+import com.otaku.fetch.base.download.DownloadItem
 
 interface AppModule {
+    /**
+     *  Unique identifier
+     * */
     val name: String
 
-    fun icon(resources: Resources): Drawable?
+    fun onSearch(query: String) {}
 
-    fun onSearch(query: String)
+    fun getNavigationGraph(): Int = 0
 
-    fun getMainFragment(link: String = ""): Fragment
+    suspend fun triggerNotification(context: Context) {}
+
+    fun initialize(query: String?, link: String = "") {}
+    fun getBottomNavigationMenu(): Int = 0
+
+    @Composable
+    fun ComposeTheme(content: @Composable() () -> Unit) {
+    }
+
+    suspend fun findEpisode(mediaId: String, mediaLink: String, mediaType: String): DownloadItem? =
+        null
 }

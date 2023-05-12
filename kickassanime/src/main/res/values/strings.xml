@@ -1,7 +1,42 @@
-<resources>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="module_name">Kickass Anime</string>
     <string name="empty_list_icon">empty list icon</string>
     <string name="retry">retry</string>
+    <string name="recent">Recent</string>
+    <string name="sub">Sub</string>
+    <string name="dub">Dub</string>
+    <string name="more">more</string>
+    <string name="prev">prev</string>
+    <string name="next">next</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="view_on_mal">view on mal</string>
+    <string name="view_all_episodes">view all episodes</string>
+    <string name="download_episode">download episode</string>
+    <string name="downloads">Downloads</string>
+    <string name="settings">Settings</string>
+    <string name="all_episodes">All Episodes</string>
+    <string name="search_anime">Search Anime</string>
+
+
+    <string name="history">History</string>
+    <string name="favourites">Favourites</string>
+
+    <!-- Preference Titles -->
+    <string name="notification_header">Notification</string>
+    <string name="subtitles_header">Subtitles</string>
+
+    <!-- Messages Preferences -->
+    <string name="signature_title">Your signature</string>
+    <string name="reply_title">Default reply action</string>
+
+    <!-- Sync Preferences -->
+    <string name="servers">Servers</string>
+    <string name="nothing_found">NOTHING\nFOUND</string>
+    <string name="cast">Cast</string>
+    <string name="home">Home</string>
+    <string name="filter">filter</string>
+
 </resources>

@@ -7,6 +7,14 @@ plugins {
 }
 
 android {
+    signingConfigs {
+        release {
+            storeFile file('/Users/Snehil/Documents/keys/Untitled')
+            storePassword 'redC@t33'
+            keyPassword 'redC@t33'
+            keyAlias 'key0'
+        }
+    }
     compileSdk env.compileSdk
 
     defaultConfig {
@@ -16,47 +24,94 @@ android {
         versionCode env.versionCode
         versionName env.versionName
 
-        testInstrumentationRunner env.testInstrumentationRunner
+        testInstrumentationRunner "com.otaku.fetch.FetchTestRunner"
+        multiDexEnabled true
     }
 
     buildTypes {
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
         debug {
             minifyEnabled false
         }
     }
 
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.4.7"
+    }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = '17'
     }
 
     buildFeatures {
         dataBinding true
+        viewBinding true
+        compose true
     }
+    namespace 'com.otaku.fetch'
+    dynamicFeatures = []
 }
 
 dependencies {
-    implementation project(path:":kickassanime")
     implementation project(path:":base")
     implementation "androidx.core:core-ktx:$versions.core_ktx"
     implementation "androidx.appcompat:appcompat:$versions.appcompat"
     implementation "com.google.android.material:material:$versions.material"
     implementation "androidx.constraintlayout:constraintlayout:$versions.constraintlayout"
-    implementation 'androidx.navigation:navigation-fragment:2.4.2'
+    implementation "androidx.navigation:navigation-fragment:$versions.nav"
+    implementation "androidx.navigation:navigation-ui-ktx:$versions.nav"
+    implementation "androidx.hilt:hilt-work:$versions.work_hilt"
+    implementation "androidx.work:work-runtime-ktx:$versions.work"
+    implementation project(path: ':kickassanime')
+    androidTestImplementation "io.github.rascaler:assertj:$versions.assertJ"
     testImplementation "junit:junit:$versions.junit"
     androidTestImplementation "androidx.test.ext:junit:$versions.androidx_junit"
     androidTestImplementation "androidx.test.espresso:espresso-core:$versions.espresso_core"
-
     // Hilt
     implementation "com.google.dagger:hilt-android:$versions.hilt"
     kapt "com.google.dagger:hilt-compiler:$versions.hilt"
     kaptAndroidTest "com.google.dagger:hilt-android-compiler:$versions.hilt"
     androidTestImplementation "com.google.dagger:hilt-android-testing:$versions.hilt"
+
+    implementation "io.github.lapism:search:$versions.search_lapism"
+    // Test
+    androidTestImplementation "org.assertj:assertj-core:$versions.assertJCore"
+    androidTestImplementation "com.squareup.okhttp3:mockwebserver:$versions.mockwebserver"
+    implementation "androidx.multidex:multidex:$versions.multidex"
+
+    implementation("androidx.hilt:hilt-work:$versions.work_hilt")
+    androidTestImplementation("androidx.work:work-testing:$versions.work")
+    // When using Kotlin.
+    kapt("androidx.hilt:hilt-compiler:1.0.0")
+    implementation "androidx.multidex:multidex:2.0.1"
+
+    // Jetpack Compose
+    def composeBom = platform('androidx.compose:compose-bom:2022.12.00')
+    implementation 'androidx.compose:compose-bom:2023.05.00'
+    androidTestImplementation 'androidx.compose:compose-bom:2023.05.00'
+
+    // Choose one of the following:
+    // Material Design 3
+    implementation 'androidx.compose.material3:material3'
+
+    // Android Studio Preview support
+    implementation 'androidx.compose.ui:ui-tooling-preview'
+    debugImplementation 'androidx.compose.ui:ui-tooling'
+
+    // UI Tests
+    androidTestImplementation 'androidx.compose.ui:ui-test-junit4'
+    debugImplementation 'androidx.compose.ui:ui-test-manifest'
+    implementation "androidx.datastore:datastore-preferences:1.0.0"
+
+    // Optional - Integration with activities
+    implementation 'androidx.activity:activity-compose:1.7.1'
+    implementation 'androidx.compose.runtime:runtime-livedata'
+    implementation("ch.acra:acra-mail:5.9.7")
 }

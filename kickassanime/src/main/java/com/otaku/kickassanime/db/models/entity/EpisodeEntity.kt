@@ -1,39 +1,64 @@
 package com.otaku.kickassanime.db.models.entity
 
+import android.os.Parcelable
+import android.text.format.DateUtils
+import android.text.format.DateUtils.MINUTE_IN_MILLIS
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
+import com.otaku.kickassanime.utils.LocalDateTimeSerializable
+import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 import org.threeten.bp.LocalDateTime
+import org.threeten.bp.ZoneOffset
 
 @Entity(
     tableName = "episode",
     foreignKeys = [ForeignKey(
         entity = AnimeEntity::class,
-        parentColumns = ["animeId"],
-        childColumns = ["animeId"]
-    )]
-
+        parentColumns = ["animeSlug"],
+        childColumns = ["animeSlug"]
+    )],
 )
+@Parcelize
 data class EpisodeEntity(
-    val name: String? = null,
-    val title: String? = null,
-    val episodeSlug: String? = null,
+    val episodeNumber: Float? = null,
+    var title: String? = null,
+    val duration: Long? = null,
     @PrimaryKey
-    val episodeSlugId: Int,
-    val dub: String? = null,
-    val link1: String? = null,
-    val link2: String? = null,
-    val link3: String? = null,
-    val link4: String? = null,
+    val episodeSlug: String,
     @ColumnInfo(index = true)
-    val animeId: String? = null,
-    val sector: String? = null,
-    val createdDate: LocalDateTime? = null,
-    val next: Int? = null,
-    val prev: Int? = null,
-    val episodeId: Int? = null,
-    val rating: Int? = null,
-    val votes: String? = null,
-    val favourite: Boolean? = null
+    var animeSlug: String?,
+    var link1: String? = null,
+    var link2: String? = null,
+    var link3: String? = null,
+    var link4: String? = null,
+    @Serializable(with = LocalDateTimeSerializable::class)
+    var createdDate: LocalDateTime? = null,
+    var next: String? = null,
+    var prev: String? = null,
+    var language: String? = null,
+    var thumbnail: String? = null,
+    var favourite: Boolean? = null
+) : Parcelable {
+    val timeAgo: String
+        get() {
+            val date = createdDate ?: return ""
+            val relativeTimeSpanString = DateUtils.getRelativeTimeSpanString(
+                date.toEpochSecond(ZoneOffset.UTC) * 1000,
+                System.currentTimeMillis(),
+                MINUTE_IN_MILLIS
+            )
+            return "Uploaded : $relativeTimeSpanString"
+        }
+}
+
+@Entity(
+    tableName = "episode_page",
+    primaryKeys = ["episodeSlug"]
+)
+data class EpisodePageEntity(
+    val episodeSlug: String,
+    val pageNo: Int
 )

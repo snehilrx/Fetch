@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools">
+
+	<data>
+
+		<variable
+			name="animeDetails"
+			type="com.otaku.kickassanime.db.models.entity.AnimeEntity" />
+
+		<variable
+			name="episodeDetails"
+			type="com.otaku.kickassanime.db.models.entity.EpisodeEntity" />
+
+		<import type="android.view.View" />
+
+		<import type="android.text.format.DateUtils" />
+	</data>
+
+	<FrameLayout
+		android:layout_width="match_parent"
+		android:layout_height="match_parent">
+
+		<com.facebook.shimmer.ShimmerFrameLayout
+			android:id="@+id/shimmerLoading"
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			app:shimmer_auto_start="true"
+			tools:visibility="invisible">
+
+			<include layout="@layout/shimmer_episode" />
+		</com.facebook.shimmer.ShimmerFrameLayout>
+
+		<androidx.coordinatorlayout.widget.CoordinatorLayout
+			android:id="@+id/episode"
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			android:visibility="gone"
+			tools:visibility="visible">
+
+			<com.otaku.fetch.base.ui.GradientFromImage
+				android:id="@+id/appbar_image_view"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:adjustViewBounds="true"
+				android:foregroundGravity="top"
+				android:scaleType="centerCrop"
+				app:imageUrl="@{animeDetails.getImageUrl()}"
+				tools:src="@tools:sample/avatars" />
+
+			<com.google.android.material.appbar.AppBarLayout
+				android:id="@+id/appbarLayout"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:background="@android:color/transparent"
+				android:elevation="0dp"
+				android:fitsSystemWindows="true">
+
+				<com.google.android.material.appbar.CollapsingToolbarLayout
+					android:id="@+id/collapsingToolbar"
+					android:layout_width="match_parent"
+					android:layout_height="?attr/collapsingToolbarLayoutLargeSize"
+					android:shadowColor="?colorPrimaryVariant"
+					android:shadowDx="1"
+					android:shadowDy="1"
+					app:autoSizeTextType="uniform"
+					app:contentScrim="?attr/colorPrimary"
+					app:expandedTitleTextColor="?colorPrimaryVariant"
+					app:layout_scrollFlags="scroll|snap|exitUntilCollapsed"
+					app:maxLines="2"
+					app:statusBarScrim="?attr/colorSecondary"
+					app:toolbarId="@+id/toolbar"
+					tools:title="hello">
+
+					<TextView
+						android:id="@+id/episodeNumber"
+						android:layout_width="wrap_content"
+						android:layout_height="48dp"
+						android:layout_gravity="end"
+						android:layout_marginTop="48dp"
+						android:layout_marginEnd="24dp"
+						android:layout_marginBottom="24dp"
+						android:background="@drawable/black_chip"
+						android:visibility="invisible"
+						app:layout_collapseMode="pin"
+						tools:visibility="visible" />
+
+					<com.google.android.material.appbar.MaterialToolbar
+						android:id="@+id/toolbar"
+						android:layout_width="match_parent"
+						android:layout_height="?attr/actionBarSize"
+						android:elevation="10dp"
+						app:layout_collapseMode="pin" />
+
+				</com.google.android.material.appbar.CollapsingToolbarLayout>
+			</com.google.android.material.appbar.AppBarLayout>
+
+			<androidx.core.widget.NestedScrollView
+				android:id="@+id/scrollView"
+				android:layout_width="match_parent"
+				android:layout_height="match_parent"
+				android:background="@drawable/anime_details_background"
+				android:fillViewport="true"
+				android:scrollbars="none"
+				app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
+
+				<androidx.constraintlayout.widget.ConstraintLayout
+					android:layout_width="match_parent"
+					android:layout_height="fill_parent"
+					tools:context=".page.episodepage.EpisodeActivity">
+
+					<TextView
+                            android:id="@+id/textView2"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginTop="16dp"
+                            android:text="@{episodeDetails.timeAgo}"
+                            android:textAllCaps="true"
+                            android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            tools:text="Uploaded : 0 mins ago" />
+
+					<include
+						android:id="@+id/episodeDetailsContainer"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						layout="@layout/fragment_episode_controls"
+						app:layout_constraintEnd_toEndOf="parent"
+						app:layout_constraintStart_toStartOf="parent"
+						app:layout_constraintTop_toBottomOf="@+id/aspectRatioFrameLayout"
+						tools:layout="@layout/fragment_episode_controls" />
+
+					<androidx.media3.ui.AspectRatioFrameLayout
+						android:id="@+id/aspectRatioFrameLayout"
+						android:layout_width="match_parent"
+						android:layout_height="300dp"
+						android:layout_marginTop="@dimen/item_spacing"
+						app:layout_constraintEnd_toEndOf="parent"
+						app:layout_constraintStart_toStartOf="parent"
+						app:layout_constraintTop_toBottomOf="@+id/textView2">
+
+						<androidx.media3.ui.PlayerView
+							android:id="@+id/player_view"
+							android:layout_width="match_parent"
+							android:layout_height="match_parent"
+							app:use_artwork="true" />
+					</androidx.media3.ui.AspectRatioFrameLayout>
+
+				</androidx.constraintlayout.widget.ConstraintLayout>
+			</androidx.core.widget.NestedScrollView>
+
+            <com.otaku.kickassanime.page.episodepage.CustomWebView
+                    android:id="@+id/webView"
+                    android:visibility="gone"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+		</androidx.coordinatorlayout.widget.CoordinatorLayout>
+	</FrameLayout>
+
+</layout>

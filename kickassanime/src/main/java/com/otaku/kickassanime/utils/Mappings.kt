@@ -1,95 +1,125 @@
 package com.otaku.kickassanime.utils
 
-import com.otaku.kickassanime.api.model.Anime
-import com.otaku.kickassanime.api.model.AnimeInformation
-import com.otaku.kickassanime.api.model.AnimeResponse
-import com.otaku.kickassanime.api.model.EpisodeInformation
+import com.otaku.kickassanime.api.model.EpisodeApiResponse
+import com.otaku.kickassanime.api.model.EpisodesWithPreview
+import com.otaku.kickassanime.api.model.Recent
+import com.otaku.kickassanime.api.model.SearchItem
 import com.otaku.kickassanime.db.models.entity.AnimeEntity
+import com.otaku.kickassanime.db.models.entity.AnimeGenreEntity
+import com.otaku.kickassanime.db.models.entity.AnimeLanguageEntity
 import com.otaku.kickassanime.db.models.entity.EpisodeEntity
+import com.otaku.kickassanime.db.models.entity.VideoHistory
+import org.threeten.bp.LocalDateTime
+import org.threeten.bp.ZoneOffset
 
-fun AnimeResponse.asAnimeEntity(): AnimeEntity {
+
+fun Recent.asAnimeEntity(): AnimeEntity {
     return AnimeEntity(
-        animeId = this.animeId?.toInt() ?: 0,
-        animeSlugId = this.slug?.substringAfterLast("-")?.toInt() ?: 0,
-        animeslug = this.slug?.removeSuffix("/anime/")?.substringBeforeLast("-"),
-        description = this.description,
-        name = this.name,
-        image = this.poster
+        animeSlug = slug ?: "",
+        name = this.title ?: "",
+        image = this.poster?.hq?.removeSuffix("-hq") ?: this.poster?.sm?.removeSuffix("-sm"),
+        year = year
     )
 }
 
-fun Anime.asAnimeEntity(): AnimeEntity {
-    return AnimeEntity(
-        animeSlugId = this.slug?.substringBeforeLast("/")?.substringAfterLast("-")?.toInt() ?: 0,
-        animeslug = this.slug?.removeSuffix("/anime/")?.substringBeforeLast("/"),
-        name = this.name,
-        image = this.poster,
-        type = this.type
-    )
+fun extractEpisodeSlug(slug: String?): String {
+    return slug?.split("/")?.getOrNull(2) ?: ""
 }
 
-fun Anime.asEpisodeEntity(): EpisodeEntity {
+fun Recent.asEpisodeEntity(): EpisodeEntity {
     return EpisodeEntity(
-        episodeSlug = this.slug,
-        episodeSlugId = this.slug?.substringAfterLast("-")?.toInt() ?: 0,
-        name = this.episode,
-        createdDate = this.episodeDate?.let { Utils.parseDateTime(it) },
-        sector = this.type
-    )
-}
-
-@Suppress("unused")
-fun AnimeInformation.asAnimeEntity(): AnimeEntity {
-    return AnimeEntity(
-        animeId = this.animeId?.toInt() ?: 0,
-        animeSlugId = this.slug?.substringAfterLast("-")?.toInt() ?: 0,
-        animeslug = this.slug?.removeSuffix("/anime/")?.substringBeforeLast("-"),
-        rating = this.rating,
-        broadcastDay = this.broadcastDay,
-        startdate = this.startdate?.let { Utils.parseDateTime(it) },
-        enTitle = this.enTitle,
-        broadcastTime = this.broadcastTime,
-        source = this.source,
+        episodeSlug = extractEpisodeSlug(this.watchUri),
+        animeSlug = slug,
         duration = this.duration,
-        name = this.name,
-        enddate = this.enddate?.let { Utils.parseDateTime(it) },
-        image = this.image,
-        status = this.status,
-        description = this.description,
-        site = this.site,
-        infoLink = this.infoLink,
-        createddate = this.createddate,
-        malId = this.malId?.toIntOrNull(),
-        simklId = this.simklId?.toIntOrNull(),
-        type = this.type
+        language = this.language,
+        episodeNumber = this.episodeNumber,
+        createdDate = this.createdAt?.let { Utils.parseDateTime(it) },
     )
 }
 
-@Suppress("unused")
-fun EpisodeInformation.asEpisodeEntity(): EpisodeEntity {
+fun EpisodeApiResponse.asEpisodeEntity(e: EpisodeEntity): EpisodeEntity {
+    val response = this
+    return e.apply {
+        animeSlug = response.showSlug
+        link1 = response.servers.getOrNull(0)
+        link2 = response.servers.getOrNull(1)
+        next = response.nextEpSlug
+        title = response.title
+        link4 = response.servers.getOrNull(2)
+        prev = response.prevEpSlug
+        link3 = response.servers.getOrNull(3)
+        language = response.language
+        thumbnail = response.thumbnail?.hq?.removeSuffix("-hq")
+            ?: response.thumbnail?.sm?.removeSuffix("-sm")
+    }
+}
+
+fun EpisodeApiResponse.asAnimeEntity(anime: AnimeEntity): AnimeEntity {
+    val newAnimeData = this
+    return anime.apply {
+        name = newAnimeData.title
+        description = newAnimeData.synopsis
+        animeSlug = newAnimeData.showSlug ?: ""
+        poster = newAnimeData.poster
+    }
+}
+
+fun EpisodeEntity.asVideoHistory(): VideoHistory {
+    return VideoHistory(
+        episodeSlug,
+        lastPlayed = LocalDateTime.now(ZoneOffset.UTC),
+        timestamp = 0
+    )
+}
+
+fun SearchItem.asAnimeEntity(): AnimeEntity {
+    return AnimeEntity(
+        animeSlug = this.slug ?: "",
+        name = this.titleEn,
+        image = this.poster?.hq?.removeSuffix("-hq") ?: this.poster?.sm?.removeSuffix("-sm"),
+        year = this.year,
+        description = this.synopsis,
+        type = this.type,
+        rating = this.rating
+    )
+}
+
+fun SearchItem.asLanguageEntity(): List<AnimeLanguageEntity> {
+    return this.locales.map {
+        AnimeLanguageEntity(
+            animeSlug = this.slug ?: "",
+            language = it
+        )
+    }
+}
+
+fun SearchItem.asAnimeGenreEntity(): List<AnimeGenreEntity> {
+    return this.genres.map {
+        AnimeGenreEntity(
+            animeSlug = this.slug ?: "",
+            genre = it
+        )
+    }
+}
+
+fun EpisodesWithPreview.asEpisodeEntity(
+    animeSlug: String,
+    language: String,
+    prev: String?,
+    next: String?
+): EpisodeEntity {
     return EpisodeEntity(
-        episodeId = this.epId?.toIntOrNull() ?: 0,
-        animeId = this.animeId,
-        link1 = this.link1,
-        link2 = this.link2,
-        next = this.next?.slug?.substringAfterLast("-")?.toInt(),
-        episodeSlugId = this.slug?.substringAfterLast("-")?.toInt() ?: 0,
-        createdDate = this.createdDate?.let { Utils.parseDateTime(it) },
-        episodeSlug = this.slug?.removeSuffix("/anime/")?.substringBeforeLast("-"),
-        title = this.title,
-        sector = this.sector,
-        votes = this.votes,
-        link4 = this.link4,
-        rating = this.rating,
-        prev = this.next?.slug?.substringAfterLast("-")?.toInt(),
-        name = this.name,
-        link3 = this.link3,
-        favourite = this.favourite
+        episodeNumber = episodeNumber,
+        title = title,
+        duration = duration_ms,
+        episodeSlug = slug(),
+        animeSlug = animeSlug,
+        thumbnail = this.thumbnail?.hq?.removeSuffix("-hq")
+            ?: this.thumbnail?.sm?.removeSuffix("-sm"),
+        language = language
     )
 }
 
-//fun Episodes.asEpisodeEntity(): EpisodeEntity {
-//    return EpisodeEntity(
-//
-//    )
-//}
+fun EpisodesWithPreview.slug(): String {
+    return "ep-${episodeNumber?.toInt()}-$slug"
+}

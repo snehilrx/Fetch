@@ -1,35 +1,35 @@
 package com.otaku.kickassanime.db.models.entity
 
+import android.os.Parcelable
+import androidx.room.Embedded
 import androidx.room.Entity
-import androidx.room.Index
 import androidx.room.PrimaryKey
-import org.threeten.bp.LocalDateTime
+import com.otaku.kickassanime.Strings.KICKASSANIME_URL
+import kotlinx.parcelize.Parcelize
 
 @Entity(
-    tableName = "anime",
-    indices = [Index(value = ["animeId"], unique = true)]
+    tableName = "anime"
 )
+@Parcelize
 data class AnimeEntity(
-    var animeId: Int? = null,
-    var malId: Int? = null,
-    var simklId: Int? = null,
     @PrimaryKey
-    var animeSlugId: Int,
+    var animeSlug: String,
     var name: String? = null,
-    var enTitle: String? = null,
-    var animeslug: String? = null,
     var description: String? = null,
-    var status: String? = null,
     var image: String? = null,
-    var startdate: LocalDateTime? = null,
-    var enddate: LocalDateTime? = null,
-    var broadcastDay: String? = null,
-    var broadcastTime: String? = null,
-    var source: String? = null,
-    var duration: String? = null,
-    var site: String? = null,
-    var infoLink: String? = null,
-    var createddate: String? = null,
+    var status: String? = null,
     var type: String? = null,
-    var rating: Boolean? = null
+    var rating: String? = null,
+    var favourite: Boolean = false,
+    val year: Int? = null
+) : Parcelable {
+    fun getImageUrl(): String {
+        return "${KICKASSANIME_URL}image/poster/$image"
+    }
+}
+
+data class AnimeEntityWithPage(
+    @Embedded
+    val animeEntity: AnimeEntity,
+    val pageNumber: Int
 )

@@ -5,13 +5,12 @@
 
     <data>
 
+        <import type="android.view.View"/>
         <variable
             name="tileData"
             type="com.otaku.fetch.data.ITileData" />
 
         <import type="com.otaku.fetch.base.ui.GradientFromImage" />
-
-        <import type="com.otaku.fetch.base.ui.UiUtils" />
     </data>
 
 
@@ -25,11 +24,18 @@
         app:reflect_relativeDepth="0.3">
 
         <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="@dimen/cardview_height"
             android:clickable="true"
             android:focusable="true"
             app:elevation="2dp"
+            android:splitMotionEvents="true"
+            android:layout_marginStart="@dimen/cardview_margin"
+            android:layout_marginEnd="@dimen/cardview_margin"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:id="@+id/card"
             app:shapeAppearance="@style/ShapeAppearanceOverlay.Fetch.CardView">
 
             <androidx.constraintlayout.widget.ConstraintLayout
@@ -53,17 +59,49 @@
                     tools:src="@tools:sample/avatars" />
 
 
-                <com.google.android.material.chip.ChipGroup
+                <com.google.android.material.textview.MaterialTextView
                     android:id="@+id/tags"
-                    android:layout_width="0dp"
+                    android:layout_width="80dp"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="16dp"
-                    android:layoutDirection="rtl"
-                    app:chipSpacing="5dp"
-                    app:entries="@{tileData.tags}"
+                    android:background="@drawable/black_chip"
+                    android:gravity="center"
+                    android:layout_marginEnd="8dp"
+                    android:text="@{tileData.tags.size() > 0 ? tileData.tags.get(0) : ``}"
+                    android:textAppearance="@style/Fetch.ChipText"
+                    android:visibility="@{tileData.tags.size() > 0 ? View.VISIBLE : View.GONE}"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="@+id/title" />
+                    app:layout_constraintEnd_toStartOf="@+id/tags2"
+                    tools:text="Hello" />
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/tags2"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:background="@drawable/black_chip"
+                    android:gravity="center"
+                    android:visibility="@{tileData.tags.size() > 1 ? View.VISIBLE : View.GONE}"
+                    android:text="@{tileData.tags.size() > 1 ? tileData.tags.get(1) : ``}"
+                    android:textAppearance="@style/Fetch.ChipText"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="@+id/title"
+                    tools:text="Hello" />
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/tags3"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:layout_marginEnd="8dp"
+                    android:background="@drawable/black_chip"
+                    android:gravity="center"
+                    android:text="@{tileData.tags.size() > 2 ? tileData.tags.get(2) : ``}"
+                    android:textAppearance="@style/Fetch.ChipText"
+                    android:visibility="@{tileData.tags.size() > 2 ? View.VISIBLE : View.GONE}"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/tags"
+                    tools:text="Hello" />
 
                 <com.google.android.material.textview.MaterialTextView
                     android:id="@+id/title"
@@ -72,12 +110,12 @@
                     android:layout_marginStart="24dp"
                     android:layout_marginEnd="24dp"
                     android:layout_marginBottom="16dp"
-                    android:gravity="right"
+                    android:gravity="end"
                     android:lineSpacingExtra="2sp"
                     android:maxLines="2"
                     android:text="@{tileData.title.trim}"
                     android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
-                    android:textColor="@color/white"
+                    android:textColor="@android:color/white"
                     android:textStyle="bold"
                     app:layout_constraintBottom_toTopOf="@+id/tags"
                     app:layout_constraintEnd_toEndOf="parent"

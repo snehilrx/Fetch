@@ -3,16 +3,26 @@ plugins {
     id 'org.jetbrains.kotlin.android'
     id 'dagger.hilt.android.plugin'
     id 'kotlin-kapt'
+    id "androidx.navigation.safeargs.kotlin"
+    id 'kotlin-parcelize'
 }
 
 android {
+    signingConfigs {
+        release {
+            storePassword 'redC@t33'
+            keyPassword 'redC@t33'
+            keyAlias 'key0'
+            storeFile file('/Users/Snehil/Documents/keys/Untitled')
+        }
+    }
     compileSdk env.compileSdk
 
     defaultConfig {
         minSdk env.minSdk
         targetSdk env.targetSdk
 
-        testInstrumentationRunner env.testInstrumentationRunner
+        testInstrumentationRunner "com.otaku.fetch.base.FetchTestRunner"
     }
 
     buildTypes {
@@ -25,46 +35,57 @@ android {
     buildFeatures {
         dataBinding true
         viewBinding true
+        compose true
     }
 
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-    kotlinOptions {
-        jvmTarget = '1.8'
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.4.7"
     }
     namespace 'com.otaku.fetch.base'
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
 }
 
 dependencies {
+    implementation project(path: ':base:cloudflarebypass')
+
     implementation "androidx.core:core-ktx:$versions.core_ktx"
     implementation "androidx.appcompat:appcompat:$versions.appcompat"
     implementation "com.google.android.material:material:$versions.material"
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:$versions.swipe_refresh_layout"
-    implementation "com.github.sparrow007:carouselrecyclerview:$versions.carouselrecyclerview"
     implementation "androidx.palette:palette:$versions.palette"
 
     // Hilt
     implementation "com.google.dagger:hilt-android:$versions.hilt"
-    implementation project(path: ':base:cloudflarebypass')
-    kapt "com.google.dagger:hilt-compiler:$versions.hilt"
+    implementation "androidx.constraintlayout:constraintlayout:$versions.constraintlayout"
+    implementation "androidx.hilt:hilt-common:$versions.palette"
 
     // okhttp
     implementation("com.squareup.okhttp3:okhttp:$versions.okhttp")
     implementation("com.squareup.okhttp3:logging-interceptor:$versions.okhttp")
 
+    debugImplementation "com.squareup.leakcanary:leakcanary-android:$versions.leak_canary"
+
+    implementation "androidx.navigation:navigation-ui-ktx:$versions.nav"
     // Glide
     implementation "com.github.bumptech.glide:glide:$versions.glide"
     implementation group: 'com.github.bumptech.glide', name: 'okhttp3-integration', version: versions.glide_okhttp
     kapt "com.github.bumptech.glide:compiler:$versions.glide"
 
 
+    implementation "io.github.lapism:search:$versions.search_lapism"
+    implementation "com.mikepenz:iconics-core:$versions.iconics"
+    implementation "com.mikepenz:fontawesome-typeface:$versions.iconics_fontawesome"
+    implementation "com.maxkeppeler.sheets:core:$versions.sheets"
+    implementation "com.maxkeppeler.sheets:info:$versions.sheets"
+    implementation "com.mikepenz:iconics-views:$versions.iconics"
+
     /* test dependency */
     androidTestImplementation "androidx.test.espresso:espresso-core:$versions.espresso_core"
     testImplementation "junit:junit:$versions.junit"
     androidTestImplementation "androidx.test.ext:junit:$versions.androidx_junit"
-
     // hilt
     androidTestImplementation "com.google.dagger:hilt-android-testing:$versions.hilt"
     kaptAndroidTest "com.google.dagger:hilt-android-compiler:$versions.hilt"
@@ -72,4 +93,66 @@ dependencies {
     kapt "com.github.bumptech.glide:compiler:$versions.glide"
     implementation "com.github.bumptech.glide:glide:$versions.glide"
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:$versions.swipe_refresh_layout"
+
+    implementation "androidx.work:work-runtime-ktx:$versions.work"
+    implementation("androidx.hilt:hilt-work:$versions.work_hilt")
+    // When using Kotlin.
+    kapt("androidx.hilt:hilt-compiler:$versions.hilt_compiler")
+    kapt "com.google.dagger:hilt-compiler:$versions.hilt"
+    // Jetpack Compose
+    def composeBom = platform('androidx.compose:compose-bom:2023.05.00')
+    implementation composeBom
+    androidTestImplementation composeBom
+
+    // Choose one of the following:
+    // Material Design 3
+    implementation 'androidx.compose.material3:material3'
+
+    // Android Studio Preview support
+    implementation 'androidx.compose.ui:ui-tooling-preview'
+    debugImplementation 'androidx.compose.ui:ui-tooling'
+
+    // UI Tests
+    androidTestImplementation 'androidx.compose.ui:ui-test-junit4'
+    debugImplementation 'androidx.compose.ui:ui-test-manifest'
+    implementation "androidx.datastore:datastore-preferences:1.0.0"
+
+    implementation "androidx.navigation:navigation-fragment-ktx:$versions.nav"
+    implementation "androidx.navigation:navigation-compose:$versions.nav"
+
+    // Room
+    implementation "androidx.room:room-ktx:$versions.room"
+    implementation "androidx.room:room-common:$versions.room"
+    implementation "androidx.room:room-paging:$versions.room"
+    kapt "androidx.room:room-compiler:$versions.room"
+
+
+    // Optional - Integration with activities
+    implementation 'androidx.activity:activity-compose:1.7.1'
+    // Optional - Integration with ViewModels
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1'
+
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1'
+    implementation "androidx.lifecycle:lifecycle-viewmodel-compose:$versions.compose_lifecycle"
+    implementation "androidx.paging:paging-compose:$versions.compose_paging"
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:$versions.compose_lifecycle")
+    // Optional - Integration with LiveData
+    implementation 'androidx.compose.runtime:runtime-livedata'
+    implementation "androidx.media3:media3-exoplayer:$versions.media3"
+    implementation "androidx.media3:media3-ui:$versions.media3"
+
+    implementation "androidx.media3:media3-datasource-cronet:$versions.media3"
+    // For loading data using the OkHttp network stack
+    implementation "androidx.media3:media3-datasource-okhttp:$versions.media3"
+    implementation "androidx.hilt:hilt-navigation-compose:1.1.0-alpha01"
+    implementation "androidx.media3:media3-exoplayer:$versions.media3"
+    implementation "androidx.media3:media3-datasource-okhttp:$versions.media3"
+    implementation "androidx.media3:media3-ui:$versions.media3"
+    implementation "androidx.media3:media3-extractor:$versions.media3"
+    implementation "androidx.media3:media3-session:$versions.media3"
+    implementation "androidx.media3:media3-cast:$versions.media3"
+    implementation "androidx.media3:media3-datasource-cronet:$versions.media3"
+    implementation "androidx.media3:media3-exoplayer-hls:$versions.media3"
+    implementation "androidx.media3:media3-exoplayer-dash:$versions.media3"
+    implementation "com.anggrayudi:materialpreference:$versions.materialpreference"
 }

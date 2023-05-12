@@ -1,16 +1,13 @@
 package com.otaku.kickassanime.api.conveter
 
 import com.google.gson.Gson
-import com.google.gson.JsonElement
 import com.google.gson.JsonParser
 import com.otaku.kickassanime.Strings
 import com.otaku.kickassanime.api.utils.ApiUtils
 import com.otaku.kickassanime.exceptions.ApiException
-import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import retrofit2.Converter
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import java.lang.reflect.Type
 
 
@@ -42,7 +39,7 @@ class FindJsonInTextConverterFactory private constructor(private val gson: Gson?
         // :(\[?\{.*\}\])(,\")
 
         @JvmStatic
-        private val regex: Regex = """appData = (\{.*\})(,\")""".toRegex()
+        private val regex: Regex = """appData = (\{.*\})( *\|\| *\{\}\,)""".toRegex()
 
         @JvmStatic
         private val converter = value@{ type: Type, gson: Gson, field: String ->
@@ -51,9 +48,10 @@ class FindJsonInTextConverterFactory private constructor(private val gson: Gson?
                 val match = regex.find(rawString)
                 val json = match?.groups?.get(1)
                     ?: throw ApiException("No match found for the regex in @JsonInText")
-                val objectField = JsonParser().parse(json.value.plus("}"))?.asJsonObject.let { element->
-                    return@let if (field == Strings.NONE) element else element?.get(field)
-                }
+                val objectField =
+                    JsonParser().parse(json.value)?.asJsonObject.let { element ->
+                        return@let if (field == Strings.NONE) element else element?.get(field)
+                    }
                 return@converter gson.fromJson(objectField, type)
             }
         }

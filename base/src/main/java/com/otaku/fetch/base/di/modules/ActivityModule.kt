@@ -6,4 +6,5 @@ import dagger.hilt.android.components.ActivityComponent
 
 @Module
 @InstallIn(ActivityComponent::class)
+@Suppress("UNUSED")
 object ActivityModule

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="item_view_width">164dp</dimen>
-    <dimen name="item_spacing">14dp</dimen>
+    <dimen name="item_spacing">10dp</dimen>
 </resources>

@@ -3,11 +3,29 @@ package com.otaku.kickassanime.db.models.entity
 import androidx.room.Entity
 
 @Entity(
-    tableName = "front_page_episodes",
-    primaryKeys = ["episodeSlugId", "animeSlugId"]
+    tableName = "recent",
+    primaryKeys = ["episodeSlug", "animeSlug"]
 )
-data class FrontPageEpisodes(
-    val animeSlugId: Int,
-    val episodeSlugId: Int,
+data class RecentEntity(
+    val animeSlug: String,
+    val episodeSlug: String,
+    val pageNo: Int
+)
+
+@Entity(
+    tableName = "popular",
+    primaryKeys = ["animeSlug"]
+)
+data class PopularEntity(
+    val animeSlug: String,
+    val pageNo: Int
+)
+
+@Entity(
+    tableName = "trending",
+    primaryKeys = ["animeSlug"]
+)
+data class TrendingEntity(
+    val animeSlug: String,
     val pageNo: Int
 )

@@ -1,3 +1,92 @@
 <resources>
 
+    <style name="Theme.KickassAnime" parent="Theme.Fetch">
+        <item name="colorPrimary">#e7dba3</item>
+        <item name="colorPrimaryVariant">#463610</item>
+        <item name="colorOnPrimary">#000</item>
+        <!-- Secondary brand color. -->
+        <item name="colorSecondary">#6C5623</item>
+        <item name="colorSecondaryVariant">#FFC107</item>
+        <item name="colorOnSecondary">#000</item>
+        <item name="colorOnSurface">#000</item>
+        <item name="colorOutline">#2000</item>
+        <item name="bottomNavigationStyle">@style/Widget.KickassAnime.BottomNaviagation</item>
+    </style>
+
+    <style name="Widget.KickassAnime.BottomNaviagation" parent="Widget.Material3.BottomNavigationView">
+        <item name="itemActiveIndicatorStyle">
+            @style/Widget.KickassAnime.BottomNavigationView.ActiveIndicator
+        </item>
+        <item name="itemRippleColor">@color/bottom_appbar_ripple</item>
+        <item name="itemIconTint">@color/bottom_appbar_icon_color</item>
+        <item name="itemTextColor">@color/bottom_appbar_color</item>
+    </style>
+
+    <style name="Widget.KickassAnime.BottomNavigationView.ActiveIndicator" parent="@style/Widget.Material3.BottomNavigationView.ActiveIndicator">
+        <item name="android:color">#6C5623</item>
+    </style>
+
+    <style name="TextAppearance.KickassAnime.TitleLarge" parent="TextAppearance.Material3.TitleLarge">
+        <item name="fontWeight">700</item>
+    </style>
+
+    <style name="TextAppearance.KickassAnime.TitleMedium" parent="TextAppearance.Material3.TitleMedium">
+        <item name="fontWeight">300</item>
+    </style>
+
+    <style name="TextAppearance.KickassAnime.TitleSmall" parent="TextAppearance.Material3.TitleSmall">
+        <item name="fontWeight">200</item>
+    </style>
+
+    <style name="TextAppearance.Video.Title" parent="TextAppearance.KickassAnime.TitleMedium">
+        <item name="android:textColor">@color/mdtp_white</item>
+        <item name="android:height">128dp</item>
+        <item name="android:textSize">28sp</item>
+    </style>
+
+    <style name="TextAppearance.Video.SubTitle" parent="TextAppearance.Material3.TitleSmall">
+        <item name="android:textColor">@color/mdtp_white</item>
+        <item name="android:height">64dp</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="Theme.KickassAnime.VideoMenuBottomSheet" parent="Theme.MaterialComponents.BottomSheetDialog">
+        <item name="background">@android:color/transparent</item>
+        <item name="contentPaddingBottom">24dp</item>
+    </style>
+
+    <style name="Widget.KickassAnime.NoSpacingButton" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="android:textAllCaps">true</item>
+        <item name="android:strokeColor">?attr/colorPrimary</item>
+        <item name="android:textColor">?attr/colorOnSurface</item>
+        <item name="android:layout_marginLeft">8dp</item>
+        <item name="android:layout_marginRight">8dp</item>
+        <item name="android:layout_marginTop">8dp</item>
+        <item name="android:paddingTop">16dp</item>
+        <item name="android:paddingBottom">16dp</item>
+        <item name="iconTint">?attr/colorOnSurface</item>
+        <item name="android:textAppearance">@style/TextAppearance.Material3.LabelLarge</item>
+    </style>
+
+    <style name="Widget.KickassAnime.ProgressBar" parent="Widget.Material3.LinearProgressIndicator">
+        <item name="android:indeterminateOnly">true</item>
+        <item name="android:indeterminateBehavior">repeat</item>
+        <item name="android:indeterminateDuration">3500</item>
+        <item name="android:minWidth">48dip</item>
+        <item name="android:maxWidth">48dip</item>
+        <item name="android:minHeight">48dip</item>
+        <item name="android:maxHeight">48dip</item>
+    </style>
+
+    <style name="Widget.KickassAnime.ProgressBar.Vertical">
+        <item name="android:indeterminateOnly">false</item>
+        <item name="android:progressDrawable">@drawable/vertical_progress_bar</item>
+        <item name="android:indeterminateDrawable">@drawable/loading</item>
+        <item name="android:minWidth">1dip</item>
+        <item name="android:maxWidth">12dip</item>
+    </style>
+
+    <style name="TrackSelectionDialogThemeOverlay" parent="ThemeOverlay.AppCompat.Dialog.Alert">
+        <item name="windowNoTitle">false</item>
+    </style>
 </resources>

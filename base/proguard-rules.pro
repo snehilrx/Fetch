@@ -19,3 +19,20 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+-keep public class com.otaku.fetch.CustomGlideModule {
+   *;
+}
+-keepclassmembers class * extends androidx.datastore.preferences.protobuf.GeneratedMessageLite {
+    <fields>;
+}
+-keep public class com.otaku.fetch.base.R {
+    public *;
+}
+-keep public class com.lapism.search.R {
+    public *;
+}
+
+-dontwarn com.otaku.fetch.base.R$font
+-dontwarn com.otaku.fetch.base.R$layout
+-dontwarn com.otaku.fetch.base.R$styleable

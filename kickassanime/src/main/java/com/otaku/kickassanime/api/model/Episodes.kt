@@ -1,12 +1,18 @@
 package com.otaku.kickassanime.api.model
 
+import androidx.annotation.Keep
 import com.google.gson.annotations.SerializedName
 
-data class Episodes (
-    @SerializedName("epnum") val epnum: String? = null,
-    @SerializedName("name") val name: String? = null,
+@Keep
+data class EpisodesWithPreview(
+    @SerializedName("episode_number") var episodeNumber: Float? = null,
+    @SerializedName("thumbnail") var thumbnail: Images? = null,
     @SerializedName("slug") val slug: String? = null,
-    // \/anime\/estab-life-great-escape-836031\/episode-06-994213
-    @SerializedName("createddate") val createddate: String? = null,
-    @SerializedName("num") val num: String? = null
+    var title: String? = null,
+    var duration_ms: Long? = null
+)
+
+@Keep
+data class EpisodesResponse(
+    @SerializedName("result") var result: ArrayList<EpisodesWithPreview> = arrayListOf()
 )

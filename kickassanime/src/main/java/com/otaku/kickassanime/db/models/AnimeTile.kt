@@ -5,17 +5,23 @@ import com.otaku.kickassanime.Strings
 
 data class AnimeTile(
     override val title: String,
-    val animeslug: String,
-    val animeSlugId: Int,
-    val episodeSlug: String,
-    val episodeSlugId: Int,
+    val animeSlug: String,
+    val episodeSlug: String?,
     val image: String,
-    val type: String,
-    val episodeNumber: String,
+    val rating: String?,
+    val episodeNumber: Int,
     val pageNo: Int
 ) : ITileData {
+    override fun areItemsTheSame(newItem: ITileData): Boolean {
+        return newItem is AnimeTile && episodeSlug == newItem.episodeSlug
+    }
+
+    override fun areContentsTheSame(newItem: ITileData): Boolean {
+        return newItem is AnimeTile && this == newItem
+    }
+
     override val imageUrl: String
-        get() = "${Strings.KICKASSANIME_URL}/uploads/$image"
+        get() = "${Strings.KICKASSANIME_URL}image/poster/$image"
     override val tags: List<String>
-        get() = listOf(type, "EP $episodeNumber")
+        get() = listOfNotNull(rating, "EP $episodeNumber")
 }

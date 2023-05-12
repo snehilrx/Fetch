@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	xmlns:app="http://schemas.android.com/apk/res-auto">
+
+	<View
+		android:id="@+id/sk0"
+		android:layout_width="0dp"
+		android:layout_height="72sp"
+		android:layout_marginStart="32dp"
+		android:layout_marginTop="105dp"
+		android:layout_marginEnd="105dp"
+		android:background="@drawable/shine_overlay"
+		app:layout_constraintEnd_toEndOf="parent"
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintTop_toTopOf="parent" />
+
+	<View
+		android:id="@+id/sk1"
+		android:layout_width="0dp"
+		android:layout_height="@dimen/cardview_height"
+		android:layout_marginStart="24dp"
+		android:layout_marginTop="32dp"
+		android:layout_marginEnd="24dp"
+		android:background="@drawable/shine_overlay"
+		android:clickable="true"
+		android:focusable="true"
+		app:elevation="2dp"
+		app:layout_constraintEnd_toEndOf="parent"
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintTop_toBottomOf="@+id/sk0"
+		app:shapeAppearance="@style/ShapeAppearanceOverlay.Fetch.CardView" />
+
+	<include
+		layout="@layout/shimmer_list"
+		android:layout_width="0dp"
+		android:layout_height="0dp"
+		app:layout_constraintBottom_toBottomOf="parent"
+		app:layout_constraintEnd_toEndOf="parent"
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintTop_toBottomOf="@+id/sk1" />
+</androidx.constraintlayout.widget.ConstraintLayout>

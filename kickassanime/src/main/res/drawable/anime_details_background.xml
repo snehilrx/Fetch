@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <solid android:color="@color/sheetsDayBackground"/>
+    <gradient
+        android:startColor="@color/sheetsDayBackground"
+        android:centerColor="@color/sheetsDayBackground"
+        android:endColor="#4affffff"
+        android:useLevel="true"
+        android:angle="90" />
+
+</shape>

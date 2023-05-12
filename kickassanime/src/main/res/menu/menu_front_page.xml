@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+            android:id="@+id/home"
+            android:title="@string/home"
+            android:icon="@drawable/king" />
+    <item
+            android:id="@+id/history"
+            android:title="@string/history"
+            android:icon="@drawable/ic_baseline_history_24" />
+    <item
+            android:id="@+id/favourites"
+            android:title="@string/favourites"
+            android:icon="@drawable/ic_outline_favorite_border_24" />
+    <item
+            android:id="@+id/settings"
+            android:title="@string/settings"
+            android:icon="@drawable/baseline_settings_24"
+            android:iconTint="?attr/colorOnPrimary" />
+    <item
+            android:id="@+id/downloads"
+            android:title="@string/downloads"
+            android:icon="@drawable/baseline_file_download_24"
+            android:iconTint="?attr/colorOnPrimary" />
+</menu>

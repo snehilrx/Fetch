@@ -1,3 +1,30 @@
 <resources>
 
+    <style name="Theme.KickassAnime" parent="Theme.Fetch">
+        <item name="colorPrimary">#463610</item>
+        <item name="android:colorPrimary">#6C5623</item>
+        <item name="colorPrimaryVariant">#FFC107</item>
+        <item name="colorOnPrimary">#fff</item>
+        <!-- Secondary brand color. -->
+        <item name="colorSecondary">#e7dba3</item>
+        <item name="colorSecondaryVariant">#e7dba3</item>
+        <item name="colorOnSecondary">#fff</item>
+        <item name="colorOnSurface">#fff</item>
+        <item name="colorOutline">#2fff</item>
+        <item name="bottomNavigationStyle">@style/Widget.KickassAnime.BottomNaviagation</item>
+    </style>
+
+    <style name="Widget.KickassAnime.BottomNaviagation" parent="Widget.Material3.BottomNavigationView">
+        <item name="itemActiveIndicatorStyle">
+            @style/Widget.KickassAnime.BottomNavigationView.ActiveIndicator
+        </item>
+        <item name="itemRippleColor">@color/bottom_appbar_ripple</item>
+        <item name="itemIconTint">@color/bottom_appbar_icon_color</item>
+        <item name="itemTextColor">@color/bottom_appbar_color</item>
+    </style>
+
+    <style name="Widget.KickassAnime.BottomNavigationView.ActiveIndicator" parent="@style/Widget.Material3.BottomNavigationView.ActiveIndicator">
+        <item name="android:color">#6C5623</item>
+    </style>
+
 </resources>

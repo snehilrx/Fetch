@@ -1,23 +1,38 @@
 package com.otaku.kickassanime.api.model
 
+import androidx.annotation.Keep
 import com.google.gson.annotations.SerializedName
 
+@Keep
+class RecentApiResponse : BaseApiResponse<Recent>()
 
-data class Anime (
-    @SerializedName("episode"      ) val episode     : String? = null,
-    /** anime/boruto-naruto-next-generations-923495/episode-245-958365 */
-    @SerializedName("slug"         ) val slug        : String? = null,
-    @SerializedName("type"         ) val type        : String? = null,
-    @SerializedName("episode_date" ) val episodeDate : String? = null,
-    @SerializedName("name"         ) val name        : String? = null,
-    @SerializedName("poster"       ) val poster      : String? = null
+@Keep
+data class Recent(
+    @SerializedName("language") var language: String? = null,
+    var duration: Long = 0,
+    @SerializedName("created_at") var createdAt: String? = null,
+    @SerializedName("locales") var locales: ArrayList<String> = arrayListOf(),
+    @SerializedName("title") var title: String? = null,
+    @SerializedName("title_en") var titleEn: String? = null,
+    @SerializedName("synopsis") var synopsis: String? = null,
+    @SerializedName("episode_title") var episodeTitle: String? = null,
+    @SerializedName("episode_number") var episodeNumber: Float? = null,
+    @SerializedName("episode_string") var episodeString: String? = null,
+    @SerializedName("poster") var poster: Images? = null,
+    @SerializedName("type") var type: String? = null,
+    @SerializedName("year") var year: Int? = null,
+    @SerializedName("rating") var rating: String? = null,
+    @SerializedName("slug") var slug: String? = null,
+    @SerializedName("watch_uri") var watchUri: String? = null
 )
 
-data class AnimeCollection (
-    @SerializedName("all") val anime : List<Anime>
+@Keep
+data class Images(
+    @SerializedName("sm") var sm: String?,
+    @SerializedName("hq") var hq: String?
 )
 
-
-data class AnimeListFrontPageResponse (
-    @SerializedName("data") val anime : AnimeCollection
+open class BaseApiResponse<T>(
+    @SerializedName("hadNext") var hasNext: Boolean = false,
+    var result: ArrayList<T> = arrayListOf()
 )

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/navigation_home"
+        app:startDestination="@id/frontPageFragment">
+
+    <fragment
+            android:id="@+id/frontPageFragment"
+            android:name="com.otaku.kickassanime.page.frontpage.FrontPageFragment"
+            android:label="@string/module_name">
+        <action
+                android:id="@+id/action_frontPageFragment_to_recent"
+                app:destination="@id/recent" />
+        <action
+                android:id="@+id/action_frontPageFragment_to_popular"
+                app:destination="@id/popular" />
+        <action
+                android:id="@+id/action_frontPageFragment_to_trending"
+                app:destination="@id/trending" />
+        <action
+                android:id="@+id/action_frontPageFragment_to_episodeActivity"
+                app:destination="@id/episodeActivity" />
+        <action
+                android:id="@+id/action_frontPageFragment_to_searchFragment"
+                app:destination="@id/searchFragment" />
+    </fragment>
+    <fragment
+            android:id="@+id/recent"
+            android:name="com.otaku.kickassanime.page.frontpage.list.RecentListFragment"
+            android:label="@string/recent"
+            tools:layout="@layout/fragment_anime_list">
+        <action
+                android:id="@+id/action_recent_to_episodeFragment"
+                app:destination="@id/episodeActivity" />
+    </fragment>
+    <fragment
+            android:id="@+id/trending"
+            android:name="com.otaku.kickassanime.page.frontpage.list.TrendingListFragment"
+            android:label="@string/sub"
+            tools:layout="@layout/fragment_anime_list">
+        <action
+                android:id="@+id/action_trending_to_episodeActivity"
+                app:destination="@id/episodeActivity" />
+    </fragment>
+    <fragment
+            android:id="@+id/popular"
+            android:name="com.otaku.kickassanime.page.frontpage.list.PopularFragment"
+            android:label="@string/dub"
+            tools:layout="@layout/fragment_anime_list">
+        <action
+                android:id="@+id/action_popular_to_episodeActivity"
+                app:destination="@id/episodeActivity" />
+    </fragment>
+    <activity
+            android:id="@+id/episodeActivity"
+            android:name="com.otaku.kickassanime.page.episodepage.EpisodeActivity"
+            android:label="{title}"
+            tools:layout="@layout/activity_episode">
+        <argument
+                android:name="title"
+                app:argType="string" />
+        <argument
+                android:name="episodeSlug"
+                app:argType="string" />
+        <argument
+                android:name="animeSlug"
+                app:argType="string" />
+        <argument
+                android:name="mediaItem"
+                app:argType="android.os.Bundle"
+                app:nullable="true"
+                android:defaultValue="@null" />
+    </activity>
+
+    <fragment
+            android:id="@+id/searchFragment"
+            android:name="com.otaku.kickassanime.page.search.SearchFragment"
+            android:label="{query}">
+        <argument
+                android:name="query"
+                app:argType="string" />
+    </fragment>
+</navigation>

@@ -6,13 +6,20 @@ buildscript {
         classpath "com.google.dagger:hilt-android-gradle-plugin:$versions.hilt"
         classpath "androidx.navigation:navigation-safe-args-gradle-plugin:$versions.nav"
     }
+    repositories {
+        google()
+    }
+    configurations.all {
+        it.resolutionStrategy.cacheDynamicVersionsFor(5, 'minutes')
+        it.resolutionStrategy.cacheChangingModulesFor(0, 'seconds')
+    }
 }
 
 plugins {
-    id 'com.android.application' version '7.1.3' apply false
-    id 'com.android.library' version '7.1.3' apply false
-    id 'org.jetbrains.kotlin.android' version '1.6.20' apply false
-    id 'com.android.dynamic-feature' version '7.1.3' apply false
+    id 'com.android.application' version '8.0.1' apply false
+    id 'com.android.library' version '8.0.1' apply false
+    id 'org.jetbrains.kotlin.android' version '1.8.21' apply false
+    id 'com.android.dynamic-feature' version '8.0.1' apply false
 }
 
 task clean(type: Delete) {

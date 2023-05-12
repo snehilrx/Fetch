@@ -1,34 +1,52 @@
 package com.otaku.kickassanime.api
 
-import com.otaku.kickassanime.api.conveter.JsonInText
 import com.otaku.kickassanime.api.model.*
 import retrofit2.http.*
 
 
 interface KickassAnimeService {
 
-    @POST("/api/frontpage_video_list/all/{pageNo}")
+    @GET("/api/show/recent?type=all")
     suspend fun getFrontPageAnimeList(
-        @Path("pageNo") pageNo: Int
-    ): AnimeListFrontPageResponse?
+        @Query("page") pageNo: Int
+    ): RecentApiResponse
 
-    @GET("/anime-list")
-    @JsonInText("animes")
-    suspend fun getAllAnimeEntries(): List<AnimeResponse>?
 
-    @GET("/new-season")
-    @JsonInText("animes")
-    suspend fun getNewSeasonAnimeEntries(): List<AnimeResponse>?
+    @GET("/api/show/recent?type=sub")
+    suspend fun getFrontPageAnimeListSub(
+        @Query("page") pageNo: Int
+    ): RecentApiResponse
 
-    @FormUrlEncoded
-    @POST("/api/anime_search")
-    suspend fun search(@Field("keyword") query: String): List<AnimeSearchResponse>?
 
-    @GET("{slug}")
-    @JsonInText
-    suspend fun getAnimeEpisode(@Path("slug", encoded = true) path: String): AnimeAndEpisodeInformation?
+    @GET("/api/show/recent?type=dub")
+    suspend fun getFrontPageAnimeListDub(
+        @Query("page") pageNo: Int
+    ): RecentApiResponse
 
-    @GET("{slug}")
-    @JsonInText("anime")
-    suspend fun getAnimeInformation(@Path("slug", encoded = true) path: String): AnimeInformation?
+    @GET("api/show/filters")
+    suspend fun getFilters(): Filters
+
+    @POST("/api/fsearch")
+    suspend fun search(@Body query: SearchRequest): AnimeSearchResponse
+
+    @POST("/api/search")
+    suspend fun searchHints(@Body query: SearchRequest): List<SearchItem>
+
+
+    @GET("/api/episode/{slug}")
+    suspend fun getEpisode(
+        @Path("slug") path: String
+    ): EpisodeApiResponse
+
+    @GET("/api/show/{slug}/episodes")
+    suspend fun getEpisodes(
+        @Path("slug") path: String,
+        @Query("lang") language: String,
+        @Query("page") page: Int
+    ): EpisodesResponse
+
+    @GET("/api/show/{slug}/language")
+    suspend fun getLanguage(
+        @Path("slug") path: String
+    ): BaseApiResponse<String>
 }
