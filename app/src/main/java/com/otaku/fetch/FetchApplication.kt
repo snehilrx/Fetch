@@ -43,6 +43,7 @@ class FetchApplication : MultiDexApplication(), Configuration.Provider, AppModul
             subject = ""
             body = ""
         }
+
         findModules()
         AnimeNotifier().schedulePeriodicWork(WorkManager.getInstance(this.applicationContext))
         createNotificationChannel()
@@ -67,7 +68,7 @@ class FetchApplication : MultiDexApplication(), Configuration.Provider, AppModul
         while (true) {
             try {
                 val loadClass = classLoader.loadClass("$packageName.ModuleRegistration$count")
-                val newInstance = loadClass.newInstance()
+                val newInstance = loadClass.getDeclaredConstructor().newInstance()
                 if (newInstance is ModuleLoaders) {
                     newInstance.load(this)
                 }

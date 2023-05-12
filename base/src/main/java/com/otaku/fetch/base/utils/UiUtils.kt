@@ -1,5 +1,6 @@
 package com.otaku.fetch.base.utils
 
+import android.R
 import android.app.Activity
 import android.content.Context
 import android.content.res.Resources
@@ -8,19 +9,33 @@ import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.util.Log
 import android.util.TypedValue
+import android.widget.EditText
+import androidx.annotation.CheckResult
 import androidx.annotation.ColorInt
 import androidx.core.graphics.drawable.toBitmap
+import androidx.core.widget.doOnTextChanged
+import androidx.media3.common.util.Assertions.checkMainThread
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.Transformation
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
 import com.maxkeppeler.sheets.info.InfoSheet
 import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.typeface.library.fontawesome.FontAwesome
 import com.mikepenz.iconics.utils.colorInt
 import com.mikepenz.iconics.utils.sizeDp
 import com.otaku.fetch.base.TAG
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 
@@ -36,7 +51,7 @@ object UiUtils {
         return Color.argb(alpha, red, green, blue)
     }
 
-    fun getThemeColor(theme: Resources.Theme, id: Int = android.R.attr.colorPrimary): Int {
+    fun getThemeColor(theme: Resources.Theme, id: Int = R.attr.colorPrimary): Int {
         val typedValue = TypedValue()
         theme.resolveAttribute(id, typedValue, true)
         return typedValue.data
@@ -58,7 +73,7 @@ object UiUtils {
                 override fun onLoadFailed(
                     e: GlideException?,
                     model: Any?,
-                    target: com.bumptech.glide.request.target.Target<Drawable>?,
+                    target: Target<Drawable>?,
                     isFirstResource: Boolean
                 ): Boolean {
                     after(null)
@@ -68,7 +83,7 @@ object UiUtils {
                 override fun onResourceReady(
                     resource: Drawable?,
                     model: Any?,
-                    target: com.bumptech.glide.request.target.Target<Drawable>?,
+                    target: Target<Drawable>?,
                     dataSource: DataSource?,
                     isFirstResource: Boolean
                 ): Boolean {
@@ -121,4 +136,39 @@ object UiUtils {
             }
         }
     }
+
+    fun <T> throttleLatest(
+        intervalMs: Long = 600L,
+        coroutineScope: CoroutineScope,
+        destinationFunction: (T) -> Unit
+    ): (T) -> Unit {
+        var throttleJob: Job? = null
+        var latestParam: T? = null
+        return { param: T ->
+            if (latestParam != param) {
+                latestParam = param
+                if (throttleJob?.isCompleted != false) {
+                    throttleJob = coroutineScope.launch {
+                        delay(intervalMs)
+                        latestParam?.let(destinationFunction)
+                    }
+                }
+            }
+        }
+    }
+
+    @ExperimentalCoroutinesApi
+    @CheckResult
+    @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
+    fun EditText.textChanges(): Flow<CharSequence?> {
+        return callbackFlow {
+            checkMainThread()
+
+            val listener = doOnTextChanged { text, _, _, _ -> trySend(text) }
+            awaitClose { removeTextChangedListener(listener) }
+        }.onStart { emit(text) }
+    }
+
+    val Int.dp: Int
+        get() = (this / Resources.getSystem().displayMetrics.density).toInt()
 }

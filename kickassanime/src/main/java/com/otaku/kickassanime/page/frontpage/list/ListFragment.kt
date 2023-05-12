@@ -12,6 +12,7 @@ import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.paging.PagingDataAdapter
+import androidx.paging.map
 import androidx.recyclerview.widget.RecyclerView
 import com.otaku.fetch.base.ui.BindingFragment
 import com.otaku.fetch.data.ITileData
@@ -53,7 +54,7 @@ abstract class ListFragment<Binding: ViewDataBinding> : BindingFragment<Fragment
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
                 getList().collectLatest {
-                    animeAdapter.submitData(lifecycle, it)
+                    animeAdapter.submitData(lifecycle, it.map { item -> item })
                 }
             }
         }
@@ -94,7 +95,7 @@ abstract class ListFragment<Binding: ViewDataBinding> : BindingFragment<Fragment
 
     protected open fun filter(binding: FragmentAnimeListBinding) {}
 
-    abstract fun getList(): Flow<PagingData<ITileData>>
+    abstract fun getList(): Flow<PagingData<out ITileData>>
 
     abstract fun getListTag(): String
 

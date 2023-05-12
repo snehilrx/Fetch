@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
+import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.activity.addCallback
@@ -46,8 +47,10 @@ class ModuleActivity :
         val appModule = (application as? FetchApplication)?.currentModule ?: return
         val navHostFragment = binding.fragmentContainerView.getFragment<NavHostFragment>()
         navHostFragment.navController.setGraph(appModule.getNavigationGraph())
-        binding.bottomNavigation.inflateMenu(appModule.getBottomNavigationMenu())
-        binding.bottomNavigation.setupWithNavController(navHostFragment.navController)
+        binding.bottomNavigation?.inflateMenu(appModule.getBottomNavigationMenu())
+        binding.bottomNavigation?.setupWithNavController(navHostFragment.navController)
+        binding.railNavigation?.inflateMenu(appModule.getBottomNavigationMenu())
+        binding.railNavigation?.setupWithNavController(navHostFragment.navController)
     }
 
     @SuppressLint("PrivateResource", "ClickableViewAccessibility")
@@ -104,11 +107,12 @@ class ModuleActivity :
             setHint(getString(com.otaku.kickassanime.R.string.search_anime))
         }
         val searchEdit =
-            searchView.findViewById<View>(com.lapism.search.R.id.search_view_edit_text)
+            searchView.findViewById<EditText>(com.lapism.search.R.id.search_view_edit_text)
         val oldFocus = searchEdit.onFocusChangeListener
         searchEdit?.setOnFocusChangeListener { v, b ->
-            binding.fragmentContainerView.findViewById<View>(com.otaku.kickassanime.R.id.front)?.isVisible =
-                !b
+            binding.bottomNavigation?.isVisible = !b
+            binding.railNavigation?.isVisible = !b
+            searchEdit.text.clear()
             oldFocus.onFocusChange(v, b)
         }
 

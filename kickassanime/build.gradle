@@ -10,10 +10,10 @@ plugins {
 android {
     signingConfigs {
         release {
-            storeFile file('/Users/Snehil/Documents/keys/Untitled')
-            storePassword 'redC@t33'
-            keyAlias 'key0'
-            keyPassword 'redC@t33'
+            storeFile file(env.keyPath)
+            storePassword env.keyStorePassword
+            keyPassword env.keyStorePassword
+            keyAlias env.keyAlias
         }
     }
     compileSdk env.compileSdk
@@ -99,7 +99,7 @@ dependencies {
     implementation "com.google.dagger:hilt-android:$versions.hilt"
     kapt "com.google.dagger:hilt-compiler:$versions.hilt"
 
-    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0'
+    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1'
 
     /* tests dependencies */
     androidTestImplementation "androidx.test.espresso:espresso-core:$versions.espresso_core"
@@ -140,19 +140,19 @@ dependencies {
     implementation 'com.github.mrmike:ok2curl:0.8.0'
 
     // Jetpack Compose
-    def composeBom = platform('androidx.compose:compose-bom:$versions.compose_bom')
+    def composeBom = platform("androidx.compose:compose-bom:$versions.compose_bom")
     implementation composeBom
     androidTestImplementation composeBom
-    implementation 'androidx.compose.material3:material3'
-    implementation 'androidx.compose.ui:ui-tooling-preview'
-    debugImplementation 'androidx.compose.ui:ui-tooling'
-    androidTestImplementation 'androidx.compose.ui:ui-test-junit4'
-    debugImplementation 'androidx.compose.ui:ui-test-manifest'
+    implementation "androidx.compose.material3:material3:$versions.compose_material3"
+    implementation "androidx.compose.ui:ui-tooling-preview:$versions.compose_vector_animations"
+    debugImplementation "androidx.compose.ui:ui-tooling:$versions.compose_vector_animations"
+    androidTestImplementation "androidx.compose.ui:ui-test-junit4:$versions.compose_vector_animations"
+    debugImplementation "androidx.compose.ui:ui-test-manifest:$versions.compose_vector_animations"
     implementation "androidx.activity:activity-compose:$versions.compose_activity"
     implementation "androidx.lifecycle:lifecycle-viewmodel-compose:$versions.compose_lifecycle"
     implementation "androidx.paging:paging-compose:$versions.compose_paging"
     implementation("androidx.lifecycle:lifecycle-runtime-compose:$versions.compose_lifecycle")
-    implementation 'androidx.compose.runtime:runtime-livedata'
+    implementation "androidx.compose.runtime:runtime-livedata:$versions.compose_vector_animations"
     implementation "com.valentinilk.shimmer:compose-shimmer:$versions.compose_shimmer"
     implementation "com.github.bumptech.glide:compose:$versions.compose_glide"
     implementation "com.github.bumptech.glide:compose:$versions.compose_glide"

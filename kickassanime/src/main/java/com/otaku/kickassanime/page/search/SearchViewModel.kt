@@ -10,6 +10,7 @@ import com.otaku.kickassanime.db.models.AnimeSearchResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -24,7 +25,7 @@ class SearchViewModel @Inject constructor(private val searchRepository: SearchRe
         year: Int? = null,
         status: String? = null,
         type: String? = null
-    ): Flow<PagingData<ITileData>> {
+    ): Flow<PagingData<out ITileData>> {
         searchRepository.addToSearchHistory(query)
         return searchRepository.getSearchPager(
             query, genre, language, year, status, type
@@ -36,5 +37,7 @@ class SearchViewModel @Inject constructor(private val searchRepository: SearchRe
     }
 
     fun getFilters() {
+        viewModelScope.launch {
+        }
     }
 }

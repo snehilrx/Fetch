@@ -20,7 +20,7 @@ class SearchFragment : FrontPageListFragment() {
     private val viewModel: SearchViewModel by viewModels()
     private val args: SearchFragmentArgs by navArgs()
 
-    override fun getList(): Flow<PagingData<ITileData>> = viewModel.doSearch(args.query)
+    override fun getList(): Flow<PagingData<out ITileData>> = viewModel.doSearch(args.query)
 
     override fun getListTag(): String {
         return args.query
@@ -43,9 +43,8 @@ class SearchFragment : FrontPageListFragment() {
         binding.filter.setOnClick {
             this.context?.let {
                 InputSheet().show(it) {
-                    title("Filter")
+                    title("Filters")
                     onPositive {
-
                         dismiss()
                     }
                     onNegative {
@@ -55,5 +54,9 @@ class SearchFragment : FrontPageListFragment() {
                 }
             }
         }
+    }
+
+    companion object {
+        const val KEY_FILTER = "filter"
     }
 }

@@ -9,13 +9,14 @@ plugins {
 android {
     signingConfigs {
         release {
-            storeFile file('/Users/Snehil/Documents/keys/Untitled')
-            storePassword 'redC@t33'
-            keyPassword 'redC@t33'
-            keyAlias 'key0'
+            storeFile file(env.keyPath)
+            storePassword env.keyStorePassword
+            keyPassword env.keyStorePassword
+            keyAlias env.keyAlias
         }
     }
     compileSdk env.compileSdk
+    compileSdkPreview "UpsideDownCake"
 
     defaultConfig {
         applicationId env.applicationId
@@ -93,25 +94,25 @@ dependencies {
     implementation "androidx.multidex:multidex:2.0.1"
 
     // Jetpack Compose
-    def composeBom = platform('androidx.compose:compose-bom:2022.12.00')
-    implementation 'androidx.compose:compose-bom:2023.05.00'
-    androidTestImplementation 'androidx.compose:compose-bom:2023.05.00'
+    def composeBom = platform("androidx.compose:compose-bom:$versions.compose_bom")
+    implementation composeBom
+    androidTestImplementation composeBom
 
     // Choose one of the following:
     // Material Design 3
-    implementation 'androidx.compose.material3:material3'
+    implementation "androidx.compose.material3:material3:$versions.compose_material3"
 
     // Android Studio Preview support
-    implementation 'androidx.compose.ui:ui-tooling-preview'
-    debugImplementation 'androidx.compose.ui:ui-tooling'
+    implementation "androidx.compose.ui:ui-tooling-preview:$versions.compose_vector_animations"
+    debugImplementation "androidx.compose.ui:ui-tooling:$versions.compose_vector_animations"
 
     // UI Tests
-    androidTestImplementation 'androidx.compose.ui:ui-test-junit4'
-    debugImplementation 'androidx.compose.ui:ui-test-manifest'
-    implementation "androidx.datastore:datastore-preferences:1.0.0"
+    androidTestImplementation "androidx.compose.ui:ui-test-junit4:$versions.compose_vector_animations"
+    debugImplementation "androidx.compose.ui:ui-test-manifest:$versions.compose_vector_animations"
+    implementation "androidx.datastore:datastore-preferences:$versions.datastore"
 
     // Optional - Integration with activities
-    implementation 'androidx.activity:activity-compose:1.7.1'
-    implementation 'androidx.compose.runtime:runtime-livedata'
+    implementation "androidx.activity:activity-compose:$versions.compose_activity"
+    implementation "androidx.compose.runtime:runtime-livedata:$versions.compose_vector_animations"
     implementation("ch.acra:acra-mail:5.9.7")
 }

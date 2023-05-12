@@ -2,9 +2,8 @@
     <!-- Base application theme. -->
 
 	<style name="Theme.Fetch.CollapsingToolbar" parent="Widget.Material3.CollapsingToolbar.Medium">
-		<item name="statusBarScrim">?attr/colorPrimary</item>
 		<item name="collapsedTitleTextAppearance">@style/Theme.Fetch.CollapsingToolbar.CollapseText</item>
-		<item name="collapsedTitleTextColor">?attr/colorSecondary</item>
+		<item name="collapsedTitleTextColor">?attr/colorOnPrimary</item>
 		<item name="expandedTitleTextAppearance">@style/Theme.Fetch.CollapsingToolbar.ExpandedText</item>
 	</style>
 

@@ -111,6 +111,7 @@ class MainActivity : AppCompatActivity() {
         (application as? FetchApplication)?.currentModule = data.appModule
         val moduleIntent = Intent(this, ModuleActivity::class.java)
         startActivity(moduleIntent)
+        finish()
     }
 
 
