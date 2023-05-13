@@ -24,7 +24,7 @@ class EpisodeRepositoryTest {
     @Test
     fun testAnimeSkip(){
         runBlocking {
-            assertNotNull(episodeRepository.fetchAnimeSkipTime("dragon", 1))
+            assertNotNull(episodeRepository.fetchAnimeSkipTime("dragon", 1f))
         }
     }
 }
