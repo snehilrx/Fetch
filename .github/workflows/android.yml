@@ -1,9 +1,7 @@
-name: Android CI
+name: Android Build CI
 
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
     branches: [ "main" ]
 
 jobs:
@@ -24,26 +22,39 @@ jobs:
           cache: gradle
     - name: Make gradlew executable
       run: chmod +x ./gradlew
+      # 1 saving key to disk
+    - name: Create key
+      env:
+        BASE64_STRING: ${{ secrets.KEY_BASE64 }}
+        KEY_PATH: ${{ secrets.KEY_PATH }}
+      run: base64 --decode ${BASE64_STRING} > ${KEY_PATH}
+    - name: Store secrets in local.properties
+      env:
+        KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+        KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        KEY_PATH: ${{ secrets.KEY_PATH }}
+        STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+        run: |
+          echo "keyAlias=${KEY_ALIAS}" > local.properties
+          echo "keyPassword=${KEY_PASSWORD}" >> local.properties
+          echo "keyPath=${KEY_PATH}" >> local.properties
+          echo "storePassword=${STORE_PASSWORD}" >> local.properties
       # 2 Generate Build
     - name: Generate APK
-      run: ./gradlew :app:assembleDebug --stacktrace
-      
-    - uses: r0adkll/sign-android-release@v1
-      name: fetch
-      # ID used to access action output
-      id: sign_app
-      with:
-        releaseDirectory: ./app/build/outputs/apk/release
-        signingKeyBase64: ${{ secrets.SIGNINGKEYBASE64 }}
-        alias: ${{ secrets.KEYALIAS }}
-        keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
-        keyPassword: ${{ secrets.KEYSTOREPASSWORD }}
+      run: ./gradlew :app:assembleRelease --stacktrace
+    - name: Clean up
       env:
-        # override default build-tools version (29.0.3) -- optional
-        BUILD_TOOLS_VERSION: "34.0.0 rc4"
-
-    # Example use of `signedReleaseFile` output -- not needed
-    - uses: actions/upload-artifact@v2
+        KEY_PATH: ${{ secrets.KEY_PATH }}
+      run: |
+        rm ${KEY_PATH}
+        rm local.properties
+    - name: Upload APK to Release
+      id: upload-release-asset 
+      uses: actions/upload-release-asset@v1
+      env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN_RELEASE }}
       with:
-        name: Signed app bundle
-        path: ${{steps.sign_app.outputs.signedReleaseFile}}
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+          asset_path: ./app/build/outputs/apk/debug/app-release.apk
+          asset_name: app-debug.apk
+          asset_content_type: application/zip
