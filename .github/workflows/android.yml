@@ -12,6 +12,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+          ref: ${{ github.event.inputs.branchName }}
+    - name: set up JDK 11
+      uses: actions/setup-java@v2
+      with:
+          java-version: '11'
+          distribution: 'adopt'
+          cache: gradle
+    - name: Make gradlew executable
+      run: chmod +x ./gradlew
+      # 2 Generate Build
+    - name: Generate APK
+      run: ./gradlew :app:assembleDebug --stacktrace
+      
     - uses: r0adkll/sign-android-release@v1
       name: fetch
       # ID used to access action output
