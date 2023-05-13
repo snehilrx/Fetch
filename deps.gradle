@@ -11,12 +11,12 @@ ext.versions = [
         hilt_compiler            : '1.0.0',
         retrofit                 : '2.9.0',
         room                     : '2.6.0-alpha01',
-        core_ktx                 : '1.10.0',
+        core_ktx                 : '1.12.0-alpha03',
         appcompat                : '1.7.0-alpha02',
-        material                 : '1.8.0',
+        material                 : '1.9.0',
         constraintlayout         : '2.1.4',
         junit                    : '4.13.2',
-        androidx_junit           : '1.1.5',
+        androidx_junit           : '1.2.0-alpha01',
         espresso_core            : '3.5.1',
         annotation               : '1.4.0',
         glide                    : '4.15.1',
@@ -47,17 +47,22 @@ ext.versions = [
         compose_activity         : '1.7.1',
         compose_lifecycle        : '2.6.1',
         compose_paging           : '1.0.0-alpha19',
-        compose_shimmer          : '1.0.4',
+        compose_shimmer          : '1.0.5',
         compose_glide            : '1.0.0-alpha.1',
-        compose_material3        : '1.0.1',
+        compose_material3        : '1.1.0-rc01',
         compose_vector_animations: '1.5.0-alpha03',
         compose_text_flow        : '1.1.0',
+        kotlin_okhttp            : '1.0',
+        datastore                : '1.0.0',
         // test
         composeVersion           : "1.1.1",
         assertJ                  : "1.0.1",
         assertJCore              : '3.24.2',
         mockwebserver            : "5.0.0-alpha.10"
 ]
+
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
 
 ext.env = [
         compileSdk               : 33,
@@ -66,5 +71,8 @@ ext.env = [
         targetSdk                : 33,
         versionCode              : 2,
         versionName              : "1.1",
-        testInstrumentationRunner: "com.otaku.kickassanime.KickassTestRunner"
+        testInstrumentationRunner: "com.otaku.kickassanime.KickassTestRunner",
+        keyPath                  : properties.getProperty('keyPath'),
+        keyStorePassword         : properties.getProperty('keyStorePassword'),
+        keyAlias                 : properties.getProperty('keyAlias'),
 ]

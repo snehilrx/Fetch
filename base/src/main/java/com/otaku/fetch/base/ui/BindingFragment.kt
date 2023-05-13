@@ -1,7 +1,6 @@
 package com.otaku.fetch.base.ui
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,9 +17,9 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.CollapsingToolbarLayout
-import com.otaku.fetch.base.TAG
 import com.otaku.fetch.base.databinding.AppbarImageBinding
 import com.otaku.fetch.base.databinding.AppbarShineBinding
+import com.otaku.fetch.base.utils.UiUtils.statusBarHeight
 import com.otaku.fetch.bindings.ImageViewBindings
 import java.lang.ref.WeakReference
 
@@ -29,7 +28,8 @@ open class BindingFragment<T : ViewDataBinding>(@LayoutRes private val layoutRes
 
     private var mStatusBarHeight: Int = 0
     lateinit var weakReference: WeakReference<T>
-    protected val binding: T get() = weakReference.get() ?: throw IllegalStateException("Binding is null")
+    protected val binding: T
+        get() = weakReference.get() ?: throw IllegalStateException("Binding is null")
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -38,7 +38,7 @@ open class BindingFragment<T : ViewDataBinding>(@LayoutRes private val layoutRes
     ): View? {
         weakReference =
             WeakReference(DataBindingUtil.inflate(inflater, layoutRes, container, false))
-        mStatusBarHeight = getStatusBarHeight()
+        mStatusBarHeight = activity?.statusBarHeight ?: 0
         onBind(binding, savedInstanceState)
         return binding.root
     }
@@ -48,7 +48,8 @@ open class BindingFragment<T : ViewDataBinding>(@LayoutRes private val layoutRes
 
     protected fun initAppbar(
         binding: AppbarShineBinding?,
-        navController: NavController
+        navController: NavController,
+        hideBackButton: Boolean = false
     ) {
         if (binding == null) return
         initAppbar(
@@ -56,7 +57,8 @@ open class BindingFragment<T : ViewDataBinding>(@LayoutRes private val layoutRes
             binding.toolbar,
             binding.collapsingToolbar,
             binding.appbarLayout,
-            navController
+            navController,
+            hideBackButton
         )
     }
 
@@ -66,14 +68,14 @@ open class BindingFragment<T : ViewDataBinding>(@LayoutRes private val layoutRes
         collapsingToolbar: CollapsingToolbarLayout?,
         appbarLayout: AppBarLayout?,
         navController: NavController?,
-        showBackInHomeFragment: Boolean = false
+        hideBackButton: Boolean = false
     ) {
         initShineView(shineView, appbarLayout)
         initAppbar(
             toolbar,
             collapsingToolbar,
             navController,
-            showBackInHomeFragment
+            hideBackButton
         )
     }
 
@@ -91,7 +93,7 @@ open class BindingFragment<T : ViewDataBinding>(@LayoutRes private val layoutRes
         collapsingToolbar: CollapsingToolbarLayout?,
         navController: NavController?,
         imageUrl: String? = null,
-        showBackInHomeFragment: Boolean = false
+        hideBackButton: Boolean = false
     ) {
         if (imageView != null) {
             setAppbarBackground(imageView, imageUrl)
@@ -100,7 +102,7 @@ open class BindingFragment<T : ViewDataBinding>(@LayoutRes private val layoutRes
             toolbar,
             collapsingToolbar,
             navController,
-            showBackInHomeFragment
+            hideBackButton
         )
     }
 
@@ -114,14 +116,16 @@ open class BindingFragment<T : ViewDataBinding>(@LayoutRes private val layoutRes
     protected fun initAppbar(
         binding: AppbarImageBinding,
         navController: NavController,
-        imageUrl: String? = null
+        hideBackButton: Boolean,
+        imageUrl: String? = null,
     ) {
         initAppbar(
             binding.appbarImageView,
             binding.toolbar,
             binding.collapsingToolbar,
             navController,
-            imageUrl
+            imageUrl,
+            hideBackButton
         )
     }
 
@@ -134,48 +138,38 @@ open class BindingFragment<T : ViewDataBinding>(@LayoutRes private val layoutRes
         }
     }
 
-    private fun getStatusBarHeight(): Int {
-        var result = 0
-        val resourceId = resources.getIdentifier("status_bar_height", "dimen", "android")
-        if (resourceId > 0) {
-            try {
-                result = resources.getDimensionPixelSize(resourceId)
-            } catch (e: Exception) {
-                Log.e(
-                    TAG,
-                    "getStatusBarHeight: unable to calculate statusbar size, resources must be an issue",
-                    e
-                )
-            }
-        }
-        return result
-    }
-
     private fun initAppbar(
         toolbar: Toolbar?,
         collapsingToolbar: CollapsingToolbarLayout?,
         navController: NavController?,
-        showBackInHomeFragment: Boolean
+        hideBackButton: Boolean
     ) {
         (activity as AppCompatActivity).setSupportActionBar(toolbar)
         if (toolbar != null) {
             setupToolbar(toolbar)
             if (collapsingToolbar != null && navController != null) {
-                if (showBackInHomeFragment) {
-                    NavigationUI.setupWithNavController(
-                        collapsingToolbar,
-                        toolbar,
-                        navController,
-                        AppBarConfiguration(setOf(), null) {
-                            if(!navController.popBackStack()){
-                                activity?.finish()
-                            }
-                            return@AppBarConfiguration  true
-                        }
-                    )
+                val idToRemove = if (hideBackButton) {
+                    navController.currentDestination?.id
                 } else {
-                    NavigationUI.setupWithNavController(collapsingToolbar, toolbar, navController)
+                    null
                 }
+                NavigationUI.setupWithNavController(
+                    collapsingToolbar,
+                    toolbar,
+                    navController,
+                    AppBarConfiguration(
+                        setOfNotNull(
+                            navController.graph.startDestinationId,
+                            idToRemove
+                        ), null
+                    ) {
+                        if (!navController.popBackStack()) {
+                            activity?.finish()
+                        }
+                        return@AppBarConfiguration true
+                    }
+                )
+
             }
         }
     }

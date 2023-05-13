@@ -13,6 +13,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.graphics.drawable.IconCompat
 import androidx.core.os.bundleOf
 import androidx.media3.common.util.UnstableApi
+import com.mikepenz.iconics.Iconics
 import com.mikepenz.iconics.IconicsColor
 import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.typeface.library.fontawesome.FontAwesome
@@ -31,6 +32,7 @@ import com.otaku.kickassanime.utils.HashUtils
 import com.otaku.kickassanime.utils.Utils
 import com.otaku.kickassanime.utils.asAnimeEntity
 import com.otaku.kickassanime.utils.asEpisodeEntity
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 
@@ -39,8 +41,14 @@ const val PREF_KEY = "KickassAnime/lastUpdateHash"
 @UnstableApi
 class KickassAppModule @Inject constructor(
     val kickassAnimeService: KickassAnimeService,
-    private val kickassAnimeDb: KickassAnimeDb
+    private val kickassAnimeDb: KickassAnimeDb,
+    @ApplicationContext context: Context,
 ) : AppModule {
+
+    init {
+        Iconics.init(context)
+        Iconics.registerFont(FontAwesome)
+    }
 
     override val name: String
         get() = "Kickass Anime"

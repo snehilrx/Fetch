@@ -12,6 +12,7 @@ import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.paging.PagingDataAdapter
+import androidx.paging.map
 import androidx.recyclerview.widget.RecyclerView
 import com.otaku.fetch.base.ui.BindingFragment
 import com.otaku.fetch.data.ITileData
@@ -24,10 +25,11 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-abstract class ListFragment<Binding: ViewDataBinding> : BindingFragment<FragmentAnimeListBinding>(R.layout.fragment_anime_list) {
+abstract class ListFragment<Binding : ViewDataBinding>() :
+    BindingFragment<FragmentAnimeListBinding>(R.layout.fragment_anime_list) {
 
     override fun onBind(binding: FragmentAnimeListBinding, savedInstanceState: Bundle?) {
-        initAppbar(binding.appbar, findNavController())
+        initAppbar(binding.appbar, navController = findNavController(), hideBackButton())
         val animeAdapter = AnimeTileAdapter(
             layoutId,
             onBind
@@ -37,9 +39,11 @@ abstract class ListFragment<Binding: ViewDataBinding> : BindingFragment<Fragment
         filter(binding)
     }
 
+    protected open fun hideBackButton() = false
+
     protected abstract val layoutId: Int
 
-    protected abstract val onBind : (Binding, ITileData) -> Unit
+    protected abstract val onBind: (Binding, ITileData) -> Unit
 
     private fun initFrontPageList(
         animeAdapter: AnimeTileAdapter<*>
@@ -53,7 +57,7 @@ abstract class ListFragment<Binding: ViewDataBinding> : BindingFragment<Fragment
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
                 getList().collectLatest {
-                    animeAdapter.submitData(lifecycle, it)
+                    animeAdapter.submitData(lifecycle, it.map { item -> item })
                 }
             }
         }
@@ -94,7 +98,7 @@ abstract class ListFragment<Binding: ViewDataBinding> : BindingFragment<Fragment
 
     protected open fun filter(binding: FragmentAnimeListBinding) {}
 
-    abstract fun getList(): Flow<PagingData<ITileData>>
+    abstract fun getList(): Flow<PagingData<out ITileData>>
 
     abstract fun getListTag(): String
 

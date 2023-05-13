@@ -10,17 +10,22 @@ import android.util.Log
 import android.util.TypedValue
 import androidx.annotation.ColorInt
 import androidx.core.graphics.drawable.toBitmap
+import androidx.core.view.WindowInsetsCompat
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.Transformation
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
+import com.maxkeppeler.sheets.core.ButtonStyle
 import com.maxkeppeler.sheets.info.InfoSheet
 import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.typeface.library.fontawesome.FontAwesome
-import com.mikepenz.iconics.utils.colorInt
-import com.mikepenz.iconics.utils.sizeDp
 import com.otaku.fetch.base.TAG
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 
@@ -58,7 +63,7 @@ object UiUtils {
                 override fun onLoadFailed(
                     e: GlideException?,
                     model: Any?,
-                    target: com.bumptech.glide.request.target.Target<Drawable>?,
+                    target: Target<Drawable>?,
                     isFirstResource: Boolean
                 ): Boolean {
                     after(null)
@@ -68,7 +73,7 @@ object UiUtils {
                 override fun onResourceReady(
                     resource: Drawable?,
                     model: Any?,
-                    target: com.bumptech.glide.request.target.Target<Drawable>?,
+                    target: Target<Drawable>?,
                     dataSource: DataSource?,
                     isFirstResource: Boolean
                 ): Boolean {
@@ -94,7 +99,7 @@ object UiUtils {
         loadingError: Throwable?,
         activity: Activity,
         text: String = "ok",
-        onPositive: () -> Unit = { activity.finish() }
+        onPositive: () -> Unit = { }
     ) {
         showError(loadingError?.message, activity, onPositive, text)
     }
@@ -105,20 +110,52 @@ object UiUtils {
         onPositive: () -> Unit = { activity.finish() },
         text: String = "ok"
     ) {
-        val errorIcon = IconicsDrawable(activity, FontAwesome.Icon.faw_bug).apply {
-            colorInt = Color.RED
-            sizeDp = 24
-        }
-        Log.e(TAG, "showError: $message")
-        InfoSheet(
 
-        ).show(activity) {
-            title("Oops, we got an error")
+        val errorIcon = IconicsDrawable(activity, FontAwesome.Icon.faw_bug)
+        Log.e(TAG, "showError: $message")
+        InfoSheet().show(activity) {
+            title("Oops, we got an error 🥵")
             content(message ?: "Something went wrong")
+            displayNegativeButton(false)
+            positiveButtonStyle(
+                ButtonStyle.OUTLINED
+            )
             onPositive(text, errorIcon) {
                 dismiss()
                 onPositive()
             }
         }
     }
+
+    fun <T> throttleLatest(
+        intervalMs: Long = 600L,
+        coroutineScope: CoroutineScope,
+        destinationFunction: (T) -> Unit
+    ): (T) -> Unit {
+        var throttleJob: Job? = null
+        var latestParam: T? = null
+        return { param: T ->
+            if (latestParam != param) {
+                latestParam = param
+                if (throttleJob?.isCompleted != false) {
+                    throttleJob = coroutineScope.launch {
+                        delay(intervalMs)
+                        latestParam?.let(destinationFunction)
+                    }
+                }
+            }
+        }
+    }
+
+    val Activity.statusBarHeight
+        get() = run {
+            val rootWindowInsets = window?.decorView?.rootWindowInsets
+            return@run rootWindowInsets?.let {
+                WindowInsetsCompat.toWindowInsetsCompat(rootWindowInsets)
+                    .getInsets(WindowInsetsCompat.Type.statusBars()).top
+            }
+        }
+
+    val Int.dp: Int
+        get() = (this / Resources.getSystem().displayMetrics.density).toInt()
 }

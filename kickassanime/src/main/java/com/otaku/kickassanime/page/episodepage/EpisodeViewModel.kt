@@ -69,7 +69,6 @@ class EpisodeViewModel @Inject constructor(
                     addToHistory(episode)
                     if (!useOffline) {
                         loadDustUrls("$KICKASSANIME_URL$animeSlug/$episodeSlug")
-                        loadMobile2Urls(episode.link4)
                         fetchIntroTimestamp(anime.name, episode.episodeNumber ?: 1f)
                     }
                 } else {
@@ -166,10 +165,6 @@ class EpisodeViewModel @Inject constructor(
         viewModelScope.launch {
             historyRepository.setPlaytime(episodeSlug, time)
         }
-    }
-
-    private fun loadMobile2Urls(link: String?) {
-        // TODO
     }
 
     private val atomicHash = AtomicReference<HashSet<Int>>(hashSetOf())

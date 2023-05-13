@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.mikepenz.iconics.view.IconicsTextView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/icon"
+        android:background="@android:drawable/list_selector_background"
+        android:textAppearance="@style/TextAppearance.Video.SubTitle"
+        android:textSize="@dimen/sheetsTextSizeSubheading"
+        android:paddingStart="@dimen/md_listitem_margin_left"
+        android:paddingEnd="@dimen/md_listitem_margin_left"
+        android:paddingTop="@dimen/md_listitem_vertical_margin"
+        android:paddingBottom="@dimen/md_listitem_vertical_margin"
+        android:foregroundGravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"></com.mikepenz.iconics.view.IconicsTextView>

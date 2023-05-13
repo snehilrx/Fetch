@@ -37,6 +37,7 @@ class FavouritesFragment : ListFragment<ItemFavoriteBinding>() {
 
     override val layoutId: Int
         get() = R.layout.item_favorite
+    override fun hideBackButton() = true
 
     override val onBind: (ItemFavoriteBinding, ITileData) -> Unit =
         { itemFavoriteBinding: ItemFavoriteBinding, iTileData: ITileData ->

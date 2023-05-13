@@ -70,7 +70,7 @@ fun SwitchPref(
         }
     }
 
-    val icon: () -> Unit = if (checked) {
+    val icon: @Composable () -> Unit = if (checked) {
         {
             Icon(
                 imageVector = Icons.Filled.Check,
