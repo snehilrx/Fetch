@@ -61,8 +61,6 @@ ext.versions = [
         mockwebserver            : "5.0.0-alpha.10"
 ]
 
-Properties properties = new Properties()
-properties.load(project.rootProject.file('local.properties').newDataInputStream())
 ext.env = [
         compileSdk               : 33,
         applicationId            : full_app_name,
@@ -71,8 +69,4 @@ ext.env = [
         versionCode              : 2,
         versionName              : "1.1",
         testInstrumentationRunner: "com.otaku.kickassanime.KickassTestRunner",
-        keyPath                  : properties.getProperty('KEY_PATH'),
-        keyPassword              : properties.getProperty('KEY_PASSWORD'),
-        storePassword            : properties.getProperty('STORE_PASSWORD'),
-        keyAlias                 : properties.getProperty('KEY_ALIAS'),
 ]
