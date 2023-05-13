@@ -25,10 +25,11 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-abstract class ListFragment<Binding: ViewDataBinding> : BindingFragment<FragmentAnimeListBinding>(R.layout.fragment_anime_list) {
+abstract class ListFragment<Binding : ViewDataBinding>() :
+    BindingFragment<FragmentAnimeListBinding>(R.layout.fragment_anime_list) {
 
     override fun onBind(binding: FragmentAnimeListBinding, savedInstanceState: Bundle?) {
-        initAppbar(binding.appbar, findNavController())
+        initAppbar(binding.appbar, navController = findNavController(), hideBackButton())
         val animeAdapter = AnimeTileAdapter(
             layoutId,
             onBind
@@ -38,9 +39,11 @@ abstract class ListFragment<Binding: ViewDataBinding> : BindingFragment<Fragment
         filter(binding)
     }
 
+    protected open fun hideBackButton() = false
+
     protected abstract val layoutId: Int
 
-    protected abstract val onBind : (Binding, ITileData) -> Unit
+    protected abstract val onBind: (Binding, ITileData) -> Unit
 
     private fun initFrontPageList(
         animeAdapter: AnimeTileAdapter<*>

@@ -3,7 +3,6 @@
 
 	<style name="Theme.Fetch.CollapsingToolbar" parent="Widget.Material3.CollapsingToolbar.Medium">
 		<item name="collapsedTitleTextAppearance">@style/Theme.Fetch.CollapsingToolbar.CollapseText</item>
-		<item name="collapsedTitleTextColor">?attr/colorOnPrimary</item>
 		<item name="expandedTitleTextAppearance">@style/Theme.Fetch.CollapsingToolbar.ExpandedText</item>
 	</style>
 
@@ -21,16 +20,20 @@
 	</style>
     <style name="Theme.Fetch" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="fontFamily">@font/sohne</item>
-	    <item name="actionBarSize">64dp</item>
-	    <item name="tabSelectedTextColor">?attr/colorPrimaryVariant</item>
-	    <item name="sheetsButtonColor">?attr/colorPrimaryVariant</item>
-	    <item name="android:windowTranslucentStatus">true</item>
-	    <item name="android:windowTranslucentNavigation">true</item>
-	    <item name="collapsingToolbarLayoutStyle">@style/Theme.Fetch.CollapsingToolbar</item>
-	    <item name="collapsingToolbarLayoutMediumSize">@style/Theme.Fetch.CollapsingToolbar</item>
-	    <item name="collapsingToolbarLayoutLargeStyle">@style/Theme.Fetch.CollapsingToolbar.Large</item>
-	    <item name="contentScrim">?attr/colorPrimary</item>
-	    <item name="actionBarTheme">@style/ActionBar</item>
+        <item name="actionBarSize">64dp</item>
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowTranslucentNavigation">true</item>
+        <item name="collapsingToolbarLayoutStyle">@style/Theme.Fetch.CollapsingToolbar</item>
+        <item name="collapsingToolbarLayoutMediumSize">@style/Theme.Fetch.CollapsingToolbar</item>
+        <item name="collapsingToolbarLayoutLargeStyle">@style/Theme.Fetch.CollapsingToolbar.Large
+        </item>
+        <item name="actionBarTheme">@style/ActionBar</item>
+        <item name="sheetsButtonColor">?attr/colorOnPrimary</item>
+        <item name="sheetsBackgroundColor">?attr/colorSurface</item>
+        <item name="sheetsIconsColor">?attr/colorSecondary</item>
+        <item name="sheetsTitleColor">?attr/colorOnPrimary</item>
+        <item name="sheetsContentColor">?attr/colorOnPrimary</item>
+        <item name="sheetsContentInverseColor">?attr/colorSurfaceInverse</item>
     </style>
 
 	<style name="ActionBar" parent="Base.ThemeOverlay.AppCompat.ActionBar">

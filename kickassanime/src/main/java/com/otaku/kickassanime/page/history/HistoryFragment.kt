@@ -31,20 +31,24 @@ class HistoryFragment : ListFragment<ItemHistoryBinding>() {
     override val layoutId: Int
         get() = R.layout.item_history
 
-    override val onBind: (ItemHistoryBinding, ITileData) -> Unit = { itemHistoryBinding: ItemHistoryBinding, iTileData: ITileData ->
-        itemHistoryBinding.history = iTileData
-        itemHistoryBinding.root.setOnClick { onItemClick(iTileData) }
-    }
+    override val onBind: (ItemHistoryBinding, ITileData) -> Unit =
+        { itemHistoryBinding: ItemHistoryBinding, iTileData: ITileData ->
+            itemHistoryBinding.history = iTileData
+            itemHistoryBinding.root.setOnClick { onItemClick(iTileData) }
+        }
 
-    override fun getList(): Flow<PagingData<ITileData>> = historyViewModel.recent.map {
-        pagingData -> pagingData.map { it }
-    }
+    override fun getList(): Flow<PagingData<ITileData>> =
+        historyViewModel.recent.map { pagingData ->
+            pagingData.map { it }
+        }
 
     override fun getListTag() = "Recently Watched"
 
+    override fun hideBackButton() = true
+
 
     private fun onItemClick(item: ITileData) {
-        if(item is AnimeHistory){
+        if (item is AnimeHistory) {
             val actionHistoryFragmentToEpisodeActivity =
                 HistoryFragmentDirections.actionHistoryFragmentToEpisodeActivity(
                     title = item.title,

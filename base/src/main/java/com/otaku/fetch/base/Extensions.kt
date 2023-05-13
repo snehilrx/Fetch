@@ -4,7 +4,7 @@ import android.content.res.Configuration
 import androidx.fragment.app.Fragment
 
 val Any.TAG: String
-    get() = this::class.java.simpleName
+    get() = this::class.java.name
 
 val Fragment.isLandscape : Boolean
     get() {

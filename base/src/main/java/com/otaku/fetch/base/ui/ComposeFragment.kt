@@ -1,7 +1,6 @@
 package com.otaku.fetch.base.ui
 
 import android.os.Bundle
-import android.util.Log
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -12,12 +11,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.AppModuleProvider
 import com.otaku.fetch.base.R
-import com.otaku.fetch.base.TAG
 import com.otaku.fetch.base.databinding.ComposeBinding
 import com.otaku.fetch.base.download.DownloadScreen
 import com.otaku.fetch.base.download.DownloadUtils
 import com.otaku.fetch.base.download.DownloadViewModel
 import com.otaku.fetch.base.settings.Settings
+import com.otaku.fetch.base.utils.UiUtils.statusBarHeight
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -38,15 +37,13 @@ class ComposeFragment : BindingFragment<ComposeBinding>(R.layout.compose) {
     override fun onBind(binding: ComposeBinding, savedInstanceState: Bundle?) {
         super.onBind(binding, savedInstanceState)
         val destination = arguments?.getString("destination")
-        binding.compose.apply {
-            setPadding(paddingLeft, paddingTop + getStatusBarHeight(), paddingRight, paddingBottom)
-        }
         binding.compose.setContent {
             if (destination != null) {
                 (activity?.application as? AppModuleProvider)?.currentModule?.ComposeTheme {
                     BaseNavHost(
                         startDestination = destination,
-                        modifier = Modifier.statusBarsPadding()
+                        modifier = Modifier.statusBarsPadding(),
+                        statusBarHeight = activity?.statusBarHeight?.toFloat()
                     )
                 }
             }
@@ -58,7 +55,8 @@ class ComposeFragment : BindingFragment<ComposeBinding>(R.layout.compose) {
     fun BaseNavHost(
         modifier: Modifier = Modifier,
         navController: NavHostController = rememberNavController(),
-        startDestination: String
+        startDestination: String,
+        statusBarHeight: Float? = null
     ) {
         NavHost(
             modifier = modifier,
@@ -66,11 +64,11 @@ class ComposeFragment : BindingFragment<ComposeBinding>(R.layout.compose) {
             startDestination = startDestination
         ) {
             composable(BaseRoutes.DOWNLOADS) {
-                DownloadScreen(downloadsVM)
+                DownloadScreen(downloadsVM, statusBarHeight)
             }
             composable(BaseRoutes.SETTINGS) {
                 downloadsVM.detachListener()
-                Settings()
+                Settings(statusBarHeight)
             }
         }
     }
@@ -81,20 +79,4 @@ class ComposeFragment : BindingFragment<ComposeBinding>(R.layout.compose) {
         downloadsVM.detachListener()
     }
 
-    private fun getStatusBarHeight(): Int {
-        var result = 0
-        val resourceId = resources.getIdentifier("status_bar_height", "dimen", "android")
-        if (resourceId > 0) {
-            try {
-                result = resources.getDimensionPixelSize(resourceId)
-            } catch (e: Exception) {
-                Log.e(
-                    TAG,
-                    "getStatusBarHeight: unable to calculate statusbar size, resources must be an issue",
-                    e
-                )
-            }
-        }
-        return result
-    }
 }

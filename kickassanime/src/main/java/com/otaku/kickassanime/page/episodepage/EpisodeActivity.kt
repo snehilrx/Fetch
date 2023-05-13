@@ -276,7 +276,8 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
                                     ts.first.let { binding.playerView.player?.seekTo(it) }
                                 }
                                 oldPos = currentPos
-                                playerViewUiHelper.skipIntroButton.text = "Skip $type"
+                                playerViewUiHelper.skipIntroButton.text =
+                                    getString(R.string.skip).format(type)
                                 playerViewUiHelper.skipIntroButton.isVisible = when (type) {
                                     TimestampType.INTRO.type -> true
                                     TimestampType.RECAP.type -> true
@@ -438,7 +439,7 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
                     if (it.shouldTerminateActivity) {
                         showError(it.exception, this)
                     } else {
-                        showError(it.exception, this) {/* no-op */ }
+                        showError(it.exception, this)
                     }
                 }
                 is State.LOADING -> showLoading()
@@ -533,7 +534,7 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
                     this
                 )
             } else {
-                showError("Not media is found (Media Item is null)", this, {})
+                showError("Not media is found (Media Item is null)", this)
             }
         }
         initDropDown()
@@ -542,8 +543,9 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
 
     private fun initDropDown() {
         if (useOfflineMode) {
-            binding.episodeDetailsContainer.servers.setSimpleItems(arrayOf("Offline"))
-            binding.episodeDetailsContainer.servers.setText("Offline")
+            val offlineText = getString(R.string.offline)
+            binding.episodeDetailsContainer.servers.setSimpleItems(arrayOf(offlineText))
+            binding.episodeDetailsContainer.servers.setText(offlineText)
         }
         viewModel.getServersLinks().observe(this) { links ->
             if (links.isNotEmpty()) {

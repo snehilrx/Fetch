@@ -81,6 +81,8 @@ dependencies {
     implementation "com.maxkeppeler.sheets:core:$versions.sheets"
     implementation "com.maxkeppeler.sheets:info:$versions.sheets"
     implementation "com.mikepenz:iconics-views:$versions.iconics"
+    implementation "com.mikepenz:iconics-compose:$versions.iconics"
+
 
     /* test dependency */
     androidTestImplementation "androidx.test.espresso:espresso-core:$versions.espresso_core"
