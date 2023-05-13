@@ -27,7 +27,7 @@ jobs:
           BASE64_STRING: ${{ secrets.KEY_BASE64 }}
           KEY_PATH: ${{ secrets.KEY_PATH }}
         run: echo "${BASE64_STRING}" | base64 --decode > "${KEY_PATH}"
-      - name: Store secrets in local.properties
+      - name: Store secrets in local.properties & build apk
         env:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
@@ -38,11 +38,7 @@ jobs:
           echo "keyPassword=${KEY_PASSWORD}" >> local.properties
           echo "keyPath=${KEY_PATH}" >> local.properties
           echo "storePassword=${STORE_PASSWORD}" >> local.properties
-          echo ${KEY_PATH}
-      - name: Generate APK
-        env:
-          dependencies_file: deps.gradle
-        run: ./gradlew :app:assembleRelease --stacktrace
+          ./gradlew :app:assembleRelease --stacktrace
       - name: Clean up
         env:
           KEY_PATH: ${{ secrets.KEY_PATH }}
