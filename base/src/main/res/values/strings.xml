@@ -27,4 +27,10 @@
     <string name="download_scheme_unsupported">This demo app only supports downloading http streams</string>
 
     <string name="download_live_unsupported">This demo app does not support downloading live content</string>
+    <string name="title_back">back</string>
+    <string name="title_share">share</string>
+    <string name="downloads">Downloads</string>
+    <string name="settings">Settings\n</string>
+    <string name="play">Play</string>
+    <string name="pause">Pause\n</string>
 </resources>

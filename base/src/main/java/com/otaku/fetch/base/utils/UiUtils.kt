@@ -1,6 +1,5 @@
 package com.otaku.fetch.base.utils
 
-import android.R
 import android.app.Activity
 import android.content.Context
 import android.content.res.Resources
@@ -9,32 +8,23 @@ import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.util.Log
 import android.util.TypedValue
-import android.widget.EditText
-import androidx.annotation.CheckResult
 import androidx.annotation.ColorInt
 import androidx.core.graphics.drawable.toBitmap
-import androidx.core.widget.doOnTextChanged
-import androidx.media3.common.util.Assertions.checkMainThread
+import androidx.core.view.WindowInsetsCompat
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.Transformation
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
+import com.maxkeppeler.sheets.core.ButtonStyle
 import com.maxkeppeler.sheets.info.InfoSheet
 import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.typeface.library.fontawesome.FontAwesome
-import com.mikepenz.iconics.utils.colorInt
-import com.mikepenz.iconics.utils.sizeDp
 import com.otaku.fetch.base.TAG
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
@@ -51,7 +41,7 @@ object UiUtils {
         return Color.argb(alpha, red, green, blue)
     }
 
-    fun getThemeColor(theme: Resources.Theme, id: Int = R.attr.colorPrimary): Int {
+    fun getThemeColor(theme: Resources.Theme, id: Int = android.R.attr.colorPrimary): Int {
         val typedValue = TypedValue()
         theme.resolveAttribute(id, typedValue, true)
         return typedValue.data
@@ -109,7 +99,7 @@ object UiUtils {
         loadingError: Throwable?,
         activity: Activity,
         text: String = "ok",
-        onPositive: () -> Unit = { activity.finish() }
+        onPositive: () -> Unit = { }
     ) {
         showError(loadingError?.message, activity, onPositive, text)
     }
@@ -120,16 +110,16 @@ object UiUtils {
         onPositive: () -> Unit = { activity.finish() },
         text: String = "ok"
     ) {
-        val errorIcon = IconicsDrawable(activity, FontAwesome.Icon.faw_bug).apply {
-            colorInt = Color.RED
-            sizeDp = 24
-        }
-        Log.e(TAG, "showError: $message")
-        InfoSheet(
 
-        ).show(activity) {
-            title("Oops, we got an error")
+        val errorIcon = IconicsDrawable(activity, FontAwesome.Icon.faw_bug)
+        Log.e(TAG, "showError: $message")
+        InfoSheet().show(activity) {
+            title("Oops, we got an error 🥵")
             content(message ?: "Something went wrong")
+            displayNegativeButton(false)
+            positiveButtonStyle(
+                ButtonStyle.OUTLINED
+            )
             onPositive(text, errorIcon) {
                 dismiss()
                 onPositive()
@@ -157,17 +147,14 @@ object UiUtils {
         }
     }
 
-    @ExperimentalCoroutinesApi
-    @CheckResult
-    @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
-    fun EditText.textChanges(): Flow<CharSequence?> {
-        return callbackFlow {
-            checkMainThread()
-
-            val listener = doOnTextChanged { text, _, _, _ -> trySend(text) }
-            awaitClose { removeTextChangedListener(listener) }
-        }.onStart { emit(text) }
-    }
+    val Activity.statusBarHeight
+        get() = run {
+            val rootWindowInsets = window?.decorView?.rootWindowInsets
+            return@run rootWindowInsets?.let {
+                WindowInsetsCompat.toWindowInsetsCompat(rootWindowInsets)
+                    .getInsets(WindowInsetsCompat.Type.statusBars()).top
+            }
+        }
 
     val Int.dp: Int
         get() = (this / Resources.getSystem().displayMetrics.density).toInt()

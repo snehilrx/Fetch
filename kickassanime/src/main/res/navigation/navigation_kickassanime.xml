@@ -8,7 +8,13 @@
             tools:layout="@layout/fragment_front_page"
             android:id="@+id/home"
             android:name="com.otaku.kickassanime.page.home.HomeFragment"
-            android:label="@string/module_name" />
+            android:label="@string/module_name">
+        <deepLink
+                android:id="@+id/deepLink"
+                app:uri="kaa.sm"
+                android:autoVerify="true"
+                app:action="ACTION_VIEW" />
+    </fragment>
     <activity
             android:id="@+id/episodeActivity"
             android:name="com.otaku.kickassanime.page.episodepage.EpisodeActivity"
@@ -29,15 +35,14 @@
                 app:nullable="true"
                 android:defaultValue="@null" />
     </activity>
-	<fragment
+    <fragment
             android:id="@+id/favourites"
             android:name="com.otaku.kickassanime.page.favourtites.FavouritesFragment"
-		android:label="Favourites"
-		tools:layout="@layout/fragment_favourites" >
-		<action
-			android:id="@+id/action_favouritesFragment_to_animeActivity"
-			app:destination="@id/animeActivity" />
-	</fragment>
+            android:label="Favourites">
+        <action
+                android:id="@+id/action_favouritesFragment_to_animeActivity"
+                app:destination="@id/animeActivity" />
+    </fragment>
 	<activity
 		android:id="@+id/animeActivity"
 		android:name="com.otaku.kickassanime.page.animepage.AnimeActivity"

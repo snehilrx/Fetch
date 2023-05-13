@@ -17,10 +17,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -32,8 +31,10 @@ import androidx.media3.common.StreamKey
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.offline.Download
 import androidx.media3.exoplayer.offline.DownloadRequest
-import androidx.media3.ui.R
-import androidx.navigation.compose.rememberNavController
+import com.mikepenz.iconics.compose.Image
+import com.mikepenz.iconics.typeface.library.fontawesome.FontAwesome
+import com.otaku.fetch.base.R
+import com.otaku.fetch.base.ui.FetchScaffold
 import com.otaku.fetch.base.ui.lazytree.ItemPlacement
 import com.otaku.fetch.base.ui.lazytree.ItemTree
 import com.otaku.fetch.base.ui.lazytree.LazyTreeList
@@ -48,48 +49,25 @@ import kotlin.math.min
 @androidx.annotation.OptIn(UnstableApi::class)
 fun DownloadScreen(
     downloadsVM: DownloadViewModel,
+    statusBarHeight: Float? = null,
 ) {
-    val navController = rememberNavController()
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val items = downloadsVM.anime()
     downloadsVM.refreshDownloadState()
     val context = LocalContext.current
-    Scaffold(
-        modifier = Modifier
-            .fillMaxSize()
-            .nestedScroll(scrollBehavior.nestedScrollConnection),
-        topBar = {
-            LargeTopAppBar(title = { Text(text = "Downloads", fontWeight = FontWeight.W800) },
-                navigationIcon = {
-                    IconButton(onClick = {
-                        navController.popBackStack()
-                    }) {
-                        Icon(
-                            imageVector = Icons.Filled.ArrowBack,
-                            contentDescription = "Localized description"
-                        )
-                    }
-                },
-                modifier = Modifier.statusBarsPadding(),
-                scrollBehavior = scrollBehavior,
-                actions = {
-                    PlayPauseButton(pauseAction = {
-                        downloadsVM.pause(context)
-                    }, playAction = {
-                        downloadsVM.resume(context)
-                    }, isPaused = downloadsVM.isDownloadPaused)
-                })
-        },
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(it)
-        ) {
-            DownloadList(
-                items.toItemTreeIndex(downloadsVM), downloadsVM
-            )
+    FetchScaffold(
+        title = stringResource(id = R.string.downloads),
+        statusBarHeight ?: 0f,
+        actions = {
+            PlayPauseButton(pauseAction = {
+                downloadsVM.pause(context)
+            }, playAction = {
+                downloadsVM.resume(context)
+            }, isPaused = downloadsVM.isDownloadPaused)
         }
+    ) {
+        DownloadList(
+            items.toItemTreeIndex(downloadsVM), downloadsVM
+        )
     }
 }
 
@@ -111,15 +89,9 @@ fun PlayPauseButton(
         toggleableState = !toggleableState
     }) {
         if (toggleableState) {
-            Icon(
-                painter = painterResource(id = R.drawable.exo_icon_play),
-                contentDescription = "Localized description"
-            )
+            Image(asset = FontAwesome.Icon.faw_play)
         } else {
-            Icon(
-                painter = painterResource(id = R.drawable.exo_icon_pause),
-                contentDescription = "Localized description"
-            )
+            Image(asset = FontAwesome.Icon.faw_pause)
         }
     }
 }
@@ -240,8 +212,7 @@ private fun DownloadRepository.TreeNode.toItemTreeIndex(
                         },
                         playAction = {
                             val bundle = item.download.launchBundle
-                            val additionalData =
-                                item.download.download.request.toOfflineBundle()
+                            val additionalData = item.download.download.request.toOfflineBundle()
                             bundle.putBundle("mediaItem", additionalData)
                             localContext.startActivity(Intent(
                                 localContext, item.download.launchActivity
@@ -271,25 +242,19 @@ private fun DownloadRequest.toOfflineBundle(): Bundle {
 @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
 fun Bundle.toMediaItem(): MediaItem {
     val keys = ArrayList<StreamKey>()
-    return MediaItem.Builder()
-        .setMediaId(getString("id", ""))
-        .setUri(
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                getParcelable("uri", Uri::class.java)
-            } else {
-                getParcelable("uri")
-            }
-        )
-        .setCustomCacheKey(getString("key"))
-        .setMimeType(getString("mime"))
-        .setStreamKeys(
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                getParcelableArray("streamKey", StreamKey::class.java)
-            } else {
-                getParcelableArray("streamKey")
-            }?.mapNotNull { it as? StreamKey }?.toCollection(keys)
-        )
-        .build()
+    return MediaItem.Builder().setMediaId(getString("id", "")).setUri(
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            getParcelable("uri", Uri::class.java)
+        } else {
+            getParcelable("uri")
+        }
+    ).setCustomCacheKey(getString("key")).setMimeType(getString("mime")).setStreamKeys(
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            getParcelableArray("streamKey", StreamKey::class.java)
+        } else {
+            getParcelableArray("streamKey")
+        }?.mapNotNull { it as? StreamKey }?.toCollection(keys)
+    ).build()
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
