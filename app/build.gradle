@@ -6,6 +6,8 @@ plugins {
     id 'dagger.hilt.android.plugin'
 }
 
+apply from: '../deps.gradle'
+
 android {
     signingConfigs {
         release {
