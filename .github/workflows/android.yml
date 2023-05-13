@@ -39,6 +39,8 @@ jobs:
           echo "keyPath=${KEY_PATH}" >> local.properties
           echo "storePassword=${STORE_PASSWORD}" >> local.properties
       - name: Generate APK
+        env:
+          dependencies_file: deps.gradle
         run: ./gradlew :app:assembleRelease --stacktrace
       - name: Clean up
         env:
