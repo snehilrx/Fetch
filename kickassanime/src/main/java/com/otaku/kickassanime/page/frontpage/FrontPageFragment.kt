@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.ActivityNavigator
@@ -20,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.carouselrecyclerview.CarouselRecyclerview
 import com.google.android.material.appbar.AppBarLayout
 import com.lapism.search.widget.MaterialSearchView
+import com.mikepenz.iconics.view.IconicsTextView
 import com.otaku.fetch.base.TAG
 import com.otaku.fetch.base.databinding.CarouselItemLayoutBinding
 import com.otaku.fetch.base.livedata.State
@@ -127,7 +127,7 @@ class FrontPageFragment : BindingFragment<FragmentFrontPageBinding>(R.layout.fra
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
             val view = LayoutInflater.from(parent.context)
                 .inflate(
-                    com.google.android.material.R.layout.m3_auto_complete_simple_item,
+                    R.layout.simple_item_iconics,
                     parent,
                     false
                 )
@@ -135,9 +135,11 @@ class FrontPageFragment : BindingFragment<FragmentFrontPageBinding>(R.layout.fra
         }
 
         override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-            val textView = holder.itemView as TextView
+            val textView = holder.itemView as IconicsTextView
             val item = getItem(position)
-            textView.text = item.first
+            val text = "{faw-history}   ${item.first}"
+            textView.text = text
+
             textView.setOnClick {
                 onClick(item)
             }
@@ -186,8 +188,11 @@ class FrontPageFragment : BindingFragment<FragmentFrontPageBinding>(R.layout.fra
         searchInterface?.setQueryListener(
             object : MaterialSearchView.OnQueryTextListener {
                 override fun onQueryTextChange(newText: CharSequence) {
-                    if (newText.length > 2)
-                        frontPageViewModel.querySearchSuggestions(newText.toString())
+                    if (newText.length > 3) {
+                        frontPageViewModel.querySearchSuggestions(newText)
+                    } else {
+                        frontPageViewModel.querySearchSuggestions("")
+                    }
                 }
 
                 override fun onQueryTextSubmit(query: CharSequence) {
@@ -198,6 +203,7 @@ class FrontPageFragment : BindingFragment<FragmentFrontPageBinding>(R.layout.fra
                 }
             }
         )
+
     }
 
     private fun openSearchResultFragment(query: String) {

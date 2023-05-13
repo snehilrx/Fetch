@@ -1,5 +1,6 @@
 package com.otaku.kickassanime.page.frontpage.data
 
+import android.text.TextUtils
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -8,14 +9,13 @@ import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.otaku.fetch.base.TAG
 import com.otaku.fetch.base.livedata.State
+import com.otaku.fetch.base.utils.UiUtils.throttleLatest
 import com.otaku.kickassanime.db.models.AnimeSearchResult
 import com.otaku.kickassanime.page.search.SearchRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.zip
 import kotlinx.coroutines.launch
 import org.threeten.bp.LocalDateTime
-import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 
 @HiltViewModel
@@ -63,27 +63,25 @@ class FrontPageViewModel @Inject constructor(
     fun isLoading(): LiveData<State> = isLoading
     fun searchIsLoading(): LiveData<State> = searchIsLoading
 
-    private val lock = AtomicBoolean(false)
-    private var query = ""
-    fun querySearchSuggestions(query: String) {
-        if (this.query == query) return
-        this.query = query
-        if (lock.get()) return
-        viewModelScope.launch {
-            lock.set(true)
-            searchIsLoading.postValue(State.LOADING())
-            try {
-                val suggestions = searchRepository.search(this@FrontPageViewModel.query).map {
-                    AnimeSearchResult(it)
+    fun querySearchSuggestions(query: CharSequence) {
+        throttleLatest<CharSequence>(coroutineScope = viewModelScope) {
+            viewModelScope.launch {
+                searchIsLoading.postValue(State.LOADING())
+                try {
+                    val suggestions = if (TextUtils.isEmpty(query)) {
+                        emptyList()
+                    } else {
+                        searchRepository.search(it.toString()).map {
+                            AnimeSearchResult(it)
+                        }
+                    }
+                    searchSuggestions.postValue(suggestions)
+                    searchIsLoading.postValue(State.SUCCESS())
+                } catch (e: Exception) {
+                    searchIsLoading.postValue(State.FAILED(e))
                 }
-                searchSuggestions.postValue(suggestions)
-                searchIsLoading.postValue(State.SUCCESS())
-            } catch (e: Exception) {
-                searchIsLoading.postValue(State.FAILED(e))
             }
-            delay(100)
-            lock.set(false)
-        }
+        }(query)
     }
 
     fun getSearchSuggestions(): LiveData<List<AnimeSearchResult>> = searchSuggestions

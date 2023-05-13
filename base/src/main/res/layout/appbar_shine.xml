@@ -24,12 +24,9 @@
 	            android:layout_width="match_parent"
 	            android:layout_height="match_parent"
 	            app:collapsedTitleGravity="fill_vertical"
-	            app:collapsedTitleTextColor="?attr/colorSecondary"
-	            app:contentScrim="?attr/colorPrimary"
 	            app:layout_scrollFlags="scroll|snap|exitUntilCollapsed"
 	            app:expandedTitleGravity="top"
 	            app:expandedTitleMarginTop="100dp"
-	            app:statusBarScrim="?attr/colorSecondary"
 	            app:toolbarId="@+id/toolbar">
 
                 <TextView

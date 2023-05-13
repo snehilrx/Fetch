@@ -7,6 +7,7 @@ import androidx.paging.PagingConfig
 import com.google.gson.Gson
 import com.otaku.kickassanime.api.KickassAnimeService
 import com.otaku.kickassanime.api.model.AnimeSearchResponse
+import com.otaku.kickassanime.api.model.Filters
 import com.otaku.kickassanime.api.model.SearchRequest
 import com.otaku.kickassanime.db.KickassAnimeDb
 import com.otaku.kickassanime.db.models.entity.AnimeEntity
@@ -69,8 +70,8 @@ class SearchRepository @Inject constructor(
         }
     }
 
-    suspend fun getFilters() {
-
+    suspend fun getFilters(): Filters {
+        return kickassAnimeService.getFilters()
     }
 
     suspend fun search(query: String): List<AnimeEntity> {

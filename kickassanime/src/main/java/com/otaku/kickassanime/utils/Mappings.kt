@@ -116,7 +116,9 @@ fun EpisodesWithPreview.asEpisodeEntity(
         animeSlug = animeSlug,
         thumbnail = this.thumbnail?.hq?.removeSuffix("-hq")
             ?: this.thumbnail?.sm?.removeSuffix("-sm"),
-        language = language
+        language = language,
+        prev = prev,
+        next = next
     )
 }
 

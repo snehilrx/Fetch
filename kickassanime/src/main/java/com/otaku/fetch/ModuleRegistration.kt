@@ -26,7 +26,11 @@ class ModuleRegistration0 : ModuleLoaders {
         registerModule(
             "Kickass Anime",
             R.drawable.kaa,
-            KickassAppModule(moduleRequirements.kickassAnimeService(), moduleRequirements.kickassDb())
+            KickassAppModule(
+                moduleRequirements.kickassAnimeService(),
+                moduleRequirements.kickassDb(),
+                applicationContext
+            )
         )
     }
 }
