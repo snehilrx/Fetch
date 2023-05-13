@@ -63,7 +63,6 @@ ext.versions = [
 
 Properties properties = new Properties()
 properties.load(project.rootProject.file('local.properties').newDataInputStream())
-System.out.print(properties.toMapString())
 ext.env = [
         compileSdk               : 33,
         applicationId            : full_app_name,
