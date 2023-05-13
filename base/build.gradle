@@ -11,8 +11,8 @@ android {
     signingConfigs {
         release {
             storeFile file(env.keyPath)
-            storePassword env.keyStorePassword
-            keyPassword env.keyStorePassword
+            storePassword env.storePassword
+            keyPassword env.keyPassword
             keyAlias env.keyAlias
         }
     }
