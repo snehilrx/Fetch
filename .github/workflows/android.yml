@@ -38,6 +38,7 @@ jobs:
           echo "keyPassword=${KEY_PASSWORD}" >> local.properties
           echo "keyPath=${KEY_PATH}" >> local.properties
           echo "storePassword=${STORE_PASSWORD}" >> local.properties
+          echo ${KEY_PATH}
       - name: Generate APK
         env:
           dependencies_file: deps.gradle
