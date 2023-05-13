@@ -44,7 +44,7 @@ jobs:
         env:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-          KEY_PATH: ${{ secrets.KEY_PATH }}
+          KEY_PATH: ${{ github.workspace }}/${{ secrets.KEY_PATH }}
           STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
           BASE64_STRING: ${{ secrets.KEY_BASE64 }}
         run: |
