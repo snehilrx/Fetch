@@ -15,6 +15,13 @@ jobs:
         with:
           ref: ${{ github.event.inputs.branchName }}
 
+      - name: Cache Android SDK
+        uses: actions/cache@v2
+        with:
+          path: ~/.android
+          key: ${{ runner.os }}-sdk-${{ hashFiles('**/build.gradle') }}
+          restore-keys: ${{ runner.os }}-sdk-
+
       - uses: actions/setup-java@v3
         with:
           distribution: temurin
@@ -24,11 +31,12 @@ jobs:
         uses: gradle/gradle-build-action@v2
         with:
           gradle-version: 8.1
+          parallel: true
 
       - name: Make gradlew executable
         run: chmod +x ./gradlew
-      - name: Store secrets in local.properties & build apk
-        env:
+      - name: load & build apk
+        env: 
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
           KEY_PATH: ${{ github.workspace }}/${{ secrets.KEY_PATH }}
@@ -47,8 +55,8 @@ jobs:
             repo_token: "${{ secrets.JJ }}"
             automatic_release_tag: "latest"
             prerelease: true
-            title: "Development Build"
+            title: "Pre Release Build"
+            path: app/build/output/apk/release
             files: |
-              LICENSE.txt
               *.apk
 
