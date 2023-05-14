@@ -56,7 +56,7 @@ jobs:
             automatic_release_tag: "latest"
             prerelease: true
             title: "Pre Release Build"
-            path: app/build/output/apk/release
+            path: ${{ github.workspace }}/app/build/output/apk/release/
             files: |
-              *.apk
+              app-release.apk
 
