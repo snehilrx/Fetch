@@ -63,10 +63,12 @@ ext.versions = [
 
 ext.env = [
         compileSdk               : 33,
-        applicationId            : full_app_name,
+        applicationId            : 'com.otaku.fetch',
         minSdk                   : 26,
         targetSdk                : 33,
-        versionCode              : 2,
-        versionName              : "1.1",
+        versionCode              : 3,
+        versionName              : "1.1.0",
         testInstrumentationRunner: "com.otaku.kickassanime.KickassTestRunner",
 ]
+
+System.setProperty("APP_VERSION_NAME", project.version.toString())
