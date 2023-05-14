@@ -55,8 +55,7 @@ jobs:
       - name: Get Version Info
         id: version
         run: |
-          echo "APP_VERSION_NAME=$(grep versionName ${{ github.workspace }}/app/build.gradle | awk '{print $2}' | tr -d \"'\")" >> $GITHUB_ENV
-          echo "APP_VERSION_CODE=$(grep versionCode ${{ github.workspace }}/app/build.gradle | awk '{print $2}')" >> $GITHUB_ENV
+          echo "APP_VERSION_NAME=$(grep -w 'versionName' ${{ github.workspace }}/deps.gradle | awk -F: '{printf "%s,", $2}' | tr -d '[:space:,]' | xargs echo')" >> $GITHUB_ENV
     
       - uses: actions/upload-artifact@v3
         with:
@@ -66,9 +65,9 @@ jobs:
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
             repo_token: "${{ secrets.JJ }}"
-            automatic_release_tag: "${{ env.APP_VERSION_NAME }} - ${{ env.APP_VERSION_CODE }}"
+            automatic_release_tag: "${{ env.APP_VERSION_NAME }}"
             prerelease: false
-            title: "${{ env.APP_VERSION_NAME }} - ${{ env.APP_VERSION_CODE }}"
+            title: "${{ env.APP_VERSION_NAME }}"
             files: |
               ${{ github.workspace }}/app/build/output/apk/release/*.apk
 
