@@ -45,21 +45,38 @@ jobs:
           echo "${BASE64_STRING}" | base64 --decode > ${KEY_PATH}
           ./gradlew :app:assembleRelease --stacktrace
           rm -f ${KEY_PATH}
-
       - uses: actions/upload-artifact@v3
         with:
           name: builds
           path: ${{ github.workspace }}/app/build/outputs/apk/release/
-
       - uses: actions/upload-artifact@v3
         with:
           name: ${{ github.workspace }}/build-reports
           path: ${{ github.workspace }}/build/reports/
           
-      - name: Releasing using Hub
-        uses: ShaunLWM/action-release-debugapk@master
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1.0.0
         env:
-         GITHUB_TOKEN: ${{ secrets.JJ }}
-         APP_FOLDER: app
-         RELEASE_TITLE: New Build
+          GITHUB_TOKEN: ${{ secrets.JJ }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: |
+            Changes in this release:
+            - Add feature X
+            - Fix bug Y
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.JJ }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: app/build/outputs/apk/release/app-release.apk
+          asset_name: app-release.apk
+          asset_content_type: application/vnd.android.package-archive
 
