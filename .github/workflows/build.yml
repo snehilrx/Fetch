@@ -47,21 +47,17 @@ jobs:
           ./gradlew :app:assembleRelease --stacktrace
           rm -f ${KEY_PATH}
 
-      - name: Prepare release notes
-        run: echo ::set-output name=RELEASE_NOTES::$(git log $(git describe --tags --abbrev=0)..HEAD --no-merges --pretty=format:"%s -- %an, %as%n" | head -n 100)
-        id: release-notes
-
       - uses: actions/upload-artifact@v3
         with:
           name: builds
           path: ${{ github.workspace }}/app/build/outputs/apk/release/
+
       - name: Get Version Info
         id: version
         run: |
           echo "APP_VERSION_NAME=$(grep versionName app/build.gradle | awk '{print $2}' | tr -d \"'\")" >> $GITHUB_ENV
           echo "APP_VERSION_CODE=$(grep versionCode app/build.gradle | awk '{print $2}')"<< $GITHUB_ENV
-      
-      - name: Display Version Info
+    
       - uses: actions/upload-artifact@v3
         with:
           name: build-reports
