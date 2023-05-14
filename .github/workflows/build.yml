@@ -58,11 +58,13 @@ jobs:
           path: build/reports/
           
       - uses: "marvinpinto/action-automatic-releases@latest"
+        env: 
+          version: ${{ env.APP_VERSION_NAME }}
         with:
             repo_token: "${{ secrets.JJ }}"
-            automatic_release_tag: "${{ env.APP_VERSION_NAME }}"
+            automatic_release_tag: "latest ${version}"
             prerelease: false
-            title: "${{ env.APP_VERSION_NAME }}"
+            title: "${version}"
             files: |
               ${{ github.workspace }}/app/build/output/apk/release/*.apk
 
