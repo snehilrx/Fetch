@@ -52,11 +52,6 @@ jobs:
           name: builds
           path: ${{ github.workspace }}/app/build/outputs/apk/release/
 
-      - name: Get Version Info
-        id: version
-        run: |
-          echo "APP_VERSION_NAME=$(grep -w 'versionName' ${{ github.workspace }}/deps.gradle | awk -F: '{printf "%s,", $2}' | tr -d '[:space:,]' | xargs echo')" >> $GITHUB_ENV
-    
       - uses: actions/upload-artifact@v3
         with:
           name: build-reports
