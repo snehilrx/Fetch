@@ -31,7 +31,6 @@ jobs:
         uses: gradle/gradle-build-action@v2
         with:
           gradle-version: 8.1
-          parallel: true
 
       - name: Make gradlew executable
         run: chmod +x ./gradlew
@@ -54,17 +53,13 @@ jobs:
 
       - uses: actions/upload-artifact@v3
         with:
-          name: build-reports
-          path: build/reports/
+          name: ${{ github.workspace }}/build-reports
+          path: ${{ github.workspace }}/build/reports/
           
-      - uses: "marvinpinto/action-automatic-releases@latest"
-        env: 
-          version: ${{ env.APP_VERSION_NAME }}
-        with:
-            repo_token: "${{ secrets.JJ }}"
-            automatic_release_tag: "latest ${version}"
-            prerelease: false
-            title: "${version}"
-            files: |
-              ${{ github.workspace }}/app/build/output/apk/release/*.apk
+      - name: Releasing using Hub
+        uses: ShaunLWM/action-release-debugapk@master
+        env:
+         GITHUB_TOKEN: ${{ secrets.JJ }}
+         APP_FOLDER: app
+         RELEASE_TITLE: New Build
 
