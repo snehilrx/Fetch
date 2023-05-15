@@ -38,6 +38,8 @@ class DownloadRepositoryTest {
 
     private val fakeModule = object : AppModule {
         override val name: String = "fas"
+        override val notificationDeeplink: String
+            get() = "test"
 
         override suspend fun findEpisode(
             mediaId: String,
@@ -60,7 +62,7 @@ class DownloadRepositoryTest {
         val fakeDownloads =
             hashMapOf(
                 Uri.parse("some") to
-                        createFakeDownload(slug)
+                        createFakeDownload()
             )
         ModuleRegistry.registerModule("", 2, fakeModule)
         runBlocking {
@@ -75,7 +77,7 @@ class DownloadRepositoryTest {
         Assert.assertEquals(episode.size, 1)
     }
 
-    private fun createFakeDownload(slug: String): Download {
+    private fun createFakeDownload(): Download {
         val downloadRequest = DownloadRequest.Builder("osna", Uri.parse("kkkk"))
             .setData(Util.getUtf8Bytes(slug)).build()
         return Download(

@@ -22,13 +22,9 @@ fun Recent.asAnimeEntity(): AnimeEntity {
     )
 }
 
-fun extractEpisodeSlug(slug: String?): String {
-    return slug?.split("/")?.getOrNull(2) ?: ""
-}
-
 fun Recent.asEpisodeEntity(): EpisodeEntity {
     return EpisodeEntity(
-        episodeSlug = extractEpisodeSlug(this.watchUri),
+        episodeSlug = getEpisodeSlug(),
         animeSlug = slug,
         duration = this.duration,
         language = this.language,
