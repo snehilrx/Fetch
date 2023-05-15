@@ -43,7 +43,7 @@ jobs:
           BASE64_STRING: ${{ secrets.KEY_BASE64 }}
         run: |
           echo "${BASE64_STRING}" | base64 --decode > ${KEY_PATH}
-          ./gradlew :app:assembleRelease --stacktrace
+          ./gradlew :app:assembleRelease --scan
           rm -f ${KEY_PATH}
        
       # attaches the build apks in workflow run page 
