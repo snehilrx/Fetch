@@ -85,9 +85,6 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: '0'
-      - name: Get app version
-        id: get_version
-        uses: eriknyk/android-get-app-version-action@v1.0.1
       - name: Download APK from build
         uses: actions/download-artifact@v1
         with:
