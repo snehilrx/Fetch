@@ -11,7 +11,7 @@ ext.versions = [
         hilt_compiler            : '1.0.0',
         retrofit                 : '2.9.0',
         room                     : '2.6.0-alpha01',
-        core_ktx                 : '1.12.0-alpha03',
+        core_ktx                 : '1.12.0-alpha04',
         appcompat                : '1.7.0-alpha02',
         material                 : '1.9.0',
         constraintlayout         : '2.1.4',
@@ -49,8 +49,8 @@ ext.versions = [
         compose_paging           : '1.0.0-alpha19',
         compose_shimmer          : '1.0.5',
         compose_glide            : '1.0.0-alpha.1',
-        compose_material3        : '1.1.0-rc01',
-        compose_vector_animations: '1.5.0-alpha03',
+        compose_material3        : '1.2.0-alpha01',
+        compose_vector_animations: '1.5.0-alpha04',
         compose_text_flow        : '1.1.0',
         kotlin_okhttp            : '1.0',
         datastore                : '1.0.0',
@@ -61,14 +61,72 @@ ext.versions = [
         mockwebserver            : "5.0.0-alpha.10"
 ]
 
+// region automated versioning system
+Properties props = new Properties()
+/**
+ * will be created by github actions or
+ * add manually the following props to version.properties (git ignored)
+ * majorVersion=1
+ * minorVersion=0
+ * patchVersion=0
+ * buildNumber=
+ * */
+def versionFile = project.rootProject.file('version.properties')
+if (versionFile.exists()) {
+    props.load(versionFile.newDataInputStream())
+    props.each { prop ->
+        project.ext.set(prop.key, prop.value)
+    }
+}
+
+private static Integer getVersionCode(ext) {
+    int major = ext.majorVersion as Integer
+    int minor = ext.minorVersion as Integer
+    int patch = ext.patchVersion as Integer
+
+    return major * 10000 + minor * 100 + patch
+}
+
+private static String getVersionName(ext) {
+    if (ext.buildNumber) {
+        return "${ext.majorVersion}.${ext.minorVersion}.${ext.patchVersion}.${ext.buildNumber}"
+    }
+
+    return "${ext.majorVersion}.${ext.minorVersion}.${ext.patchVersion}"
+}
+// endregion
+
 ext.env = [
         compileSdk               : 33,
         applicationId            : 'com.otaku.fetch',
         minSdk                   : 26,
         targetSdk                : 33,
-        versionCode              : 3,
-        versionName              : "1.1.0",
+        versionCode              : getVersionCode(ext),
+        versionName              : getVersionName(ext),
         testInstrumentationRunner: "com.otaku.kickassanime.KickassTestRunner",
 ]
 
-System.setProperty("APP_VERSION_NAME", project.version.toString())
+
+def propertiesFile = project.rootProject.file('local.properties')
+/*
+ * loading apk signing values securely,
+ * the values we are looking for are -
+ * KEY_PATH - key file path
+ * KEY_PASSWORD
+ * STORE_PASSWORD=redC@t33
+ * KEY_ALIAS
+ * if local props doesn't exists, we will assume this script is running on github action.
+ * */
+if (propertiesFile.exists()) {
+    Properties properties = new Properties()
+    properties.load(propertiesFile.newDataInputStream())
+    // Looking in local props for signing. This pros file will be absent on github actions.
+    properties.each(prop -> {
+        System.properties.putIfAbsent(prop.key, prop.value)
+    })
+} else {
+    // github actions will provide environment variables containing apk signing values.
+    System.getenv().each(prop -> {
+        System.properties.putIfAbsent(prop.key, prop.value)
+    })
+}
