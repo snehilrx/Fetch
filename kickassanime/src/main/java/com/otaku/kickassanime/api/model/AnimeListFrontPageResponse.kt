@@ -12,8 +12,7 @@ data class Recent(
     var duration: Long = 0,
     @SerializedName("created_at") var createdAt: String? = null,
     @SerializedName("locales") var locales: ArrayList<String> = arrayListOf(),
-    @SerializedName("title") var title: String? = null,
-    @SerializedName("title_en") var titleEn: String? = null,
+    @SerializedName("title_en") var title: String? = null,
     @SerializedName("synopsis") var synopsis: String? = null,
     @SerializedName("episode_title") var episodeTitle: String? = null,
     @SerializedName("episode_number") var episodeNumber: Float? = null,
@@ -23,8 +22,10 @@ data class Recent(
     @SerializedName("year") var year: Int? = null,
     @SerializedName("rating") var rating: String? = null,
     @SerializedName("slug") var slug: String? = null,
-    @SerializedName("watch_uri") var watchUri: String? = null
-)
+    @SerializedName("watch_uri") private var watchUri: String? = null
+) {
+    fun getEpisodeSlug() = slug?.split("/")?.getOrNull(2) ?: ""
+}
 
 @Keep
 data class Images(

@@ -44,9 +44,28 @@ class ModuleActivity :
     }
 
     private fun initNavigationView() {
-        val appModule = (application as? FetchApplication)?.currentModule ?: return
+        var appModule = (application as? FetchApplication)?.currentModule
+        val deepLink = intent.extras?.getString(ARG_MODULE_DEEPLINK)
+        if (appModule == null) {
+            val moduleName = intent.extras?.getString(ARG_MODULE_NAME)
+            if (moduleName == null) {
+                finish()
+                return
+            } else {
+                appModule = ModuleRegistry.getModulesList().find {
+                    it.displayName.equals(moduleName, true)
+                }?.appModule
+                (application as? FetchApplication)?.currentModule = appModule
+
+            }
+        }
+        if (appModule == null) {
+            finish()
+            return
+        }
         val navHostFragment = binding.fragmentContainerView.getFragment<NavHostFragment>()
         navHostFragment.navController.setGraph(appModule.getNavigationGraph())
+        deepLink?.let { navHostFragment.navController.navigate(it) }
         binding.bottomNavigation?.inflateMenu(appModule.getBottomNavigationMenu())
         binding.bottomNavigation?.setupWithNavController(navHostFragment.navController)
         binding.railNavigation?.inflateMenu(appModule.getBottomNavigationMenu())
@@ -152,5 +171,10 @@ class ModuleActivity :
 
     override fun setQueryListener(listener: MaterialSearchView.OnQueryTextListener) {
         binding.searchView.setOnQueryTextListener(listener)
+    }
+
+    companion object {
+        const val ARG_MODULE_DEEPLINK = "data"
+        const val ARG_MODULE_NAME = "name"
     }
 }
