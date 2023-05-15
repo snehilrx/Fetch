@@ -9,6 +9,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    outputs:
+      version: ${{ steps.apk.outputs.version }}
+      
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -34,7 +37,7 @@ jobs:
 
       - name: Make gradlew executable
         run: chmod +x ./gradlew
-      - name: load & build apk
+      - name: apk
         env: 
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
@@ -45,21 +48,28 @@ jobs:
           echo "${BASE64_STRING}" | base64 --decode > ${KEY_PATH}
           ./gradlew :app:assembleRelease --stacktrace
           rm -f ${KEY_PATH}
+          echo "::set-output name=version::${APP_VERSION_NAME}"
+       
+      # attaches the build apks in workflow run page 
       - uses: actions/upload-artifact@v3
         with:
           name: builds
           path: ${{ github.workspace }}/app/build/outputs/apk/release/*.apk
+          
+      # attaches the build report in workflow run page 
       - uses: actions/upload-artifact@v3
         with:
           name: ${{ github.workspace }}/build-reports
           path: ${{ github.workspace }}/build/reports/
-          
+  
   release:
     name: Release APK
     needs: build
     runs-on: ubuntu-latest
     steps:
       - name: Download APK from build
+        env:
+          APP_VERSION_NAME: ${{ needs.build.outputs.version }}
         uses: actions/download-artifact@v1
         with:
           name: builds
@@ -69,8 +79,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.JJ }}
         with:
-          tag_name: v${{ github.event.inputs.version }}
-          name: Release v${{ github.event.inputs.version }}
+          tag_name: v${APP_VERSION_NAME}
+          name: Release v${APP_VERSION_NAME}
           draft: false
           prerelease: false
-          files: fetch/fetch_${{ github.event.inputs.version }}.apk
+          files: ${{ github.workspace }}/app/build/outputs/apk/release/*.apk
