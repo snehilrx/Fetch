@@ -20,6 +20,7 @@ import com.lapism.search.widget.MaterialSearchView
 import com.lapism.search.widget.NavigationIconCompat
 import com.otaku.fetch.base.ui.BindingActivity
 import com.otaku.fetch.base.ui.SearchInterface
+import com.otaku.fetch.base.utils.UiUtils.statusBarHeight
 import com.otaku.fetch.databinding.ActivityModuleBinding
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -115,7 +116,7 @@ class ModuleActivity :
 
         searchView.apply {
             findViewById<View>(com.lapism.search.R.id.search_view_background)
-                ?.setPaddingRelative(0, mStatusBarHeight, 0, 0)
+                ?.setPaddingRelative(0, statusBarHeight, 0, 0)
             addView(searchSuggestionsList)
             addView(label)
             addView(progressBar)

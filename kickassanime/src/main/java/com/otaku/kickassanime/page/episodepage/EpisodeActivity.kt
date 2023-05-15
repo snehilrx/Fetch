@@ -45,6 +45,7 @@ import com.otaku.fetch.base.ui.BindingActivity
 import com.otaku.fetch.base.ui.setOnClick
 import com.otaku.fetch.base.utils.UiUtils.loadBitmapFromUrl
 import com.otaku.fetch.base.utils.UiUtils.showError
+import com.otaku.fetch.base.utils.UiUtils.statusBarHeight
 import com.otaku.kickassanime.R
 import com.otaku.kickassanime.api.model.CommonSubtitle
 import com.otaku.kickassanime.databinding.ActivityEpisodeBinding
@@ -139,7 +140,7 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
         initializeWebView()
         setTransparentStatusBar()
         showBackButton()
-        binding.appbarLayout.setPaddingRelative(0, mStatusBarHeight, 0, 0)
+        binding.appbarLayout.setPaddingRelative(0, statusBarHeight, 0, 0)
     }
 
     private fun isFullscreen(): Boolean {
