@@ -48,7 +48,7 @@ jobs:
       - uses: actions/upload-artifact@v3
         with:
           name: builds
-          path: ${{ github.workspace }}/app/build/outputs/apk/release/
+          path: ${{ github.workspace }}/app/build/outputs/apk/release/*.apk
       - uses: actions/upload-artifact@v3
         with:
           name: ${{ github.workspace }}/build-reports
@@ -62,7 +62,7 @@ jobs:
       - name: Download APK from build
         uses: actions/download-artifact@v1
         with:
-          name: Fetch
+          name: builds
       - name: Create Release
         id: create_release
         uses: softprops/action-gh-release@v1
