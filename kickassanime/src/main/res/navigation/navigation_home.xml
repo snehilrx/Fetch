@@ -24,6 +24,11 @@
         <action
                 android:id="@+id/action_frontPageFragment_to_searchFragment"
                 app:destination="@id/searchFragment" />
+        <deepLink
+                android:id="@+id/deepLink3"
+                app:uri="https://kaas.am"
+                android:autoVerify="true"
+                app:action="ACTION_VIEW" />
     </fragment>
     <fragment
             android:id="@+id/recent"
@@ -33,6 +38,11 @@
         <action
                 android:id="@+id/action_recent_to_episodeFragment"
                 app:destination="@id/episodeActivity" />
+        <deepLink
+                android:id="@+id/deepLink2"
+                app:uri="https://kaas.am/recent"
+                android:autoVerify="true"
+                app:action="ACTION_VIEW" />
     </fragment>
     <fragment
             android:id="@+id/trending"

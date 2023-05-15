@@ -33,5 +33,10 @@
     <string name="filter">filter</string>
     <string name="skip">Skip %s</string>
     <string name="offline">Offline</string>
+    <string name="notification_channel_description">Kickass anime new release feeds</string>
+    <string name="group_notification_title">New animes were recenty added on kickass anime.</string>
+    <string name="new_kickassanime_notification_body">%s\\nClick to view more animes</string>
+    <string name="notification_title">New Anime Released %s</string>
+    <string name="episode">Episode %d</string>
 
 </resources>
