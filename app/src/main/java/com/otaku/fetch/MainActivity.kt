@@ -23,6 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.otaku.fetch.base.R
+import com.otaku.fetch.base.utils.UiUtils.statusBarHeight
 import com.otaku.kickassanime.ui.theme.KickassAnimeTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -108,6 +109,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun launchModule(data: ModuleRegistry.ModuleData) {
+        statusBarHeight
         (application as? FetchApplication)?.currentModule = data.appModule
         val moduleIntent = Intent(this, ModuleActivity::class.java)
         startActivity(moduleIntent)

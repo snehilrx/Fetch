@@ -2,7 +2,6 @@ package com.otaku.fetch.base.ui
 
 import android.graphics.Color
 import android.os.Bundle
-import android.util.Log
 import android.view.MenuItem
 import android.view.ViewGroup
 import android.view.WindowManager
@@ -17,7 +16,6 @@ import androidx.core.view.updateLayoutParams
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import com.google.android.material.appbar.AppBarLayout
-import com.otaku.fetch.base.TAG
 import com.otaku.fetch.base.databinding.AppbarImageBinding
 import com.otaku.fetch.bindings.ImageViewBindings
 import java.lang.ref.WeakReference
@@ -32,7 +30,6 @@ import java.lang.ref.WeakReference
 open class BindingActivity<T : ViewDataBinding>(@LayoutRes private val layoutRes: Int) :
     AppCompatActivity() {
 
-    var mStatusBarHeight: Int = 0
     lateinit var weakReference: WeakReference<T>
     val binding: T get() = weakReference.get() ?: throw IllegalStateException("Binding is null")
 
@@ -40,7 +37,6 @@ open class BindingActivity<T : ViewDataBinding>(@LayoutRes private val layoutRes
         super.onCreate(savedInstanceState)
         weakReference =
             WeakReference(DataBindingUtil.setContentView(this, layoutRes))
-        mStatusBarHeight = getStatusBarHeight()
         onBind(binding, savedInstanceState)
         consumeBottomInsets()
     }
@@ -108,23 +104,6 @@ open class BindingActivity<T : ViewDataBinding>(@LayoutRes private val layoutRes
             binding.toolbar,
             imageUrl
         )
-    }
-
-    private fun getStatusBarHeight(): Int {
-        var result = 0
-        val resourceId = resources.getIdentifier("status_bar_height", "dimen", "android")
-        if (resourceId > 0) {
-            try {
-                result = resources.getDimensionPixelSize(resourceId)
-            } catch (e: Exception) {
-                Log.e(
-                    TAG,
-                    "getStatusBarHeight: unable to calculate statusbar size, resources must be an issue",
-                    e
-                )
-            }
-        }
-        return result
     }
 
     private fun initAppbar(

@@ -150,12 +150,19 @@ object UiUtils {
     val Activity.statusBarHeight
         get() = run {
             val rootWindowInsets = window?.decorView?.rootWindowInsets
+
             return@run rootWindowInsets?.let {
-                WindowInsetsCompat.toWindowInsetsCompat(rootWindowInsets)
-                    .getInsets(WindowInsetsCompat.Type.statusBars()).top
-            }
+                val insets = WindowInsetsCompat.toWindowInsetsCompat(rootWindowInsets)
+                    .getInsets(WindowInsetsCompat.Type.statusBars())
+                StatusBarHeight.value = insets.top
+                StatusBarHeight.value
+            } ?: StatusBarHeight.value
         }
 
     val Int.dp: Int
         get() = (this / Resources.getSystem().displayMetrics.density).toInt()
+
+    private object StatusBarHeight {
+        var value: Int = 0
+    }
 }
