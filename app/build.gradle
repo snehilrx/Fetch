@@ -9,10 +9,10 @@ plugins {
 android {
     signingConfigs {
         release {
-            storeFile file(System.getenv('KEY_PATH'))
-            storePassword System.getenv('STORE_PASSWORD')
-            keyPassword System.getenv('KEY_PASSWORD')
-            keyAlias System.getenv('KEY_ALIAS')
+            storeFile file(System.properties.get('KEY_PATH'))
+            storePassword System.properties.get('STORE_PASSWORD')
+            keyPassword System.properties.get('KEY_PASSWORD')
+            keyAlias System.properties.get('KEY_ALIAS')
         }
     }
     compileSdk env.compileSdk
