@@ -77,15 +77,21 @@ jobs:
         run: |
           cd builds
           ls
+      - name: Bump version
+        id: bump_version
+        uses: oflynned/Android-Semantic-Release@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.JJ }}
+        with:
+          build_number: ${{ github.run_number }}
       - name: Create Release
         id: create_release
         uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.JJ }}
-          APP_VERSION_NAME: ${{ needs.build.outputs.version }}
         with:
-          tag_name: '${{ steps.get_version.outputs.versionName }}-${{ steps.get_version.outputs.nextVersionCode }}'
-          name: 'Release ${{ steps.get_version.outputs.versionName }}-${{ steps.get_version.outputs.nextVersionCode }}'
+          tag_name: ${{ steps.bump_version.outputs.new_tag }}
+          release_name: ${{ steps.bump_version.outputs.new_tag }}
           draft: false
           prerelease: false
           files: ${{ github.workspace }}/builds/*.apk
