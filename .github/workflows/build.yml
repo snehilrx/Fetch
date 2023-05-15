@@ -48,6 +48,7 @@ jobs:
           echo "${BASE64_STRING}" | base64 --decode > ${KEY_PATH}
           ./gradlew :app:assembleRelease --stacktrace
           rm -f ${KEY_PATH}
+          echo ${APP_VERSION_NAME}
           echo "::set-output name=version::${APP_VERSION_NAME}"
        
       # attaches the build apks in workflow run page 
@@ -68,19 +69,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download APK from build
-        env:
-          APP_VERSION_NAME: ${{ needs.build.outputs.version }}
         uses: actions/download-artifact@v1
         with:
           name: builds
+      - name: print file name
+        run: |
+          cd builds
+          ls
       - name: Create Release
         id: create_release
         uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.JJ }}
+          APP_VERSION_NAME: ${{ needs.build.outputs.version }}
         with:
           tag_name: v${APP_VERSION_NAME}
           name: Release v${APP_VERSION_NAME}
           draft: false
           prerelease: false
-          files: ${{ github.workspace }}/app/build/outputs/apk/release/*.apk
+          files: ${{ github.workspace }}/builds/*.apk
