@@ -8,7 +8,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    version: ${{ steps.versionInfo.outputs.version }}
+    
+    outputs:
+      version: ${{ steps.versionInfo.outputs.version }}
 
 
     steps:
