@@ -8,9 +8,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
-    outputs:
-      version: ${{ steps.apk.outputs.version }}
       
     steps:
       - name: Checkout
@@ -48,8 +45,6 @@ jobs:
           echo "${BASE64_STRING}" | base64 --decode > ${KEY_PATH}
           ./gradlew :app:assembleRelease --stacktrace
           rm -f ${KEY_PATH}
-          echo ${APP_VERSION_NAME}
-          echo "::set-output name=version::${APP_VERSION_NAME}"
        
       # attaches the build apks in workflow run page 
       - uses: actions/upload-artifact@v3
@@ -68,6 +63,9 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
+      - name: Get app version
+        id: get_version
+        uses: eriknyk/android-get-app-version-action@v1.0.1
       - name: Download APK from build
         uses: actions/download-artifact@v1
         with:
@@ -83,8 +81,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.JJ }}
           APP_VERSION_NAME: ${{ needs.build.outputs.version }}
         with:
-          tag_name: v${APP_VERSION_NAME}
-          name: Release v${APP_VERSION_NAME}
+          tag_name: '${{ steps.get_version.outputs.versionName }}-${{ steps.get_version.outputs.nextVersionCode }}'
+          name: 'Release ${{ steps.get_version.outputs.versionName }}-${{ steps.get_version.outputs.nextVersionCode }}'
           draft: false
           prerelease: false
           files: ${{ github.workspace }}/builds/*.apk
