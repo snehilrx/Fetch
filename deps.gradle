@@ -84,7 +84,9 @@ private static Integer getVersionCode(ext) {
     int minor = ext.minorVersion as Integer
     int patch = ext.patchVersion as Integer
 
-    return major * 10000 + minor * 100 + patch
+    def version = major * 10000 + minor * 100 + patch
+    println("app version code - ${version}")
+    return version
 }
 
 private static String getVersionName(ext) {
