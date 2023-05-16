@@ -13,6 +13,8 @@ android {
             storePassword System.properties.get('STORE_PASSWORD')
             keyPassword System.properties.get('KEY_PASSWORD')
             keyAlias System.properties.get('KEY_ALIAS')
+            v1SigningEnabled true
+            v2SigningEnabled true
         }
     }
     compileSdk env.compileSdk

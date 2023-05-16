@@ -24,7 +24,7 @@ data class Recent(
     @SerializedName("slug") var slug: String? = null,
     @SerializedName("watch_uri") private var watchUri: String? = null
 ) {
-    fun getEpisodeSlug() = slug?.split("/")?.getOrNull(2) ?: ""
+    fun getEpisodeSlug() = watchUri?.split("/")?.getOrNull(2) ?: ""
 }
 
 @Keep
