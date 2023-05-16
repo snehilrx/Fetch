@@ -18,7 +18,8 @@ fun Recent.asAnimeEntity(): AnimeEntity {
         animeSlug = slug ?: "",
         name = this.title ?: "",
         image = this.poster?.hq?.removeSuffix("-hq") ?: this.poster?.sm?.removeSuffix("-sm"),
-        year = year
+        year = year,
+        description = this.synopsis
     )
 }
 
