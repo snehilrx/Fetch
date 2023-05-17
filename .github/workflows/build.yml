@@ -74,6 +74,8 @@ jobs:
           # Output new version as an environment variable
           echo "version=${new_version}" >> "$GITHUB_ENV"
           echo "version=${new_version}" >> "$GITHUB_OUTPUT"
+          echo ${commit}
+          echo ${new_version}
           
       - name: apk
         env:
