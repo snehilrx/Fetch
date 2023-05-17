@@ -29,6 +29,10 @@ import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.dash.DashMediaSource
 import androidx.media3.exoplayer.hls.HlsMediaSource
+import androidx.media3.exoplayer.hls.playlist.DefaultHlsPlaylistParserFactory
+import androidx.media3.exoplayer.hls.playlist.FilteringHlsPlaylistParserFactory
+import androidx.media3.exoplayer.hls.playlist.HlsMultivariantPlaylist
+import androidx.media3.exoplayer.offline.DownloadHelper
 import androidx.media3.exoplayer.source.*
 import androidx.media3.exoplayer.trackselection.AdaptiveTrackSelection
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
@@ -91,18 +95,33 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
         } else {
             CacheDataSink.Factory().setCache(cache)
         }
-        val upstreamFactory = DefaultDataSource.Factory(
-            this,
-            OkHttpDataSource.Factory(okhttp.changeOrigin()).setDefaultRequestProperties(headersMap)
-        )
+        val upstreamFactory = if (useOfflineMode) {
+            null
+        } else {
+            DefaultDataSource.Factory(
+                this,
+                OkHttpDataSource.Factory(okhttp.changeOrigin())
+                    .setDefaultRequestProperties(headersMap)
+            )
+        }
         return@lazy CacheDataSource.Factory().setCache(cache)
             .setCacheWriteDataSinkFactory(cacheSink)
             .setCacheReadDataSourceFactory(FileDataSource.Factory())
             .setUpstreamDataSourceFactory(upstreamFactory)
             .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
     }
-    private val hlsMediaSource by lazy { HlsMediaSource.Factory(cachingDataSourceFactory) }
-    private val dashMediaSource by lazy { DashMediaSource.Factory(cachingDataSourceFactory) }
+    private val hlsMediaSource by lazy {
+        HlsMediaSource.Factory(cachingDataSourceFactory)
+            .setPlaylistParserFactory(
+                FilteringHlsPlaylistParserFactory(
+                    DefaultHlsPlaylistParserFactory(),
+                    listOf(StreamKey(HlsMultivariantPlaylist.GROUP_INDEX_VARIANT, 0))
+                )
+            )
+    }
+    private val dashMediaSource by lazy {
+        DashMediaSource.Factory(cachingDataSourceFactory)
+    }
     private val trackSelector by lazy {
         DefaultTrackSelector(this, AdaptiveTrackSelection.Factory()).apply {
             setParameters(
@@ -146,6 +165,7 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
     private fun isFullscreen(): Boolean {
         return binding.playerView.parent != binding.aspectRatioFrameLayout
     }
+
     private fun initPlayer() {
         val player =
             ExoPlayer.Builder(this)
@@ -186,10 +206,19 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
         binding.playerView.setRepeatToggleModes(RepeatModeUtil.REPEAT_TOGGLE_MODE_NONE)
         player.addListener(playerListener)
         playerViewUiHelper.showLoading()
-        args.mediaItem?.toMediaItem()?.let {
-            player.addMediaItem(it)
-            player.prepare()
-            player.play()
+        args.mediaItem?.toMediaItem()?.let { media ->
+            downloadUtils.getDownloadTracker()
+                .getDownloadRequest(media)
+                ?.let {
+                    player.addMediaSource(
+                        DownloadHelper.createMediaSource(
+                            it,
+                            cachingDataSourceFactory
+                        )
+                    )
+                    player.prepare()
+                    player.play()
+                }
         }
     }
 
@@ -443,6 +472,7 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
                         showError(it.exception, this)
                     }
                 }
+
                 is State.LOADING -> showLoading()
                 is State.SUCCESS -> {
                     hideLoading()
@@ -463,7 +493,7 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
             if (episode != null && anime != null) {
                 val title = buildString {
                     append("Episode ")
-                    append(episode.episodeNumber)
+                    append(episode.episodeNumber?.toInt())
                 }
                 setAppbarEpisodeNumber(binding, title)
                 binding.episodeDetails = episode

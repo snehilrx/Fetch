@@ -17,6 +17,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -26,8 +27,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
-import androidx.media3.common.MediaItem
-import androidx.media3.common.StreamKey
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.offline.Download
 import androidx.media3.exoplayer.offline.DownloadRequest
@@ -89,9 +88,15 @@ fun PlayPauseButton(
         toggleableState = !toggleableState
     }) {
         if (toggleableState) {
-            Image(asset = FontAwesome.Icon.faw_play)
+            Image(
+                asset = FontAwesome.Icon.faw_play,
+                colorFilter = ColorFilter.tint(color = MaterialTheme.colorScheme.onPrimary)
+            )
         } else {
-            Image(asset = FontAwesome.Icon.faw_pause)
+            Image(
+                asset = FontAwesome.Icon.faw_pause,
+                colorFilter = ColorFilter.tint(color = MaterialTheme.colorScheme.onPrimary)
+            )
         }
     }
 }
@@ -240,21 +245,13 @@ private fun DownloadRequest.toOfflineBundle(): Bundle {
 
 @Suppress("deprecation")
 @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
-fun Bundle.toMediaItem(): MediaItem {
-    val keys = ArrayList<StreamKey>()
-    return MediaItem.Builder().setMediaId(getString("id", "")).setUri(
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            getParcelable("uri", Uri::class.java)
-        } else {
-            getParcelable("uri")
-        }
-    ).setCustomCacheKey(getString("key")).setMimeType(getString("mime")).setStreamKeys(
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            getParcelableArray("streamKey", StreamKey::class.java)
-        } else {
-            getParcelableArray("streamKey")
-        }?.mapNotNull { it as? StreamKey }?.toCollection(keys)
-    ).build()
+fun Bundle.toMediaItem(): Uri? {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        getParcelable("uri", Uri::class.java)
+    } else {
+        getParcelable("uri")
+    }
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
