@@ -48,6 +48,7 @@ jobs:
           git fetch --depth=1 origin +refs/tags/*:refs/tags/*
           git describe --abbrev=0 --tags $(git rev-list --tags --skip=1 --max-count=1)
           old="$(git describe --abbrev=0 --tags $(git rev-list --tags --skip=1 --max-count=1))"
+          echo ${old}
           # Extract version components
           major=$(echo "${old}" | awk -F. '{print $1}')
           minor=$(echo "${old}" | awk -F. '{print $2}')
@@ -119,10 +120,8 @@ jobs:
         with:
           name: builds
       - name: print file name
-        env:
-          ver: ${{ env.version }}
         run: |
-          echo ${ver}
+          echo ${{ env.version }}
           cd builds
           ls
       - name: Create Release
@@ -131,7 +130,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.JJ }}
         with:
-          tag_name: ${{ needs.build.outputs.version }}
+          tag_name: ${{ env.version }}
           release_name: ${{ env.version }}
           draft: false
           prerelease: false
