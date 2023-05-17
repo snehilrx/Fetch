@@ -46,7 +46,7 @@ jobs:
           commit: ${{ github.event.head_commit.message }}
         run: |
           git fetch --depth=1 origin +refs/tags/*:refs/tags/*
-          old="$(git describe --abbrev=0 --tags $(git rev-list --tags --skip=1 --max-count=1))"
+          old="$(git describe --abbrev=0 --tags $(git rev-list --tags --max-count=1))"
           echo ${old}
           # Extract version components
           major=$(echo "${old}" | awk -F. '{print $1}')
