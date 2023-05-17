@@ -38,37 +38,38 @@ jobs:
 
       - name: Make gradlew executable
         run: chmod +x ./gradlew
-        
-      - name: 'Get Previous tag'
-        id: previoustag
-        uses: "WyriHaximus/github-action-get-previous-tag@v1"
-        with:
-          fallback: 1.0.0
+
       - name: Bump version
         id: bump_version
         env:
           GITHUB_TOKEN: ${{ secrets.JJ }}
           commit: ${{ github.event.head_commit.message }}
-          old: ${{ steps.previoustag.outputs.tag }}
         run: |
+          git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+          git describe --abbrev=0 --tags $(git rev-list --tags --skip=1 --max-count=1)
+          old="$(git describe --abbrev=0 --tags $(git rev-list --tags --skip=1 --max-count=1))"
           # Extract version components
           major=$(echo "${old}" | awk -F. '{print $1}')
           minor=$(echo "${old}" | awk -F. '{print $2}')
           patch=$(echo "${old}" | awk -F. '{print $3}')
-          
+          build=$(echo "${old}" | awk -F. '{print $4}')
+          build=$((build + 1))
           # Check commit message for version bump keywords
           if echo "${commit}" | grep -q -w "major"; then
             major=$((major + 1))
             minor=0
             patch=0
+            build=0
           elif echo "${commit}" | grep -q -w "minor"; then
             minor=$((minor + 1))
             patch=0
+            build=0
           elif echo "${commit}" | grep -q -w "patch"; then
             patch=$((patch + 1))
+            build=0
           fi
           # Construct new version string
-          new_version="${major}.${minor}.${patch}"
+          new_version="${major}.${minor}.${patch}.${build}"
 
           # Output new version as an environment variable
           echo "version=${new_version}" >> "$GITHUB_ENV"
@@ -85,7 +86,8 @@ jobs:
           major=$(echo "${new}" | awk -F. '{print $1}')
           minor=$(echo "${new}" | awk -F. '{print $2}')
           patch=$(echo "${new}" | awk -F. '{print $3}')
-          property_content="majorVersion=${major}\nminorVersion=${minor}\npatchVersion=${patch}"
+          build=$(echo "${new}" | awk -F. '{print $4}')
+          property_content="majorVersion=${major}\nminorVersion=${minor}\npatchVersion=${patch}\nbuildNumber=${build}"
           # Write the property file
           echo -e "${property_content}" > version.properties
           ./gradlew :app:assembleRelease --scan
