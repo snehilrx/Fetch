@@ -74,6 +74,8 @@ jobs:
 
           # Output new version as an environment variable
           echo "version=${new_version}" >> "$GITHUB_ENV"
+          echo "version=${new_version}" >> "$GITHUB_OUTPUT"
+          
       - name: apk
         env:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
@@ -130,8 +132,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.JJ }}
         with:
-          tag_name: ${{ env.version }}
-          release_name: ${{ env.version }}
+          tag_name: ${{ needs.build.outputs.version }}
+          release_name: ${{ needs.build.outputs.version }}
           draft: false
           prerelease: false
           files: ${{ github.workspace }}/builds/*.apk
