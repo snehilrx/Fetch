@@ -125,7 +125,7 @@ class KickassAppModule @Inject constructor(
                     context,
                     defaultIntent.getPendingIntent(
                         0,
-                        PendingIntent.FLAG_UPDATE_CURRENT,
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
                     ),
                     0,
                     context.getString(R.string.group_notification_title),
@@ -185,7 +185,7 @@ class KickassAppModule @Inject constructor(
         val notifyPendingIntent = defaultIntent.addNextIntent(notifyIntent)
             .getPendingIntent(
                 0,
-                PendingIntent.FLAG_UPDATE_CURRENT,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
             )
         val title = context.getString(R.string.notification_title).format(anime.title)
         val body = context.getString(R.string.episode).format(anime.episodeNumber?.toInt())
