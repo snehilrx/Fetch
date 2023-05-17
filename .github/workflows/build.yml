@@ -55,8 +55,7 @@ jobs:
           major=$(echo "${old}" | awk -F. '{print $1}')
           minor=$(echo "${old}" | awk -F. '{print $2}')
           patch=$(echo "${old}" | awk -F. '{print $3}')
-          build=$(echo "${old}" | awk -F. '{print $4}')
-
+          
           # Check commit message for version bump keywords
           if echo "${commit}" | grep -q -w "major"; then
             major=$((major + 1))
@@ -69,7 +68,7 @@ jobs:
             patch=$((patch + 1))
           fi
           # Construct new version string
-          new_version="${major}.${minor}.${patch}.${build}"
+          new_version="${major}.${minor}.${patch}"
 
           # Output new version as an environment variable
           echo "version=${new_version}" >> "$GITHUB_ENV"
@@ -86,8 +85,9 @@ jobs:
           major=$(echo "${new}" | awk -F. '{print $1}')
           minor=$(echo "${new}" | awk -F. '{print $2}')
           patch=$(echo "${new}" | awk -F. '{print $3}')
-          build=$(echo "${new}" | awk -F. '{print $4}')
-          echo "majorVersion=${major}/nminorVersion=${minor}\npatchVersion={patch}\nbuildNumber={build}" > "version.properties"
+          property_content="major=${major}\nminor=${minor}\npatch=${patch}"
+          # Write the property file
+          echo -e "${property_content}" > version.properties
           ./gradlew :app:assembleRelease --scan
           rm -f ${KEY_PATH}
        
