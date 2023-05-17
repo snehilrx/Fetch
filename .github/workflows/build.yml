@@ -122,8 +122,10 @@ jobs:
         with:
           name: builds
       - name: print file name
+        env:
+          ver: ${{ needs.build.outputs.version }}
         run: |
-          echo ${{ env.version }}
+          echo ${ver}
           cd builds
           ls
       - name: Create Release
