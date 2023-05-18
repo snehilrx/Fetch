@@ -1,0 +1,10 @@
+<resources>
+    <declare-styleable name="Shinebar">
+        <attr name="startColor" format="color" />
+        <attr name="endColor" format="color" />
+        <attr name="appbar" format="reference" />
+    </declare-styleable>
+    <declare-styleable name="GridLayoutExtras">
+        <attr name="itemWidth" format="dimension" />
+    </declare-styleable>
+</resources>

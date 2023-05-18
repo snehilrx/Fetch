@@ -37,6 +37,7 @@ import com.otaku.fetch.base.ui.FetchScaffold
 import com.otaku.fetch.base.ui.lazytree.ItemPlacement
 import com.otaku.fetch.base.ui.lazytree.ItemTree
 import com.otaku.fetch.base.ui.lazytree.LazyTreeList
+import io.github.snehilrx.shinebar.Shinebar
 import java.text.CharacterIterator
 import java.text.StringCharacterIterator
 import kotlin.math.abs
@@ -49,6 +50,7 @@ import kotlin.math.min
 fun DownloadScreen(
     downloadsVM: DownloadViewModel,
     statusBarHeight: Float? = null,
+    setupShineBar: (Shinebar) -> Unit = { _ -> run {} }
 ) {
     val items = downloadsVM.anime()
     downloadsVM.refreshDownloadState()
@@ -62,7 +64,8 @@ fun DownloadScreen(
             }, playAction = {
                 downloadsVM.resume(context)
             }, isPaused = downloadsVM.isDownloadPaused)
-        }
+        },
+        setupShineBar = setupShineBar
     ) {
         DownloadList(
             items.toItemTreeIndex(downloadsVM), downloadsVM
@@ -245,7 +248,7 @@ private fun DownloadRequest.toOfflineBundle(): Bundle {
 
 @Suppress("deprecation")
 @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
-fun Bundle.toMediaItem(): Uri? {
+fun Bundle.toMediaUri(): Uri? {
     return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         getParcelable("uri", Uri::class.java)
     } else {
