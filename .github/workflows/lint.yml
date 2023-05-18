@@ -26,17 +26,17 @@ jobs:
         with:
           gradle-version: 8.1
           parallel: true
-      - run:|
-        git fetch --depth=1 origin +refs/tags/*:refs/tags/*
-        new="$(git describe --abbrev=0 --tags $(git rev-list --tags --skip=1 --max-count=1))"
-        echo ${new}
-        major=$(echo "${new}" | awk -F. '{print $1}')
-        minor=$(echo "${new}" | awk -F. '{print $2}')
-        patch=$(echo "${new}" | awk -F. '{print $3}')
-        build=$(echo "${new}" | awk -F. '{print $4}')
-        property_content="majorVersion=${major}\nminorVersion=${minor}\npatchVersion=${patch}\nbuildNumber=${build}"
-        echo ${property_content}
-        ./gradlew lint
+      - run: |
+          git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+          new="$(git describe --abbrev=0 --tags $(git rev-list --tags --skip=1 --max-count=1))"
+          echo ${new}
+          major=$(echo "${new}" | awk -F. '{print $1}')
+          minor=$(echo "${new}" | awk -F. '{print $2}')
+          patch=$(echo "${new}" | awk -F. '{print $3}')
+          build=$(echo "${new}" | awk -F. '{print $4}')
+          property_content="majorVersion=${major}\nminorVersion=${minor}\npatchVersion=${patch}\nbuildNumber=${build}"
+          echo ${property_content}
+          ./gradlew lint
       - uses: yutailang0119/action-android-lint@v3
         with:
           report-path: build/reports/*.xml # Support glob patterns by https://www.npmjs.com/package/@actions/glob
