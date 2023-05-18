@@ -43,7 +43,7 @@ import com.google.android.gms.cast.framework.CastContext
 import com.otaku.fetch.base.TAG
 import com.otaku.fetch.base.download.DownloadUtils
 import com.otaku.fetch.base.download.changeOrigin
-import com.otaku.fetch.base.download.toMediaItem
+import com.otaku.fetch.base.download.toMediaUri
 import com.otaku.fetch.base.livedata.State
 import com.otaku.fetch.base.ui.BindingActivity
 import com.otaku.fetch.base.ui.setOnClick
@@ -206,7 +206,7 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
         binding.playerView.setRepeatToggleModes(RepeatModeUtil.REPEAT_TOGGLE_MODE_NONE)
         player.addListener(playerListener)
         playerViewUiHelper.showLoading()
-        args.mediaItem?.toMediaItem()?.let { media ->
+        args.mediaItem?.toMediaUri()?.let { media ->
             downloadUtils.getDownloadTracker()
                 .getDownloadRequest(media)
                 ?.let {

@@ -4,20 +4,18 @@
 
     <merge>
 
-        <com.otaku.fetch.base.ui.ShineView
-            android:id="@+id/shineView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:scrimHeight="192dp"
-            app:statusbarHeight="10dp"
-            app:toolbarHeight="?attr/actionBarSize" />
+        <io.github.snehilrx.shinebar.Shinebar
+                android:id="@+id/shinebar"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:fitsSystemWindows="false" />
 
         <com.google.android.material.appbar.AppBarLayout
-            android:id="@+id/appbarLayout"
-            android:layout_width="match_parent"
-            android:layout_height="192dp"
-            android:background="@android:color/transparent"
-            android:elevation="0dp">
+                android:id="@+id/appbarLayout"
+                android:layout_width="match_parent"
+                android:layout_height="192dp"
+                android:background="@android:color/transparent"
+                android:elevation="0dp">
 
             <com.google.android.material.appbar.CollapsingToolbarLayout
                     android:id="@+id/collapsingToolbar"
@@ -28,8 +26,6 @@
                     app:titleCollapseMode="scale"
                     app:expandedTitleGravity="top"
                     app:expandedTitleMarginTop="100dp"
-                    app:contentScrim="?attr/colorPrimary"
-                    app:statusBarScrim="?attr/colorSecondary"
                     app:toolbarId="@+id/toolbar">
 
                 <TextView
