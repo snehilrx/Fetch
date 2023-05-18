@@ -1,6 +1,7 @@
 package com.otaku.fetch.base.ui
 
 import android.os.Bundle
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,7 +22,9 @@ import com.otaku.fetch.base.databinding.AppbarImageBinding
 import com.otaku.fetch.base.databinding.AppbarShineBinding
 import com.otaku.fetch.base.utils.UiUtils.statusBarHeight
 import com.otaku.fetch.bindings.ImageViewBindings
+import io.github.snehilrx.shinebar.Shinebar
 import java.lang.ref.WeakReference
+
 
 open class BindingFragment<T : ViewDataBinding>(@LayoutRes private val layoutRes: Int) :
     Fragment() {
@@ -53,24 +56,22 @@ open class BindingFragment<T : ViewDataBinding>(@LayoutRes private val layoutRes
     ) {
         if (binding == null) return
         initAppbar(
-            binding.shineView,
+            binding.shinebar,
             binding.toolbar,
             binding.collapsingToolbar,
-            binding.appbarLayout,
             navController,
             hideBackButton
         )
     }
 
     protected fun initAppbar(
-        shineView: ShineView?,
+        shinebar: Shinebar?,
         toolbar: Toolbar?,
         collapsingToolbar: CollapsingToolbarLayout?,
-        appbarLayout: AppBarLayout?,
         navController: NavController?,
         hideBackButton: Boolean = false
     ) {
-        initShineView(shineView, appbarLayout)
+        setupShineBar(shinebar)
         initAppbar(
             toolbar,
             collapsingToolbar,
@@ -79,12 +80,21 @@ open class BindingFragment<T : ViewDataBinding>(@LayoutRes private val layoutRes
         )
     }
 
-    private fun initShineView(
-        shineView: ShineView?,
-        appbarLayout: AppBarLayout?
-    ) {
-        shineView?.statusbarHeight = mStatusBarHeight.toFloat()
-        appbarLayout?.addOnOffsetChangedListener(shineView)
+    fun setupShineBar(shinebar: Shinebar?) {
+        shinebar?.makeAppbarImmersive(this.bindingActivity, binding.root)
+        val start = TypedValue()
+        val end = TypedValue()
+        context?.theme?.resolveAttribute(
+            com.google.android.material.R.attr.colorOnPrimary,
+            start,
+            true
+        )
+        context?.theme?.resolveAttribute(com.google.android.material.R.attr.colorPrimary, end, true)
+
+        shinebar?.apply {
+            setStartColor(start.data)
+            setEndColor(end.data)
+        }
     }
 
     private fun initAppbar(

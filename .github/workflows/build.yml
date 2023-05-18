@@ -8,7 +8,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    version: ${{ steps.versionInfo.outputs.version }}
+    
+    outputs:
+      version: ${{ steps.bump_version.outputs.version }}
 
 
     steps:
@@ -39,16 +41,42 @@ jobs:
 
       - name: Bump version
         id: bump_version
-        uses: oflynned/Android-Semantic-Release@master
         env:
           GITHUB_TOKEN: ${{ secrets.JJ }}
-      - name: Export version info
-        id: versionInfo
-        env:
-          version: ${{steps.bump_version.outputs.new_tag}}
+          commit: ${{ github.event.head_commit.message }}
         run: |
-          echo "version=${version}"  >> "$GITHUB_OUTPUT"
+          git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+          old="$(git describe --abbrev=0 --tags $(git rev-list --tags --skip=1 --max-count=1))"
+          echo ${old}
+          # Extract version components
+          major=$(echo "${old}" | awk -F. '{print $1}')
+          minor=$(echo "${old}" | awk -F. '{print $2}')
+          patch=$(echo "${old}" | awk -F. '{print $3}')
+          build=$(echo "${old}" | awk -F. '{print $4}')
+          build=$((build + 1))
+          # Check commit message for version bump keywords
+          if echo "${commit}" | grep -q -w "major"; then
+            major=$((major + 1))
+            minor=0
+            patch=0
+            build=0
+          elif echo "${commit}" | grep -q -w "minor"; then
+            minor=$((minor + 1))
+            patch=0
+            build=0
+          elif echo "${commit}" | grep -q -w "patch"; then
+            patch=$((patch + 1))
+            build=0
+          fi
+          # Construct new version string
+          new_version="${major}.${minor}.${patch}.${build}"
 
+          # Output new version as an environment variable
+          echo "version=${new_version}" >> "$GITHUB_ENV"
+          echo "version=${new_version}" >> "$GITHUB_OUTPUT"
+          echo ${commit}
+          echo ${new_version}
+          
       - name: apk
         env:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
@@ -56,8 +84,17 @@ jobs:
           KEY_PATH: ${{ github.workspace }}/${{ secrets.KEY_PATH }}
           STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
           BASE64_STRING: ${{ secrets.KEY_BASE64 }}
+          new: ${{ env.version }}
         run: |
           echo "${BASE64_STRING}" | base64 --decode > ${KEY_PATH}
+          major=$(echo "${new}" | awk -F. '{print $1}')
+          minor=$(echo "${new}" | awk -F. '{print $2}')
+          patch=$(echo "${new}" | awk -F. '{print $3}')
+          build=$(echo "${new}" | awk -F. '{print $4}')
+          property_content="majorVersion=${major}\nminorVersion=${minor}\npatchVersion=${patch}\nbuildNumber=${build}"
+          echo ${property_content}
+          # Write the property file
+          echo -e "${property_content}" > version.properties
           ./gradlew :app:assembleRelease --scan
           rm -f ${KEY_PATH}
        
@@ -81,19 +118,17 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: '0'
-      - name: Get app version
-        id: get_version
-        uses: eriknyk/android-get-app-version-action@v1.0.1
       - name: Download APK from build
         uses: actions/download-artifact@v1
         with:
           name: builds
       - name: print file name
+        env:
+          ver: ${{ needs.build.outputs.version }}
         run: |
+          echo ${ver}
           cd builds
           ls
-        with:
-          build_number: ${{ github.run_number }}
       - name: Create Release
         id: create_release
         uses: softprops/action-gh-release@v1
@@ -101,7 +136,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.JJ }}
         with:
           tag_name: ${{ needs.build.outputs.version }}
-          release_name: ${{ env.version }}
+          release_name: ${{ needs.build.outputs.version }}
           draft: false
           prerelease: false
           files: ${{ github.workspace }}/builds/*.apk

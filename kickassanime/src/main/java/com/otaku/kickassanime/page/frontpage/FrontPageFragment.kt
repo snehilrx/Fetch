@@ -96,10 +96,9 @@ class FrontPageFragment : BindingFragment<FragmentFrontPageBinding>(R.layout.fra
 
     override fun onBind(binding: FragmentFrontPageBinding, savedInstanceState: Bundle?) {
         initAppbar(
-            binding.shineView,
+            binding.shinebar,
             binding.toolbar,
             binding.collapsingToolbar,
-            binding.appbarLayout,
             findNavController()
         )
         initFrontPageList()

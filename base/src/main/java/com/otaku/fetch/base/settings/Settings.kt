@@ -19,6 +19,7 @@ import com.otaku.fetch.base.ui.composepref.GroupHeader
 import com.otaku.fetch.base.ui.composepref.PrefsScreen
 import com.otaku.fetch.base.ui.composepref.prefs.ListPref
 import com.otaku.fetch.base.ui.composepref.prefs.SwitchPref
+import io.github.snehilrx.shinebar.Shinebar
 
 private val Context.dataStore by preferencesDataStore(name = "settings")
 
@@ -50,9 +51,14 @@ object Settings {
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 @Preview
-fun Settings(statusBarHeight: Float? = null) {
-    FetchScaffold(title = stringResource(id = R.string.settings),
+fun Settings(
+    statusBarHeight: Float? = null,
+    setupShineBar: (Shinebar) -> Unit = { _ -> run {} }
+) {
+    FetchScaffold(
+        title = stringResource(id = R.string.settings),
         statusBarHeight = statusBarHeight ?: 0f,
+        setupShineBar = setupShineBar,
         content = {
             val dataStore = LocalContext.current.dataStore
             val pref by dataStore.data.collectAsState(initial = null)
@@ -115,5 +121,6 @@ fun Settings(statusBarHeight: Float? = null) {
                     }
                 }
             }
-        })
+        }
+    )
 }
