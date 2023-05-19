@@ -25,7 +25,7 @@ interface EpisodeEntityDao : BaseDao<EpisodeEntity> {
     @Query("SELECT * FROM episode WHERE episodeSlug = :slug")
     suspend fun getEpisode(slug: String): EpisodeEntity?
 
-    @Query("SELECT ep.pageNo, e.episodeNumber,  e.thumbnail, e.episodeSlug as slug FROM episode as e, episode_page as ep where ep.episodeSlug is e.episodeSlug and e.animeSlug is :animeSlug and e.language is :language order by e.episodeNumber asc")
+    @Query("SELECT ep.pageNo, e.episodeNumber,  e.thumbnail, e.episodeSlug as slug FROM episode as e, episode_page as ep where ep.episodeSlug is e.episodeSlug and e.animeSlug is :animeSlug and e.language is :language order by e.episodeNumber desc")
     fun getEpisodes(animeSlug: String, language: String): PagingSource<Int, EpisodeTile>
 
     @RewriteQueriesToDropUnusedColumns

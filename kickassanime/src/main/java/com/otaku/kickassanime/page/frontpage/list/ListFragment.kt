@@ -25,7 +25,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-abstract class ListFragment<Binding : ViewDataBinding>() :
+abstract class ListFragment<Binding : ViewDataBinding> :
     BindingFragment<FragmentAnimeListBinding>(R.layout.fragment_anime_list) {
 
     override fun onBind(binding: FragmentAnimeListBinding, savedInstanceState: Bundle?) {

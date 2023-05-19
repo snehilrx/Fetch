@@ -25,6 +25,7 @@ data class EpisodeTile(
 class EpisodeRemoteMediator(
     private val animeSlug: String,
     private val language: String,
+    private val startPage: Int,
     private val api: KickassAnimeService,
     private val database: KickassAnimeDb
 ) : RemoteMediator<Int, EpisodeTile>() {
@@ -36,26 +37,25 @@ class EpisodeRemoteMediator(
             val endPaging = MediatorResult.Success(endOfPaginationReached = true)
             val continuePaging = MediatorResult.Success(endOfPaginationReached = false)
             val loadKey = when (loadType) {
-                LoadType.REFRESH -> 1
+                LoadType.REFRESH -> startPage
                 LoadType.PREPEND -> return endPaging
                 LoadType.APPEND -> {
-                    val lastItem = state.lastItemOrNull()
-                    if (lastItem == null) {
-                        Log.i(TAG, "Page End")
-                        return endPaging
-                    }
-                    lastItem.pageNo.plus(1)
+                    val lastItem = state.lastItemOrNull()?.pageNo ?: startPage
+                    lastItem.minus(1)
                 }
+            }
+            if (loadKey <= 0) {
+                return endPaging
             }
             Log.i(TAG, "Page No, Load Key: $loadKey")
 
             val response = api.getEpisodes(animeSlug, language, loadKey)
 
-            Log.i(TAG, "Fetch ${response.result.size} episodes, ${loadType.name}")
-            Utils.saveEpisodePage(animeSlug, language, response, database, loadKey)
-            return if (response.result.isEmpty()) {
+            Log.i(TAG, "Fetch ${response?.result?.size} episodes, ${loadType.name}")
+            return if (response?.result.isNullOrEmpty() || response == null) {
                 endPaging
             } else {
+                Utils.saveEpisodePage(animeSlug, language, response, database, loadKey)
                 continuePaging
             }
         } catch (e: IOException) {

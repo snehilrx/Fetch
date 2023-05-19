@@ -11,6 +11,7 @@ import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
+import com.otaku.fetch.GlideApp
 import com.otaku.fetch.base.TAG
 
 
@@ -31,22 +32,22 @@ object ImageViewBindings {
                 "${url}-hq.webp", "${url}-hq.jpg", "${url}-hq.jpeg"
             )
             try {
-                Glide.with(view.context)
+                GlideApp.with(view.context)
                     .load(urls[0])
                     .error(
-                        Glide.with(view.context)
+                        GlideApp.with(view.context)
                             .load(urls[1])
                             .error(
-                                Glide.with(view.context)
+                                GlideApp.with(view.context)
                                     .load(urls[2])
                                     .error(
-                                        Glide.with(view.context)
+                                        GlideApp.with(view.context)
                                             .load(urls[3])
                                             .error(
                                                 Glide.with(view.context)
                                     .load(urls[4])
                                     .error(
-                                        Glide.with(view.context)
+                                        GlideApp.with(view.context)
                                             .load(urls[5])
                                     )
                                 )

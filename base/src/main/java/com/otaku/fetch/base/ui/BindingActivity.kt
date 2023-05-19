@@ -1,9 +1,13 @@
 package com.otaku.fetch.base.ui
 
+import android.content.res.Configuration
+import android.content.res.Resources
 import android.graphics.Color
 import android.os.Bundle
+import android.os.PersistableBundle
 import android.view.MenuItem
-import android.view.ViewGroup
+import android.view.View
+import android.view.ViewGroup.MarginLayoutParams
 import android.view.WindowManager
 import android.widget.ImageView
 import androidx.annotation.LayoutRes
@@ -12,7 +16,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.updateLayoutParams
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import com.google.android.material.appbar.AppBarLayout
@@ -38,26 +42,18 @@ open class BindingActivity<T : ViewDataBinding>(@LayoutRes private val layoutRes
         weakReference =
             WeakReference(DataBindingUtil.setContentView(this, layoutRes))
         onBind(binding, savedInstanceState)
-        consumeBottomInsets()
     }
 
-    private fun consumeBottomInsets() {
-        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, windowInsets ->
-            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-            // Apply the insets as a margin to the view. Here the system is setting
-            // only the bottom, left, and right dimensions, but apply whichever insets are
-            // appropriate to your layout. You can also update the view padding
-            // if that's more appropriate.
-            view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                leftMargin = insets.left
-                bottomMargin = insets.bottom
-                rightMargin = insets.right
-            }
+    override fun onCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {
+        super.onCreate(savedInstanceState, persistentState)
+        weakReference =
+            WeakReference(DataBindingUtil.setContentView(this, layoutRes))
+        onBind(binding, savedInstanceState)
+    }
 
-            // Return CONSUMED if you don't want want the window insets to keep being
-            // passed down to descendant views.
-            WindowInsetsCompat.CONSUMED
-        }
+    override fun onResume() {
+        super.onResume()
+        window.decorView.consumeBottomInsets(binding.root)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -113,12 +109,22 @@ open class BindingActivity<T : ViewDataBinding>(@LayoutRes private val layoutRes
     }
 
     fun setTransparentStatusBar() {
+        window.statusBarColor = Color.TRANSPARENT
         window.setFlags(
             WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
-            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or
+                    WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
         )
-        window.statusBarColor = Color.TRANSPARENT
+        WindowInsetsControllerCompat(window, binding.root).let { controller ->
+            val isNightMode = resources.configuration.uiMode and
+                    Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
+            controller.isAppearanceLightStatusBars =
+                !isNightMode
+            controller.isAppearanceLightNavigationBars =
+                !isNightMode
+        }
     }
+
 
     protected open fun onBind(binding: T, savedInstanceState: Bundle?) {}
 
@@ -126,5 +132,18 @@ open class BindingActivity<T : ViewDataBinding>(@LayoutRes private val layoutRes
         super.onDestroy()
         setSupportActionBar(null)
         if (this::weakReference.isInitialized) weakReference.clear()
+    }
+}
+
+fun View.consumeBottomInsets(view: View) {
+
+    ViewCompat.setOnApplyWindowInsetsListener(this) { _, insets ->
+        val systemWindowInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+        val bottomMargin = systemWindowInsets.bottom
+
+        val layoutParams = view.layoutParams as MarginLayoutParams
+        layoutParams.bottomMargin += (bottomMargin / Resources.getSystem().displayMetrics.density).toInt()
+
+        insets
     }
 }

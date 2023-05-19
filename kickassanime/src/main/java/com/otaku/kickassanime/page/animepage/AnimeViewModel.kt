@@ -11,8 +11,11 @@ import com.otaku.fetch.base.livedata.State
 import com.otaku.kickassanime.db.models.entity.AnimeEntity
 import com.otaku.kickassanime.db.models.entity.AnimeLanguageEntity
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flatMapConcat
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -28,6 +31,8 @@ class AnimeViewModel @Inject constructor(private val animeRepository: AnimeRepos
 
 
     private val pagers = HashMap<Pair<String, String>, Flow<PagingData<EpisodeTile>>>()
+
+    @OptIn(FlowPreview::class)
     fun getEpisodeList(
         animeSlug: String,
         language: String?
@@ -36,8 +41,13 @@ class AnimeViewModel @Inject constructor(private val animeRepository: AnimeRepos
             emptyFlow()
         } else {
             pagers.getOrPut(Pair(animeSlug, language)) {
-                animeRepository.getEpisodes(animeSlug, language).flow
-                    .cachedIn(viewModelScope)
+                flow {
+                    emit(animeRepository.getPagesAndSaveFirstPage(animeSlug, language))
+                }
+                    .flatMapConcat {
+                        animeRepository.getEpisodes(animeSlug, language, it).flow
+                            .cachedIn(viewModelScope)
+                    }
             }
         }
     }
