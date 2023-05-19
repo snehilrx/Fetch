@@ -23,13 +23,13 @@ class AnimeRepository @Inject constructor(
 
 
     @OptIn(ExperimentalPagingApi::class)
-    fun getEpisodes(animeSlug: String, languageId: String) = Pager(
+    fun getEpisodes(animeSlug: String, languageId: String, startPage: Int) = Pager(
         config = PagingConfig(
             pageSize = 100,
             enablePlaceholders = true,
         ),
         remoteMediator = EpisodeRemoteMediator(
-            animeSlug, languageId, kickassAnimeService, kickassAnimeDb
+            animeSlug, languageId, startPage, kickassAnimeService, kickassAnimeDb
         ),
     ) {
         kickassAnimeDb.episodeEntityDao().getEpisodes(animeSlug, languageId)
@@ -51,5 +51,11 @@ class AnimeRepository @Inject constructor(
         val language = kickassAnimeService.getLanguage(animeSlug)
         kickassAnimeDb.animeLanguageDao()
             .insertAll(language.result.map { AnimeLanguageEntity(it, animeSlug) })
+    }
+
+    suspend fun getPagesAndSaveFirstPage(animeSlug: String, language: String): Int {
+        val response = kickassAnimeService.getEpisodes(animeSlug, language, 1)
+        val number = response?.pages?.lastOrNull()?.number
+        return number ?: 1
     }
 }

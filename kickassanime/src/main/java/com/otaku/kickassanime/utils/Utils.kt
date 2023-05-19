@@ -126,15 +126,16 @@ object Utils {
         database: KickassAnimeDb,
         pageNo: Int
     ) {
-        val episodeEntity = List(response.result.size) { index ->
-            response.result[index].asEpisodeEntity(
+        val result = response.result ?: return
+        val episodeEntity = List(result.size) { index ->
+            result[index].asEpisodeEntity(
                 animeSlug,
                 language,
-                response.result.getOrNull(index - 1)?.slug(),
-                response.result.getOrNull(index + 1)?.slug()
+                result.getOrNull(index - 1)?.slug(),
+                result.getOrNull(index + 1)?.slug()
             )
         }
-        val pages = response.result.map {
+        val pages = result.map {
             EpisodePageEntity(it.slug(), pageNo)
         }
         database.withTransaction {
