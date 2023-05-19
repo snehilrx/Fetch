@@ -86,7 +86,7 @@
     <fragment
             android:id="@+id/searchFragment"
             android:name="com.otaku.kickassanime.page.search.SearchFragment"
-            android:label="{query}">
+            android:label="Search/n{query}">
         <argument
                 android:name="query"
                 app:argType="string" />

@@ -72,7 +72,11 @@ fun EpisodeEntity.asVideoHistory(): VideoHistory {
 fun SearchItem.asAnimeEntity(): AnimeEntity {
     return AnimeEntity(
         animeSlug = this.slug ?: "",
-        name = this.titleEn,
+        name = if (this.titleEn.isNullOrEmpty()) {
+            this.titleText
+        } else {
+            this.titleEn
+        },
         image = this.poster?.hq?.removeSuffix("-hq") ?: this.poster?.sm?.removeSuffix("-sm"),
         year = this.year,
         description = this.synopsis,

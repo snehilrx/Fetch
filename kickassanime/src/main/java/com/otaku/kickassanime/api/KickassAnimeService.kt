@@ -43,7 +43,7 @@ interface KickassAnimeService {
         @Path("slug") path: String,
         @Query("lang") language: String,
         @Query("page") page: Int
-    ): EpisodesResponse
+    ): EpisodesResponse?
 
     @GET("/api/show/{slug}/language")
     suspend fun getLanguage(

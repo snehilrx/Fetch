@@ -81,16 +81,14 @@ open class BindingFragment<T : ViewDataBinding>(@LayoutRes private val layoutRes
     }
 
     fun setupShineBar(shinebar: Shinebar?) {
-        shinebar?.makeAppbarImmersive(this.bindingActivity, binding.root)
         val start = TypedValue()
         val end = TypedValue()
         context?.theme?.resolveAttribute(
-            com.google.android.material.R.attr.colorOnPrimary,
+            com.google.android.material.R.attr.colorPrimary,
             start,
             true
         )
-        context?.theme?.resolveAttribute(com.google.android.material.R.attr.colorPrimary, end, true)
-
+        context?.theme?.resolveAttribute(com.google.android.material.R.attr.colorAccent, end, true)
         shinebar?.apply {
             setStartColor(start.data)
             setEndColor(end.data)

@@ -13,6 +13,12 @@ data class EpisodesWithPreview(
 )
 
 @Keep
+data class Page(
+    val number: Int,
+)
+
+@Keep
 data class EpisodesResponse(
-    @SerializedName("result") var result: ArrayList<EpisodesWithPreview> = arrayListOf()
+    val pages: List<Page>?,
+    @SerializedName("result") var result: ArrayList<EpisodesWithPreview>? = arrayListOf()
 )
