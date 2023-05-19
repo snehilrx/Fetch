@@ -25,6 +25,7 @@ import com.otaku.fetch.bindings.ImageViewBindings
 import io.github.snehilrx.shinebar.Shinebar
 import java.lang.ref.WeakReference
 
+
 open class BindingFragment<T : ViewDataBinding>(@LayoutRes private val layoutRes: Int) :
     Fragment() {
 
@@ -88,7 +89,6 @@ open class BindingFragment<T : ViewDataBinding>(@LayoutRes private val layoutRes
             true
         )
         context?.theme?.resolveAttribute(com.google.android.material.R.attr.colorAccent, end, true)
-
         shinebar?.apply {
             setStartColor(start.data)
             setEndColor(end.data)

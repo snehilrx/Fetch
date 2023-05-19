@@ -1,6 +1,8 @@
 package com.otaku.fetch.base.ui
 
 import android.os.Bundle
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -40,11 +42,13 @@ class ComposeFragment : BindingFragment<ComposeBinding>(R.layout.compose) {
         binding.compose.setContent {
             if (destination != null) {
                 (activity?.application as? AppModuleProvider)?.currentModule?.ComposeTheme {
-                    BaseNavHost(
-                        startDestination = destination,
-                        modifier = Modifier.statusBarsPadding(),
-                        statusBarHeight = activity?.statusBarHeight?.toFloat()
-                    )
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        BaseNavHost(
+                            modifier = Modifier.statusBarsPadding(),
+                            startDestination = destination,
+                            statusBarHeight = activity?.statusBarHeight?.toFloat(),
+                        )
+                    }
                 }
             }
         }
@@ -56,7 +60,7 @@ class ComposeFragment : BindingFragment<ComposeBinding>(R.layout.compose) {
         modifier: Modifier = Modifier,
         navController: NavHostController = rememberNavController(),
         startDestination: String,
-        statusBarHeight: Float? = null
+        statusBarHeight: Float? = null,
     ) {
         NavHost(
             modifier = modifier,
@@ -64,11 +68,17 @@ class ComposeFragment : BindingFragment<ComposeBinding>(R.layout.compose) {
             startDestination = startDestination
         ) {
             composable(BaseRoutes.DOWNLOADS) {
-                DownloadScreen(downloadsVM, statusBarHeight)
+                DownloadScreen(
+                    downloadsVM,
+                    statusBarHeight,
+
+                    ) { shinebar -> setupShineBar(shinebar) }
             }
             composable(BaseRoutes.SETTINGS) {
                 downloadsVM.detachListener()
-                Settings(statusBarHeight)
+                Settings(
+                    statusBarHeight,
+                ) { shinebar -> setupShineBar(shinebar) }
             }
         }
     }

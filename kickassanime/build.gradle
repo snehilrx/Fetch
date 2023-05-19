@@ -68,6 +68,7 @@ dependencies {
     implementation "androidx.appcompat:appcompat:$versions.appcompat"
     implementation "androidx.constraintlayout:constraintlayout:$versions.constraintlayout"
     implementation "androidx.preference:preference:$versions.preference"
+    implementation project(path: ':shinebar')
     testImplementation "androidx.paging:paging-common:$versions.paging"
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:$versions.swipe_refresh_layout"
     implementation "com.squareup.retrofit2:converter-gson:$versions.gson_conveter"
@@ -159,5 +160,4 @@ dependencies {
     implementation "androidx.compose.material3:material3:$versions.compose_material3"
     implementation("androidx.compose.animation:animation-graphics:$versions.compose_vector_animations")
     implementation "io.github.oleksandrbalan:textflow:$versions.compose_text_flow"
-
 }

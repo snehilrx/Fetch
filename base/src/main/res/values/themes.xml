@@ -18,7 +18,7 @@
 	<style name="Theme.Fetch.CollapsingToolbar.ExpandedText" parent="TextAppearance.Material3.HeadlineLarge">
 		<item name="fontFamily">@font/sohne_fett</item>
 	</style>
-    <style name="Theme.Fetch" parent="Theme.Material3.DayNight.NoActionBar">
+    <style name="Theme.Fetch" parent="Theme.Material3.DayNight.ShineBar">
         <item name="fontFamily">@font/sohne</item>
         <item name="actionBarSize">64dp</item>
         <item name="android:windowTranslucentStatus">true</item>

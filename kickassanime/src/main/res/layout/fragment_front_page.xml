@@ -27,14 +27,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
 
-                <com.otaku.fetch.base.ui.ShineView
-                        android:id="@+id/shineView"
+                <io.github.snehilrx.shinebar.Shinebar
+                        android:id="@+id/shinebar"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:fitsSystemWindows="true"
-                        app:scrimHeight="192dp"
-                        app:statusbarHeight="10dp"
-                        app:toolbarHeight="?attr/actionBarSize" />
+                        android:fitsSystemWindows="false" />
 
                 <com.google.android.material.appbar.AppBarLayout
                         android:id="@+id/appbarLayout"
@@ -50,9 +47,7 @@
                             tools:title="hello"
                             android:layout_width="match_parent"
                             android:layout_height="?attr/collapsingToolbarLayoutLargeSize"
-                            app:contentScrim="?attr/colorPrimary"
                             app:layout_scrollFlags="scroll|exitUntilCollapsed"
-                            app:statusBarScrim="?attr/colorSecondary"
                             app:titleCollapseMode="scale"
                             app:toolbarId="@+id/toolbar">
 
