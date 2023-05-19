@@ -1,6 +1,6 @@
 # Fetch [![Github All Releases](https://img.shields.io/github/downloads/snehilrx/Fetch/total.svg)]() [![Github All Releases](https://img.shields.io/github/issues/snehilrx/Fetch/total.svg)]() 
 
-[![Download Apk](https://custom-icon-badges.herokuapp.com/badge/-Download-blue?style=for-the-badge&logo=download&logoColor=white "Download Apk")](https://github.com/snehilrx/Fetch/releases/tag/0.0.1.39)
+[![Download Apk](https://custom-icon-badges.herokuapp.com/badge/-Download-blue?style=for-the-badge&logo=download&logoColor=white "Download Apk")](https://github.com/snehilrx/Fetch/releases)
 
 
 <p align="center">
