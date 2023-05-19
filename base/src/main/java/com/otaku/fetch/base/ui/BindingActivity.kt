@@ -142,8 +142,9 @@ fun View.consumeBottomInsets(view: View) {
         val bottomMargin = systemWindowInsets.bottom
 
         val layoutParams = view.layoutParams as MarginLayoutParams
-        layoutParams.bottomMargin += (bottomMargin / Resources.getSystem().displayMetrics.density).toInt()
-
+        if (layoutParams.bottomMargin == 0) { 
+            layoutParams.bottomMargin += (bottomMargin / Resources.getSystem().displayMetrics.density).toInt()
+        }
         insets
     }
 }
