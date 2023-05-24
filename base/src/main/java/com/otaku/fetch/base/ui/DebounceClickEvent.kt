@@ -6,7 +6,7 @@ import android.view.View.OnClickListener
 
 
 private var lastClick = 0L
-private const val TIMEOUT = 1000
+private const val TIMEOUT = 500
 
 class DebounceClickEvent(val event: () -> Unit) : OnClickListener {
     @Synchronized

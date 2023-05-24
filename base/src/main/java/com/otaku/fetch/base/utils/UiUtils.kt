@@ -22,10 +22,6 @@ import com.maxkeppeler.sheets.info.InfoSheet
 import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.typeface.library.fontawesome.FontAwesome
 import com.otaku.fetch.base.TAG
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 
@@ -101,6 +97,7 @@ object UiUtils {
         text: String = "ok",
         onPositive: () -> Unit = { }
     ) {
+        Log.e("ERROR_SHOWN", "Something happened during network call", loadingError)
         showError(loadingError?.message, activity, onPositive, text)
     }
 
@@ -114,7 +111,7 @@ object UiUtils {
         val errorIcon = IconicsDrawable(activity, FontAwesome.Icon.faw_bug)
         Log.e(TAG, "showError: $message")
         InfoSheet().show(activity) {
-            title("Oops, we got an error 🥵")
+            title("What the fuck just happened?")
             content(message ?: "Something went wrong")
             displayNegativeButton(false)
             positiveButtonStyle(
@@ -123,26 +120,6 @@ object UiUtils {
             onPositive(text, errorIcon) {
                 dismiss()
                 onPositive()
-            }
-        }
-    }
-
-    fun <T> throttleLatest(
-        intervalMs: Long = 600L,
-        coroutineScope: CoroutineScope,
-        destinationFunction: (T) -> Unit
-    ): (T) -> Unit {
-        var throttleJob: Job? = null
-        var latestParam: T? = null
-        return { param: T ->
-            if (latestParam != param) {
-                latestParam = param
-                if (throttleJob?.isCompleted != false) {
-                    throttleJob = coroutineScope.launch {
-                        delay(intervalMs)
-                        latestParam?.let(destinationFunction)
-                    }
-                }
             }
         }
     }

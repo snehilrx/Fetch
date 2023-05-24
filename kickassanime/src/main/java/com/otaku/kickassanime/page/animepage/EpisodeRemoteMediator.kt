@@ -10,6 +10,7 @@ import com.otaku.kickassanime.api.KickassAnimeService
 import com.otaku.kickassanime.db.KickassAnimeDb
 import com.otaku.kickassanime.utils.Constraints
 import com.otaku.kickassanime.utils.Utils
+import org.threeten.bp.Duration
 import org.threeten.bp.LocalDateTime
 import retrofit2.HttpException
 import java.io.IOException
@@ -19,7 +20,13 @@ data class EpisodeTile(
     var episodeNumber: Int? = null,
     var thumbnail: String? = null,
     val slug: String? = null,
-)
+    val title: String? = null,
+    val duration: Long? = null
+) {
+    fun readableDuration(): String {
+        return "${duration?.let { Duration.ofMillis(it).toMinutes() }} min"
+    }
+}
 
 @OptIn(ExperimentalPagingApi::class)
 class EpisodeRemoteMediator(

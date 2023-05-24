@@ -5,7 +5,9 @@ import com.google.gson.annotations.SerializedName
 
 
 @Keep
-class AnimeSearchResponse : BaseApiResponse<SearchItem>()
+class AnimeSearchResponse(
+    val maxPage: Int
+) : BaseApiResponse<SearchItem>()
 
 @Keep
 data class SearchItem(

@@ -1,7 +1,6 @@
 package com.otaku.fetch.base.ui
 
 import android.content.res.Configuration
-import android.content.res.Resources
 import android.graphics.Color
 import android.os.Bundle
 import android.os.PersistableBundle
@@ -138,12 +137,12 @@ open class BindingActivity<T : ViewDataBinding>(@LayoutRes private val layoutRes
 fun View.consumeBottomInsets(view: View) {
 
     ViewCompat.setOnApplyWindowInsetsListener(this) { _, insets ->
-        val systemWindowInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+        val systemWindowInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
         val bottomMargin = systemWindowInsets.bottom
 
         val layoutParams = view.layoutParams as MarginLayoutParams
-        if (layoutParams.bottomMargin == 0) { 
-            layoutParams.bottomMargin += (bottomMargin / Resources.getSystem().displayMetrics.density).toInt()
+        if (layoutParams.bottomMargin == 0) {
+            layoutParams.bottomMargin += (bottomMargin)
         }
         insets
     }

@@ -170,10 +170,9 @@ class ModuleActivity :
         searchUi.suggestionsList.isVisible = true
     }
 
-    override fun setQueryListener(listener: MaterialSearchView.OnQueryTextListener) {
+    override fun setQueryListener(listener: MaterialSearchView.OnQueryTextListener?) {
         binding.searchView.setOnQueryTextListener(listener)
     }
-
     companion object {
         const val ARG_MODULE_DEEPLINK = "data"
         const val ARG_MODULE_NAME = "name"

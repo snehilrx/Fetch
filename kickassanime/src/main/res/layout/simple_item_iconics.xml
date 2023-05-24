@@ -10,4 +10,4 @@
         android:paddingBottom="@dimen/md_listitem_vertical_margin"
         android:foregroundGravity="center"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"></com.mikepenz.iconics.view.IconicsTextView>
+        android:layout_height="wrap_content" />

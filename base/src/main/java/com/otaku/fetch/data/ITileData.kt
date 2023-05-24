@@ -6,7 +6,7 @@ interface ITileData : BaseItem {
 
     val imageUrl: String
     val tags: List<String>
-    val title: String
+    val title: String?
 
     override fun areItemsTheSame(newItem: BaseItem): Boolean {
         return newItem is ITileData && areItemsTheSame(newItem)

@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.ActivityNavigator
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
@@ -22,6 +23,7 @@ import com.lapism.search.widget.MaterialSearchView
 import com.mikepenz.iconics.view.IconicsTextView
 import com.otaku.fetch.base.TAG
 import com.otaku.fetch.base.databinding.CarouselItemLayoutBinding
+import com.otaku.fetch.base.livedata.GenericState
 import com.otaku.fetch.base.livedata.State
 import com.otaku.fetch.base.ui.BindingFragment
 import com.otaku.fetch.base.ui.searchInterface
@@ -47,6 +49,7 @@ import com.otaku.kickassanime.page.animepage.AnimeActivity
 import com.otaku.kickassanime.page.frontpage.data.FrontPageViewModel
 import com.otaku.kickassanime.utils.Utils.showError
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.FlowPreview
 
 
 @AndroidEntryPoint
@@ -155,6 +158,7 @@ class FrontPageFragment : BindingFragment<FragmentFrontPageBinding>(R.layout.fra
         }
     }
 
+    @OptIn(FlowPreview::class)
     private fun initSearchBar() {
         searchInterface?.setSuggestions(
             ConcatAdapter(
@@ -163,45 +167,43 @@ class FrontPageFragment : BindingFragment<FragmentFrontPageBinding>(R.layout.fra
             )
         )
         frontPageViewModel.getSearchSuggestions().observe(this) { list ->
-            if (list.isEmpty()) {
-                searchInterface?.showError(Exception("No Results"))
-            } else {
-                searchHintAdapter.submitList(list)
-            }
-        }
-
-        frontPageViewModel.searchIsLoading().observe(this) {
-            when (it) {
-                is State.FAILED -> {
+            when (list) {
+                is GenericState.FAILED -> {
                     searchInterface?.showError(Exception("Something went wrong"))
                 }
-                is State.LOADING -> {
+
+                is GenericState.LOADING -> {
                     searchInterface?.showLoading()
                 }
-                is State.SUCCESS -> {
+
+                is GenericState.SUCCESS -> {
+                    val animeSearchResults = list.obj
+                    if (animeSearchResults.isNullOrEmpty()) {
+                        searchInterface?.showError(Exception("No Results"))
+                    } else {
+                        searchHintAdapter.submitList(animeSearchResults)
+                    }
                     searchInterface?.showContent()
                 }
+
+                else -> {}
             }
         }
-        searchInterface?.setQueryListener(
-            object : MaterialSearchView.OnQueryTextListener {
-                override fun onQueryTextChange(newText: CharSequence) {
-                    if (newText.length > 3) {
-                        frontPageViewModel.querySearchSuggestions(newText)
-                    } else {
-                        frontPageViewModel.querySearchSuggestions("")
+
+        frontPageViewModel.transformToQueryFlow(
+            lifecycleScope,
+            { listener: MaterialSearchView.OnQueryTextListener ->
+                searchInterface?.setQueryListener(object :
+                    MaterialSearchView.OnQueryTextListener by listener {
+                    override fun onQueryTextSubmit(query: CharSequence) {
+                        val queryValue = query.toString()
+                        frontPageViewModel.addToSearchHistory(queryValue)
+                        openSearchResultFragment(queryValue)
                     }
-                }
-
-                override fun onQueryTextSubmit(query: CharSequence) {
-                    historyAdapter.submitList(
-                        frontPageViewModel.getSearchHistory().map { it to it })
-                    openSearchResultFragment(query.toString())
-                    searchHintAdapter.submitList(emptyList())
-                }
-            }
-        )
-
+                })
+            }, {
+                searchInterface?.setQueryListener(null)
+            })
     }
 
     private fun openSearchResultFragment(query: String) {
@@ -325,7 +327,7 @@ class FrontPageFragment : BindingFragment<FragmentFrontPageBinding>(R.layout.fra
             is AnimeTile -> {
                 findNavController().navigate(
                     FrontPageFragmentDirections.actionFrontPageFragmentToEpisodeActivity(
-                        title = item.title,
+                        title = item.title ?: "",
                         episodeSlug = item.episodeSlug ?: "",
                         animeSlug = item.animeSlug
                     ),

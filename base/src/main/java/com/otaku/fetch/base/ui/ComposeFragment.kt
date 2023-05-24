@@ -1,9 +1,6 @@
 package com.otaku.fetch.base.ui
 
 import android.os.Bundle
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.fragment.app.activityViewModels
@@ -42,16 +39,14 @@ class ComposeFragment : BindingFragment<ComposeBinding>(R.layout.compose) {
         binding.compose.setContent {
             if (destination != null) {
                 (activity?.application as? AppModuleProvider)?.currentModule?.ComposeTheme {
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        BaseNavHost(
-                            modifier = Modifier.statusBarsPadding(),
-                            startDestination = destination,
-                            statusBarHeight = activity?.statusBarHeight?.toFloat(),
-                        )
-                    }
+                    BaseNavHost(
+                        startDestination = destination,
+                        statusBarHeight = activity?.statusBarHeight?.toFloat(),
+                    )
                 }
             }
         }
+
     }
 
     @Composable

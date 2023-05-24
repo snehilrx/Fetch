@@ -28,12 +28,6 @@
         <item name="collapsingToolbarLayoutLargeStyle">@style/Theme.Fetch.CollapsingToolbar.Large
         </item>
         <item name="actionBarTheme">@style/ActionBar</item>
-        <item name="sheetsButtonColor">?attr/colorOnPrimary</item>
-        <item name="sheetsBackgroundColor">?attr/colorSurface</item>
-        <item name="sheetsIconsColor">?attr/colorSecondary</item>
-        <item name="sheetsTitleColor">?attr/colorOnPrimary</item>
-        <item name="sheetsContentColor">?attr/colorOnPrimary</item>
-        <item name="sheetsContentInverseColor">?attr/colorSurfaceInverse</item>
     </style>
 
 	<style name="ActionBar" parent="Base.ThemeOverlay.AppCompat.ActionBar">

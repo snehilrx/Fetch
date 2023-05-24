@@ -7,23 +7,23 @@
         android:layout_height="match_parent">
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/videoPicker"
-            style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="14dp"
-            android:layout_marginTop="14dp"
-            android:layout_marginEnd="14dp"
-            android:hint="@string/servers"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+                android:id="@+id/videoPicker"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="14dp"
+                android:layout_marginTop="14dp"
+                android:layout_marginEnd="14dp"
+                android:hint="@string/servers"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
 
             <com.otaku.fetch.base.ui.ComboBox
-                android:id="@+id/servers"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="none" />
+                    android:id="@+id/servers"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -113,26 +113,26 @@
                 android:layout_marginTop="4dp" />
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/castBtn"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                app:iconTint="?attr/colorOnSurface"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="8dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginRight="8dp"
-                android:gravity="start|center_vertical"
-                android:insetTop="0dp"
-                android:insetBottom="0dp"
-                android:paddingTop="16dp"
-                android:paddingBottom="16dp"
-                android:paddingLeft="@dimen/preferenceIconMaxSize"
-                android:paddingRight="@dimen/preferenceIconMaxSize"
-                android:strokeColor="?attr/colorPrimary"
-                android:text="@string/cast"
-                android:textAllCaps="true"
-                android:textAppearance="@style/TextAppearance.Material3.LabelLarge"
-                android:textColor="?attr/colorOnSurface" />
+                    android:id="@+id/castBtn"
+                    style="@style/Widget.KickassAnime.NoSpacingButton"
+                    app:iconTint="?attr/colorOnSurface"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginRight="8dp"
+                    android:gravity="start|center_vertical"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:paddingTop="16dp"
+                    android:paddingBottom="16dp"
+                    android:paddingLeft="@dimen/preferenceIconMaxSize"
+                    android:paddingRight="@dimen/preferenceIconMaxSize"
+                    android:strokeColor="?attr/colorPrimary"
+                    android:text="@string/cast"
+                    android:textAllCaps="true"
+                    android:textAppearance="@style/TextAppearance.Material3.LabelLarge"
+                    android:textColor="?attr/colorOnSurface" />
         </FrameLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

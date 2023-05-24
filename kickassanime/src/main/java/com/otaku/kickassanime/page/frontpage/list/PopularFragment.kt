@@ -11,7 +11,7 @@ class PopularFragment : FrontPageListFragment() {
         if (item is AnimeTile)
             findNavController().navigate(
                 PopularFragmentDirections.actionPopularToEpisodeActivity(
-                    title = item.title,
+                    title = item.title ?: "",
                     episodeSlug = item.episodeSlug ?: "",
                     animeSlug = item.animeSlug
                 )

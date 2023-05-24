@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="TextAppearance.Video.Title" parent="TextAppearance.KickassAnime.TitleMedium">
-        <item name="android:textColor">@color/mdtp_white</item>
+        <item name="android:textColor">?attr/colorOnSurface</item>
         <item name="android:height">128dp</item>
         <item name="android:textSize">28sp</item>
         <item name="android:autoSizeTextType">uniform</item>
     </style>
 
     <style name="TextAppearance.Video.SubTitle" parent="TextAppearance.KickassAnime.TitleSmall">
-        <item name="android:textColor">@color/mdtp_white</item>
+        <item name="android:textColor">?attr/colorOnSurface</item>
         <item name="android:height">64dp</item>
         <item name="android:textSize">14sp</item>
         <item name="android:autoSizeTextType">uniform</item>

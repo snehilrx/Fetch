@@ -115,14 +115,15 @@ class AnimeActivity : AppCompatActivity() {
                             IconButton(onClick = { finish() }) {
                                 Icon(
                                     imageVector = Icons.Filled.ArrowBack,
+                                    tint = contentColorFor(backgroundColor = MaterialTheme.colorScheme.background),
                                     contentDescription = "Localized description"
                                 )
                             }
                         },
                         actions = {
                             FavoriteButton(onClick = {
+                                applyFavourite(!isFavourite)
                                 setFavorite(!isFavourite)
-                                applyFavourite(isFavourite)
                             }, isChecked = isFavourite)
                         },
                         scrollBehavior = scrollBehavior

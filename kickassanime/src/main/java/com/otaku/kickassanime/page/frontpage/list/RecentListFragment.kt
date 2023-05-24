@@ -11,7 +11,7 @@ class RecentListFragment : FrontPageListFragment() {
         if (item is AnimeTile)
             findNavController().navigate(
                 RecentListFragmentDirections.actionRecentToEpisodeFragment(
-                    title = item.title,
+                    title = item.title ?: "",
                     episodeSlug = item.episodeSlug ?: "",
                     animeSlug = item.animeSlug
                 )

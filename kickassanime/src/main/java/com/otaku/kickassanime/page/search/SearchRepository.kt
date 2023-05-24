@@ -1,18 +1,16 @@
 package com.otaku.kickassanime.page.search
 
 import android.content.Context
+import android.util.Log
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
-import com.google.gson.Gson
 import com.otaku.kickassanime.api.KickassAnimeService
 import com.otaku.kickassanime.api.model.AnimeSearchResponse
 import com.otaku.kickassanime.api.model.Filters
 import com.otaku.kickassanime.api.model.SearchRequest
 import com.otaku.kickassanime.db.KickassAnimeDb
 import com.otaku.kickassanime.db.models.entity.AnimeEntity
-import com.otaku.kickassanime.db.models.entity.AnimeEntityWithPage
-import com.otaku.kickassanime.utils.Constraints
 import com.otaku.kickassanime.utils.asAnimeEntity
 import com.otaku.kickassanime.utils.asAnimeGenreEntity
 import com.otaku.kickassanime.utils.asLanguageEntity
@@ -31,12 +29,27 @@ const val PREF_SEARCH = "searches"
 class SearchRepository @Inject constructor(
     private val kickassAnimeService: KickassAnimeService,
     private val db: KickassAnimeDb,
-    private val gson: Gson,
     @ApplicationContext private val context: Context
 ) {
 
     private val searchHistoryPref =
         context.getSharedPreferences("search_history", Context.MODE_PRIVATE)
+
+    private val remoteMediator = SearchRemoteMediator(
+        this,
+        db
+    )
+
+    @OptIn(ExperimentalPagingApi::class)
+    val pager = Pager(
+        config = PagingConfig(
+            pageSize = 30,
+            enablePlaceholders = false
+        ),
+        remoteMediator = remoteMediator,
+    ) {
+        db.searchDao().find(remoteMediator.hashCode())
+    }
 
     init {
         searchHistoryPref.getString(PREF_SEARCH, "")?.let { list ->
@@ -45,29 +58,16 @@ class SearchRepository @Inject constructor(
         }
     }
 
-    @OptIn(ExperimentalPagingApi::class)
-    fun getSearchPager(
+    fun search(
         query: String,
         genre: List<String>? = null,
-        language: List<String>? = null,
         year: Int? = null,
-        status: String? = null,
         type: String? = null
-    ): Pager<Int, AnimeEntityWithPage> {
-        val remoteMediator = SearchRemoteMediator(
-            this,
-            db,
-            query, genre, language, year, status, type
-        )
-        return Pager(
-            config = PagingConfig(
-                pageSize = Constraints.NETWORK_PAGE_SIZE,
-                enablePlaceholders = true
-            ),
-            remoteMediator = remoteMediator,
-        ) {
-            db.searchDao().find(remoteMediator.hashCode())
-        }
+    ) {
+        remoteMediator.query = query
+        remoteMediator.type = type
+        remoteMediator.year = year
+        remoteMediator.genre = genre
     }
 
     suspend fun getFilters(): Filters {
@@ -88,7 +88,6 @@ class SearchRepository @Inject constructor(
         query: String,
         page: Int,
         genre: List<String>? = null,
-        language: List<String>? = null,
         year: Int? = null,
         status: String? = null,
         type: String? = null
@@ -97,23 +96,18 @@ class SearchRepository @Inject constructor(
             query,
             page,
             Base64.encode(
-                gson.toJson(
-                    buildJsonObject {
-                        year?.let { put("year", it) }
-                        status?.let { put("year", status) }
-                        type?.let { put("year", type) }
-                        language?.let {
-                            putJsonArray("language") {
-                                language.map { add(it) }
-                            }
-                        }
-                        genre?.let {
-                            putJsonArray("language") {
-                                genre.map { add(it) }
-                            }
+                buildJsonObject {
+                    year?.let { put("year", it) }
+                    status?.let { put("status", status) }
+                    type?.let { put("type", type) }
+                    genre?.let {
+                        putJsonArray("genre") {
+                            genre.map { add(it) }
                         }
                     }
-                ).encodeToByteArray()
+                }.toString().apply {
+                    Log.d("JSON", this)
+                }.encodeToByteArray()
             )
         ))
     }

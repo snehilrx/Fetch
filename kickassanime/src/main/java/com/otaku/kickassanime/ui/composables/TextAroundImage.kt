@@ -7,6 +7,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.*
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
@@ -22,10 +23,15 @@ import eu.wewox.textflow.TextFlowObstacleAlignment
 
 @Composable
 fun TextAroundImage(
-    text: String, imageUrl: String, imageHeightInDp: Dp, imageWidthInDp: Dp, modifier: Modifier
+    text: String, imageUrl: String,
+    imageHeightInDp: Dp,
+    imageWidthInDp: Dp,
+    maxLine: Int,
+    modifier: Modifier
 ) {
     TextFlow(
         text = text,
+        maxLines = maxLine,
         style = MaterialTheme.typography.bodyLarge,
         modifier = modifier,
         obstacleAlignment = TextFlowObstacleAlignment.TopStart,
@@ -39,6 +45,8 @@ fun TextAroundImage(
                     .padding(0.dp, 0.dp, 16.dp, 0.dp)
             )
         },
+        softWrap = true,
+        overflow = TextOverflow.Ellipsis,
         color = LocalContentColor.current
     )
 }
@@ -114,6 +122,7 @@ fun TextAroundImagePreview() {
         imageUrl = "https://www2.kickassanime.ro/image/poster/my-hero-academia-dubs-",
         imageHeightInDp = 120.dp,
         imageWidthInDp = 90.dp,
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize(),
+        maxLine = 10
     )
 }

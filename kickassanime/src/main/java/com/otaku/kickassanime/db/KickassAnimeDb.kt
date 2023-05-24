@@ -10,8 +10,8 @@ import com.otaku.kickassanime.db.models.entity.*
     entities = [AnimeEntity::class, EpisodeEntity::class, SearchResultEntity::class,
         AnimeGenreEntity::class, RecentEntity::class, TrendingEntity::class, EpisodePageEntity::class,
         VideoHistory::class, PopularEntity::class, AnimeLanguageEntity::class],
-    version = 7,
-    exportSchema = true
+    version = 8,
+    exportSchema = true,
 )
 @TypeConverters(Converters::class)
 abstract class KickassAnimeDb : RoomDatabase() {
