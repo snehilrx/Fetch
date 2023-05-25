@@ -164,7 +164,11 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
         initializeWebView()
         setTransparentStatusBar()
         showBackButton()
-        binding.appbarLayout.setPaddingRelative(0, statusBarHeight, 0, 0)
+        statusBarHeight {
+            runOnUiThread {
+                binding.appbarLayout.setPaddingRelative(0, it, 0, 0)
+            }
+        }
     }
 
     private fun isFullscreen(): Boolean {

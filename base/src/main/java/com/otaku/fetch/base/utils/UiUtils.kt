@@ -9,8 +9,13 @@ import android.graphics.drawable.Drawable
 import android.util.Log
 import android.util.TypedValue
 import androidx.annotation.ColorInt
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.view.WindowInsetsCompat
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.lifecycle.lifecycleScope
+import com.anggrayudi.materialpreference.util.openWebsite
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.Transformation
@@ -23,6 +28,10 @@ import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.typeface.library.fontawesome.FontAwesome
 import com.otaku.fetch.base.R
 import com.otaku.fetch.base.TAG
+import com.otaku.fetch.base.settings.dataStore
+import com.otaku.fetch.base.ui.BindingActivity.Companion.REPO_LINK
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 
@@ -150,17 +159,38 @@ object UiUtils {
         }
     }
 
-    val Activity.statusBarHeight
-        get() = run {
-            val rootWindowInsets = window?.decorView?.rootWindowInsets
 
-            return@run rootWindowInsets?.let {
-                val insets = WindowInsetsCompat.toWindowInsetsCompat(rootWindowInsets)
-                    .getInsets(WindowInsetsCompat.Type.statusBars())
-                StatusBarHeight.value = insets.top
-                StatusBarHeight.value
-            } ?: StatusBarHeight.value
+    fun AppCompatActivity.statusBarHeight(delayedUpdate: (Int) -> Unit): Int {
+        val rootWindowInsets = window?.decorView?.rootWindowInsets
+        lifecycleScope.launch {
+            dataStore.data.collectLatest {
+                it[PREF_STATUS_BAR_HEIGHT]?.let { it1 -> delayedUpdate(it1) }
+            }
         }
+        return rootWindowInsets?.let {
+            val insets = WindowInsetsCompat.toWindowInsetsCompat(rootWindowInsets)
+                .getInsets(WindowInsetsCompat.Type.statusBars())
+            StatusBarHeight.value = insets.top
+            lifecycleScope.launch {
+                dataStore.edit {
+                    it[PREF_STATUS_BAR_HEIGHT] = insets.top
+                }
+            }
+            StatusBarHeight.value
+        } ?: StatusBarHeight.value
+    }
+
+    fun showUpdate(activity: AppCompatActivity) {
+        InfoSheet().show(activity) {
+            title(activity.getString(R.string.new_update_avalaible))
+            content(activity.getString(R.string.new_update_avalaible_desc))
+            displayPositiveButton(true)
+            onPositive("Open") {
+                activity.openWebsite(REPO_LINK)
+                dismiss()
+            }
+        }
+    }
 
     val Int.dp: Int
         get() = (this / Resources.getSystem().displayMetrics.density).toInt()
@@ -168,4 +198,8 @@ object UiUtils {
     private object StatusBarHeight {
         var value: Int = 0
     }
+
+
+    @JvmStatic
+    val PREF_STATUS_BAR_HEIGHT = intPreferencesKey("status_bar_height")
 }

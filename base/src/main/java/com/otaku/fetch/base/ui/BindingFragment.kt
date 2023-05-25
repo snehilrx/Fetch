@@ -41,7 +41,9 @@ open class BindingFragment<T : ViewDataBinding>(@LayoutRes private val layoutRes
     ): View? {
         weakReference =
             WeakReference(DataBindingUtil.inflate(inflater, layoutRes, container, false))
-        mStatusBarHeight = activity?.statusBarHeight ?: 0
+        (activity as? AppCompatActivity)?.statusBarHeight {
+            mStatusBarHeight = it
+        }
         onBind(binding, savedInstanceState)
         return binding.root
     }
