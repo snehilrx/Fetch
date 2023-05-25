@@ -33,6 +33,7 @@ class MainActivity : AppCompatActivity() {
     private val sohen = FontFamily(
         Font(R.font.sohne_fett, FontWeight.Bold)
     )
+
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
