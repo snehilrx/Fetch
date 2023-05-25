@@ -5,7 +5,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.LocalContext
@@ -17,6 +16,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.otaku.fetch.base.R
 import com.otaku.fetch.base.askNotificationPermission
 import com.otaku.fetch.base.ui.BindingActivity
@@ -56,6 +56,9 @@ object Settings {
 
     @JvmStatic
     val PREF_DEFAULTS_SET = booleanPreferencesKey("is_defaults_set")
+
+    @JvmStatic
+    val PREF_NEW_UPDATE_FOUND = booleanPreferencesKey("new_update")
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
@@ -69,7 +72,7 @@ fun Settings(
         content = {
             val context = LocalContext.current
             val dataStore = context.dataStore
-            val pref by dataStore.data.collectAsState(initial = null)
+            val pref by dataStore.data.collectAsStateWithLifecycle(initialValue = null)
             if (pref?.get(Settings.NOTIFICATION_ENABLED) == true) {
                 val askNotificationPermission =
                     ((context as? FragmentContextWrapper)?.baseContext as? BindingActivity<*>)?.askNotificationPermission()

@@ -142,8 +142,12 @@ class ModuleActivity :
         searchUi = SearchComponents(searchSuggestionsList, label, progressBar)
 
         searchView.apply {
-            findViewById<View>(com.lapism.search.R.id.search_view_background)
-                ?.setPaddingRelative(0, statusBarHeight, 0, 0)
+            statusBarHeight {
+                runOnUiThread {
+                    findViewById<View>(com.lapism.search.R.id.search_view_background)
+                        ?.setPaddingRelative(0, it, 0, 0)
+                }
+            }
             addView(searchSuggestionsList)
             addView(label)
             addView(progressBar)

@@ -50,6 +50,17 @@ open class BindingActivity<T : ViewDataBinding>(@LayoutRes private val layoutRes
         weakReference =
             WeakReference(DataBindingUtil.setContentView(this, layoutRes))
         onBind(binding, savedInstanceState)
+        checkUpdates()
+    }
+
+    private fun checkUpdates() {
+        lifecycleScope.launch {
+            dataStore.data.collectLatest {
+                if (it[Settings.PREF_NEW_UPDATE_FOUND] == true) {
+                    UiUtils.showUpdate(this@BindingActivity)
+                }
+            }
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {
@@ -159,6 +170,10 @@ open class BindingActivity<T : ViewDataBinding>(@LayoutRes private val layoutRes
         super.onDestroy()
         setSupportActionBar(null)
         if (this::weakReference.isInitialized) weakReference.clear()
+    }
+
+    companion object {
+        const val REPO_LINK = "https://github.com/snehilrx/Fetch/releases/latest"
     }
 }
 

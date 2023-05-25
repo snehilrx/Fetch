@@ -46,4 +46,6 @@
     <string name="permission_required">Permission Required</string>
     <string name="notifications_rational">Notifications permissions is required to send updates of anime released on kickass anime.\n\nThis works by pinging the server every hour or so to check if animes released or not.</string>
     <string name="notifications_updates_unavailable">As you have not allowed notifications pemission, you won\'t be reciving anime release updates</string>
+    <string name="new_update_avalaible">New Update Available</string>
+    <string name="new_update_avalaible_desc">A new update is released on github</string>
 </resources>
