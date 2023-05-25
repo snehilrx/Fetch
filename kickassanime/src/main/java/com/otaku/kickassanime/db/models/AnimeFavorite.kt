@@ -1,8 +1,10 @@
 package com.otaku.kickassanime.db.models
 
+import androidx.annotation.Keep
 import com.otaku.fetch.data.ITileData
 import com.otaku.kickassanime.Strings
 
+@Keep
 data class AnimeFavorite(
     override val title: String,
     val animeSlug: String,

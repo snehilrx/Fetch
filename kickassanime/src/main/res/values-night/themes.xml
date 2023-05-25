@@ -27,6 +27,12 @@
         <item name="colorOnSurfaceInverse">@color/md_theme_dark_inverseOnSurface</item>
         <item name="colorSurfaceInverse">@color/md_theme_dark_inverseSurface</item>
         <item name="colorPrimaryInverse">@color/md_theme_dark_inversePrimary</item>
+        <item name="sheetsButtonColor">?attr/colorOnPrimary</item>
+        <item name="sheetsBackgroundColor">?attr/colorSurface</item>
+        <item name="sheetsIconsColor">?attr/colorSecondary</item>
+        <item name="sheetsTitleColor">?attr/colorOnPrimary</item>
+        <item name="sheetsContentColor">?attr/colorOnPrimary</item>
+        <item name="sheetsContentInverseColor">?attr/colorSurfaceInverse</item>
     </style>
 
 </resources>

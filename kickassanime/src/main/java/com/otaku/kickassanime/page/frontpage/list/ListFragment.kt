@@ -28,9 +28,11 @@ import kotlinx.coroutines.launch
 abstract class ListFragment<Binding : ViewDataBinding> :
     BindingFragment<FragmentAnimeListBinding>(R.layout.fragment_anime_list) {
 
+    private lateinit var animeAdapter: AnimeTileAdapter<Binding>
+
     override fun onBind(binding: FragmentAnimeListBinding, savedInstanceState: Bundle?) {
         initAppbar(binding.appbar, navController = findNavController(), hideBackButton())
-        val animeAdapter = AnimeTileAdapter(
+        animeAdapter = AnimeTileAdapter(
             layoutId,
             onBind
         )
@@ -40,7 +42,6 @@ abstract class ListFragment<Binding : ViewDataBinding> :
     }
 
     protected open fun hideBackButton() = false
-
     protected abstract val layoutId: Int
 
     protected abstract val onBind: (Binding, ITileData) -> Unit
@@ -94,6 +95,10 @@ abstract class ListFragment<Binding : ViewDataBinding> :
         listControlsBinding.retryBtn.isVisible =
             loadState.mediator?.refresh is LoadState.Error && adapter.itemCount == 0
 
+    }
+
+    fun refresh() {
+        animeAdapter.refresh()
     }
 
     protected open fun filter(binding: FragmentAnimeListBinding) {}

@@ -92,6 +92,7 @@ dependencies {
     implementation "androidx.room:room-ktx:$versions.room"
     implementation "androidx.room:room-common:$versions.room"
     implementation "androidx.room:room-paging:$versions.room"
+    testImplementation 'org.junit.jupiter:junit-jupiter'
     kapt "androidx.room:room-compiler:$versions.room"
 
     testImplementation project(path: ':base:cloudflarebypass')

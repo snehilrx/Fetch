@@ -4,7 +4,7 @@ import com.otaku.fetch.data.ITileData
 import com.otaku.kickassanime.Strings
 
 data class AnimeTile(
-    override val title: String,
+    override val title: String?,
     val animeSlug: String,
     val episodeSlug: String?,
     val image: String,

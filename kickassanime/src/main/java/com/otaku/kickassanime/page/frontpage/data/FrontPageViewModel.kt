@@ -6,13 +6,24 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
+import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.viewModelScope
+import com.lapism.search.widget.MaterialSearchView
 import com.otaku.fetch.base.TAG
+import com.otaku.fetch.base.livedata.DebouncedLiveData
+import com.otaku.fetch.base.livedata.GenericState
 import com.otaku.fetch.base.livedata.State
-import com.otaku.fetch.base.utils.UiUtils.throttleLatest
 import com.otaku.kickassanime.db.models.AnimeSearchResult
 import com.otaku.kickassanime.page.search.SearchRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.zip
 import kotlinx.coroutines.launch
 import org.threeten.bp.LocalDateTime
@@ -32,8 +43,7 @@ class FrontPageViewModel @Inject constructor(
         .asLiveData(viewModelScope.coroutineContext)
 
     private val isLoading = MutableLiveData<State>()
-    private val searchSuggestions = MutableLiveData<List<AnimeSearchResult>>()
-    private val searchIsLoading = MutableLiveData<State>()
+    private val searchSuggestions = MutableLiveData<GenericState<List<AnimeSearchResult>>>()
 
     init {
         viewModelScope.launch {
@@ -61,32 +71,63 @@ class FrontPageViewModel @Inject constructor(
     }
 
     fun isLoading(): LiveData<State> = isLoading
-    fun searchIsLoading(): LiveData<State> = searchIsLoading
-
-    fun querySearchSuggestions(query: CharSequence) {
-        throttleLatest<CharSequence>(coroutineScope = viewModelScope) {
-            viewModelScope.launch {
-                searchIsLoading.postValue(State.LOADING())
-                try {
-                    val suggestions = if (TextUtils.isEmpty(query)) {
-                        emptyList()
-                    } else {
-                        searchRepository.search(it.toString()).map {
-                            AnimeSearchResult(it)
-                        }
-                    }
-                    searchSuggestions.postValue(suggestions)
-                    searchIsLoading.postValue(State.SUCCESS())
-                } catch (e: Exception) {
-                    searchIsLoading.postValue(State.FAILED(e))
-                }
-            }
-        }(query)
-    }
-
-    fun getSearchSuggestions(): LiveData<List<AnimeSearchResult>> = searchSuggestions
+    fun getSearchSuggestions(): LiveData<GenericState<List<AnimeSearchResult>>> =
+        DebouncedLiveData(
+            searchSuggestions.distinctUntilChanged(),
+            300,
+            viewModelScope.coroutineContext
+        )
 
     fun getSearchHistory(): List<String> {
         return searchRepository.getSearchHistory()
+    }
+
+    @OptIn(FlowPreview::class)
+    fun transformToQueryFlow(
+        scope: CoroutineScope,
+        registerCallback: (MaterialSearchView.OnQueryTextListener) -> Unit,
+        unregisterCallback: () -> Unit,
+    ) {
+        scope.launch {
+            callbackFlow {
+                val onQueryTextChange = object : MaterialSearchView.OnQueryTextListener {
+                    override fun onQueryTextChange(newText: CharSequence) {
+                        trySend(newText.toString())
+                    }
+
+                    override fun onQueryTextSubmit(query: CharSequence) {
+                    }
+                }
+                registerCallback(onQueryTextChange)
+                awaitClose { unregisterCallback() }
+            }
+                .conflate()
+                .debounce(300).distinctUntilChanged { x, y ->
+                    x.equals(y, true)
+                }
+                .collectLatest { query ->
+                    viewModelScope.launch {
+                        searchSuggestions.postValue(GenericState.LOADING())
+                        try {
+                            val suggestions = if (TextUtils.isEmpty(query)) {
+                                emptyList()
+                            } else {
+                                searchRepository.search(query).map {
+                                    AnimeSearchResult(it)
+                                }
+                            }
+                            searchSuggestions.postValue(GenericState.SUCCESS(suggestions))
+                        } catch (e: Exception) {
+                            searchSuggestions.postValue(GenericState.FAILED(e))
+                        }
+                    }
+                }
+        }
+    }
+
+    fun addToSearchHistory(query: String) {
+        viewModelScope.launch {
+            searchRepository.addToSearchHistory(query)
+        }
     }
 }

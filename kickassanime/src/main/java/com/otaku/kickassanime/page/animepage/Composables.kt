@@ -14,14 +14,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.otaku.fetch.base.livedata.State
+import com.otaku.fetch.base.ui.composepref.prefs.DialogHeader
 import com.otaku.fetch.base.utils.UiUtils
+import com.otaku.kickassanime.R
 import com.otaku.kickassanime.Strings
 import com.otaku.kickassanime.db.models.entity.AnimeEntity
 import com.otaku.kickassanime.db.models.entity.AnimeLanguageEntity
@@ -181,7 +187,7 @@ fun <T> ComboBox(
     ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = {
         expanded = !expanded
     }) {
-        TextField(
+        OutlinedTextField(
             readOnly = true,
             value = toString(getItem()),
             onValueChange = { },
@@ -228,23 +234,65 @@ fun Episode(episodeTile: EpisodeTile, onEpisodeClick: (EpisodeTile) -> Unit) {
             modifier = Modifier.fillMaxSize()
         )
         Text(
-            text = "Episode ${episodeTile.episodeNumber}",
+            text = buildAnnotatedString {
+                val text = stringResource(id = R.string.episode_tile_text)
+                append(text)
+                val episodeNumber = episodeTile.episodeNumber.toString()
+                append(episodeNumber)
+                appendLine()
+                append(episodeTile.title)
+                appendLine()
+                val readableDuration = episodeTile.readableDuration()
+                append(readableDuration)
+                val start = text.length + episodeNumber.length
+                val end = (episodeTile.title?.length ?: 0) + readableDuration.length
+                addStyle(
+                    SpanStyle(
+                        fontSize = MaterialTheme.typography.labelSmall.fontSize
+                    ),
+                    start, start + end
+                )
+            },
             color = Color.White,
             modifier = Modifier
                 .padding(18.dp, 16.dp)
                 .fillMaxWidth()
         )
+
     }
 }
 
 @Composable
 fun AnimeDetails(animeEntity: AnimeEntity) {
-    TextAroundImage(
-        imageUrl = animeEntity.getImageUrl(),
-        text = animeEntity.description ?: "",
-        modifier = Modifier
-            .fillMaxWidth(),
-        imageWidthInDp = 190.dp,
-        imageHeightInDp = 240.dp
-    )
+    var showFullText by remember {
+        mutableStateOf(false)
+    }
+    Column {
+        TextAroundImage(
+            imageUrl = animeEntity.getImageUrl(),
+            text = animeEntity.description ?: "",
+            modifier = Modifier
+                .fillMaxWidth(),
+            imageWidthInDp = 190.dp,
+            imageHeightInDp = 240.dp,
+            maxLine = 12
+        )
+        if (showFullText) {
+            Dialog(onDismissRequest = { showFullText = false }) {
+                Card(modifier = Modifier.padding(12.dp)) {
+                    DialogHeader(
+                        dialogTitle = animeEntity.name,
+                        dialogMessage = animeEntity.description
+                    )
+                }
+            }
+        }
+        Text(
+            text = stringResource(id = R.string.read_more),
+            color = Color(0xff64B5F6),
+            modifier = Modifier
+                .padding(vertical = 10.dp)
+                .clickable { showFullText = true }
+        )
+    }
 }

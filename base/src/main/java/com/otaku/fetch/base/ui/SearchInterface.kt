@@ -11,7 +11,7 @@ interface SearchInterface {
     fun showError(e: Throwable)
     fun showLoading()
     fun showContent()
-    fun setQueryListener(listener: MaterialSearchView.OnQueryTextListener)
+    fun setQueryListener(listener: MaterialSearchView.OnQueryTextListener?)
 }
 
 val Fragment.searchInterface: SearchInterface?
