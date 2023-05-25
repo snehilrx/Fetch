@@ -48,7 +48,12 @@ class EpisodeViewModel @Inject constructor(
     private val timeSkips = MutableLiveData<List<Pair<Long, String?>>>()
     private val subtitleLinks = MutableLiveData<List<CommonSubtitle>>()
 
-    fun fetchEpisode(animeSlug: String, episodeSlug: String, useOffline: Boolean) {
+    fun fetchEpisode(
+        animeSlug: String,
+        episodeSlug: String,
+        useOffline: Boolean,
+        fetchTimeStamps: Boolean
+    ) {
         viewModelScope.launch(io) {
             loadState.postValue(State.LOADING())
             try {
@@ -69,7 +74,12 @@ class EpisodeViewModel @Inject constructor(
                     addToHistory(episode)
                     if (!useOffline) {
                         loadDustUrls("$KICKASSANIME_URL$animeSlug/$episodeSlug")
-                        fetchIntroTimestamp(anime.name, episode.episodeNumber ?: 1f)
+                    }
+                    try {
+                        if (fetchTimeStamps) {
+                            fetchIntroTimestamp(anime.name, episode.episodeNumber ?: 1f)
+                        }
+                    } catch (ignored: Exception) {
                     }
                 } else {
                     throw Exception("No episode found!")

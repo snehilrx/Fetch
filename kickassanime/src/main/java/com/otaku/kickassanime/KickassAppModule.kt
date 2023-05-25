@@ -60,7 +60,7 @@ class KickassAppModule @Inject constructor(
         get() = "http://kaa.sm/recent"
 
     override fun onSearch(query: String) {
-        TODO("Not yet implemented")
+        TODO("Not yet implemented... Will be used when multiple providers a available")
     }
 
     override fun initialize(query: String?, link: String) {
@@ -228,13 +228,6 @@ class KickassAppModule @Inject constructor(
                     Manifest.permission.POST_NOTIFICATIONS
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
                 return
             }
             notify(id, builder.build())

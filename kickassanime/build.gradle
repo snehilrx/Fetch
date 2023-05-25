@@ -161,4 +161,5 @@ dependencies {
     implementation "androidx.compose.material3:material3:$versions.compose_material3"
     implementation("androidx.compose.animation:animation-graphics:$versions.compose_vector_animations")
     implementation "io.github.oleksandrbalan:textflow:$versions.compose_text_flow"
+    implementation "androidx.datastore:datastore-preferences:1.0.0"
 }

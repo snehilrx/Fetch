@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup.MarginLayoutParams
 import android.view.WindowManager
 import android.widget.ImageView
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.LayoutRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -18,9 +19,17 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
+import androidx.datastore.preferences.core.edit
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.appbar.AppBarLayout
+import com.otaku.fetch.base.R
 import com.otaku.fetch.base.databinding.AppbarImageBinding
+import com.otaku.fetch.base.settings.Settings
+import com.otaku.fetch.base.settings.dataStore
+import com.otaku.fetch.base.utils.UiUtils
 import com.otaku.fetch.bindings.ImageViewBindings
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import java.lang.ref.WeakReference
 
 
@@ -124,6 +133,25 @@ open class BindingActivity<T : ViewDataBinding>(@LayoutRes private val layoutRes
         }
     }
 
+    val notificationPermission = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (!isGranted) {
+            UiUtils.showNotificationInfo(
+                this,
+                getString(R.string.notifications_updates_unavailable)
+            )
+        }
+        lifecycleScope.launch {
+            dataStore.data.collectLatest {
+                if (it[Settings.PREF_DEFAULTS_SET] != isGranted) {
+                    dataStore.edit { pref ->
+                        pref[Settings.NOTIFICATION_ENABLED] = isGranted
+                    }
+                }
+            }
+        }
+    }
 
     protected open fun onBind(binding: T, savedInstanceState: Bundle?) {}
 
@@ -142,7 +170,7 @@ fun View.consumeBottomInsets(view: View) {
 
         val layoutParams = view.layoutParams as MarginLayoutParams
         if (layoutParams.bottomMargin == 0) {
-            layoutParams.bottomMargin += (bottomMargin)
+          layoutParams.bottomMargin += (bottomMargin)
         }
         insets
     }

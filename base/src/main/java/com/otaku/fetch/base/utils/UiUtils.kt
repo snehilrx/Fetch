@@ -21,6 +21,7 @@ import com.maxkeppeler.sheets.core.ButtonStyle
 import com.maxkeppeler.sheets.info.InfoSheet
 import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.typeface.library.fontawesome.FontAwesome
+import com.otaku.fetch.base.R
 import com.otaku.fetch.base.TAG
 import kotlin.math.roundToInt
 
@@ -120,6 +121,31 @@ object UiUtils {
             onPositive(text, errorIcon) {
                 dismiss()
                 onPositive()
+            }
+        }
+    }
+
+
+    fun showNotificationInfo(
+        activity: Activity,
+        string: String,
+        onPermissionRequest: (() -> Unit)? = null
+    ) {
+        InfoSheet().show(activity) {
+            title(activity.getString(R.string.permission_required))
+            content(string)
+            displayPositiveButton(true)
+            positiveButtonStyle(
+                ButtonStyle.OUTLINED
+            )
+            onPermissionRequest?.let {
+                displayNegativeButton(true)
+                onNegative("ALLOW") {
+                    onPermissionRequest()
+                }
+            }
+            onPositive("OK") {
+                dismiss()
             }
         }
     }
