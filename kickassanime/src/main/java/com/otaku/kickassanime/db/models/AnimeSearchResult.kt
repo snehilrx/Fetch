@@ -14,7 +14,7 @@ class AnimeSearchResult(
     override val title: String = animeEntity.name ?: ""
 ) : ITileData {
     override fun areItemsTheSame(newItem: ITileData): Boolean {
-        return newItem is AnimeSearchResult && newItem == this
+        return newItem is AnimeSearchResult && newItem.animeEntity.animeSlug == this.animeEntity.animeSlug
     }
 
     override fun areContentsTheSame(newItem: ITileData): Boolean {

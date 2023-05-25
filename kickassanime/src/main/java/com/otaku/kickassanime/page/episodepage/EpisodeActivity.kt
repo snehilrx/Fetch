@@ -16,6 +16,7 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.os.postDelayed
 import androidx.core.view.*
+import androidx.lifecycle.lifecycleScope
 import androidx.media3.cast.CastPlayer
 import androidx.media3.common.*
 import androidx.media3.common.MediaItem.SubtitleConfiguration
@@ -45,6 +46,8 @@ import com.otaku.fetch.base.download.DownloadUtils
 import com.otaku.fetch.base.download.changeOrigin
 import com.otaku.fetch.base.download.toMediaUri
 import com.otaku.fetch.base.livedata.State
+import com.otaku.fetch.base.settings.Settings
+import com.otaku.fetch.base.settings.dataStore
 import com.otaku.fetch.base.ui.BindingActivity
 import com.otaku.fetch.base.ui.setOnClick
 import com.otaku.fetch.base.utils.UiUtils.loadBitmapFromUrl
@@ -60,6 +63,8 @@ import com.otaku.kickassanime.db.models.entity.EpisodeEntity
 import com.otaku.kickassanime.page.animepage.AnimeActivity
 import com.otaku.kickassanime.utils.Utils.binarySearchGreater
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import javax.inject.Inject
 
@@ -159,7 +164,11 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
         initializeWebView()
         setTransparentStatusBar()
         showBackButton()
-        binding.appbarLayout.setPaddingRelative(0, statusBarHeight, 0, 0)
+        statusBarHeight {
+            runOnUiThread {
+                binding.appbarLayout.setPaddingRelative(0, it, 0, 0)
+            }
+        }
     }
 
     private fun isFullscreen(): Boolean {
@@ -459,7 +468,17 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
     }
 
     private fun fetchRemote() {
-        viewModel.fetchEpisode(args.animeSlug, args.episodeSlug, useOfflineMode)
+        val pref = this.dataStore.data
+        lifecycleScope.launch {
+            pref.collectLatest {
+                viewModel.fetchEpisode(
+                    args.animeSlug,
+                    args.episodeSlug,
+                    useOfflineMode,
+                    it[Settings.SKIP_ENABLED] == true
+                )
+            }
+        }
     }
 
     private fun initLoadingState() {

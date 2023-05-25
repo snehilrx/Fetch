@@ -38,5 +38,12 @@
     <string name="new_kickassanime_notification_body">%s\\nClick to view more animes</string>
     <string name="notification_title">New Anime Released %s</string>
     <string name="episode">Episode %d</string>
+    <string name="search_result"><![CDATA[Search Result \n{query}]]></string>
+    <string name="read_more">Read more</string>
+    <string name="episode_tile_text">Episode</string>
+    <string name="genre">Genre</string>
+    <string name="year">Year</string>
+    <string name="type">Type</string>
+    <string name="apply">Apply</string>
 
 </resources>

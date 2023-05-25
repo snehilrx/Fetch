@@ -65,11 +65,11 @@ void main() {
 
     // the gradient begins with a point as origin and as the progress increases
     // the origin changes to a line whose max length will be half of the view width
-    float length = uViewSize.x * progress * _half;
+    float len = uViewSize.x * progress * _half;
 
     // control points of Bezier curve
     vec2 A = vec2(-10.0f, uViewSize.y - uMarginTop - drawHeight - ushaderHeight * progress);
-    vec2 B = vec2(length, uViewSize.y - 2.0 * uMarginTop - ushaderHeight * progress);
+    vec2 B = vec2(len, uViewSize.y - 2.0 * uMarginTop - ushaderHeight * progress);
     vec2 C = vec2(uViewSize.x + ushaderHeight * 0.5, uViewSize.y - uMarginTop - ushaderHeight * progress);
 
     vec2 P = gl_FragCoord.xy;
@@ -79,15 +79,29 @@ void main() {
     // projection point on the curve
     vec2 Bt = curve(t, A, B, C);
 
+    // starting and ending point of the origin line
+    float start_x = 0.0;
+    float end_x = 2.0 * len;
 
-    vec2 origin = vec2(0.0, uViewSize.y);
+    // picking a point on the origin line which is  to the point p
+    if (P.x > start_x && P.x < end_x) {
+        start_x = P.x;
+    } else if (P.x >= end_x) {
+        start_x = end_x;
+    }
+
+    vec2 origin = vec2(start_x, uViewSize.y);
     vec2 toP = P - origin;
     vec2 toBt = Bt - origin;
     if (P.y > A.y) {
         if (dot(toP, toBt) >= 0.0 && dot(toP, toP) <= dot(toBt, toBt)) {
             float distance_ratio = 1.0 - length(toP) / length(toBt);
-            vec3 color = mix(uStartColor.rgb, uEndColor.rgb, distance_ratio);
+            vec3 color = mix(uStartColor.rgb, uEndColor.rgb, mix(1.0 - progress, distance_ratio * 1.2, true));
             fragColor = vec4(color.rgb, distance_ratio);
+        } else {
+            fragColor = vec4(0.0);
         }
+    } else {
+        fragColor = vec4(0.0);
     }
 }

@@ -93,12 +93,12 @@ fun PlayPauseButton(
         if (toggleableState) {
             Image(
                 asset = FontAwesome.Icon.faw_play,
-                colorFilter = ColorFilter.tint(color = MaterialTheme.colorScheme.onPrimary)
+                colorFilter = ColorFilter.tint(color = MaterialTheme.colorScheme.onSurface)
             )
         } else {
             Image(
                 asset = FontAwesome.Icon.faw_pause,
-                colorFilter = ColorFilter.tint(color = MaterialTheme.colorScheme.onPrimary)
+                colorFilter = ColorFilter.tint(color = MaterialTheme.colorScheme.onSurface)
             )
         }
     }

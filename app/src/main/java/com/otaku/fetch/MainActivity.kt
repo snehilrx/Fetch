@@ -33,6 +33,7 @@ class MainActivity : AppCompatActivity() {
     private val sohen = FontFamily(
         Font(R.font.sohne_fett, FontWeight.Bold)
     )
+
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -109,7 +110,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun launchModule(data: ModuleRegistry.ModuleData) {
-        statusBarHeight
+        statusBarHeight {}
         (application as? FetchApplication)?.currentModule = data.appModule
         val moduleIntent = Intent(this, ModuleActivity::class.java)
         moduleIntent.putExtra(ModuleActivity.ARG_MODULE_NAME, data.displayName)

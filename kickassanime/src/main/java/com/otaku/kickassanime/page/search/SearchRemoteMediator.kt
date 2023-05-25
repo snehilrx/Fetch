@@ -16,18 +16,17 @@ import com.otaku.kickassanime.utils.asLanguageEntity
 class SearchRemoteMediator(
     private val repository: SearchRepository,
     private val db: KickassAnimeDb,
-    private val query: String,
-    private val genre: List<String>? = null,
-    private val language: List<String>? = null,
-    private val year: Int? = null,
-    private val status: String? = null,
-    private val type: String? = null
+    var query: String? = null,
+    var genre: List<String>? = null,
+    var year: Int? = null,
+    var status: String? = null,
+    var type: String? = null
 ) : RemoteMediator<Int, AnimeEntityWithPage>() {
 
     override suspend fun load(
-        loadType: LoadType,
-        state: PagingState<Int, AnimeEntityWithPage>
+        loadType: LoadType, state: PagingState<Int, AnimeEntityWithPage>
     ): MediatorResult {
+        val localQueryCopy = query ?: return MediatorResult.Success(endOfPaginationReached = true)
         try {
             val page = when (loadType) {
                 LoadType.REFRESH -> 1
@@ -35,7 +34,7 @@ class SearchRemoteMediator(
                 LoadType.APPEND -> state.lastItemOrNull()?.pageNumber?.plus(1) ?: 1
             }
 
-            val search = repository.search(query, page, genre, language, year, status)
+            val search = repository.search(localQueryCopy, page, genre, year, status)
 
 
             db.withTransaction {
@@ -43,16 +42,11 @@ class SearchRemoteMediator(
                 db.animeEntityDao().insertAll(search.result.map { it.asAnimeEntity() })
                 db.animeLanguageDao().insertAll(search.result.flatMap { it.asLanguageEntity() })
                 db.animeGenreDao().insertAll(search.result.flatMap { it.asAnimeGenreEntity() })
-                db.searchDao().insertAllReplace(
-                    search.result.map {
-                        SearchResultEntity(
-                            id,
-                            it.slug ?: "",
-                            page,
-                            System.currentTimeMillis()
-                        )
-                    }
-                )
+                db.searchDao().insertAllReplace(search.result.mapIndexed { index, it ->
+                    SearchResultEntity(
+                        id, it.slug ?: "", page, index, System.currentTimeMillis()
+                    )
+                })
 
                 if (db.searchDao().uniqueCount() > 10) {
                     val leastRecentlyUsed = db.searchDao().getLeastRecentlyUsed()
@@ -62,7 +56,9 @@ class SearchRemoteMediator(
                 }
             }
 
-            return MediatorResult.Success(endOfPaginationReached = search.result.isEmpty())
+            return MediatorResult.Success(
+                endOfPaginationReached = search.result.isEmpty() || page >= search.maxPage
+            )
         } catch (e: Exception) {
             return MediatorResult.Error(e)
         }
@@ -76,7 +72,6 @@ class SearchRemoteMediator(
 
         if (query != other.query) return false
         if (genre != other.genre) return false
-        if (language != other.language) return false
         if (year != other.year) return false
         if (status != other.status) return false
         if (type != other.type) return false
@@ -87,7 +82,6 @@ class SearchRemoteMediator(
     override fun hashCode(): Int {
         var result = query.hashCode()
         result = 31 * result + (genre?.hashCode() ?: 0)
-        result = 31 * result + (language?.hashCode() ?: 0)
         result = 31 * result + (year ?: 0)
         result = 31 * result + (status?.hashCode() ?: 0)
         result = 31 * result + (type?.hashCode() ?: 0)

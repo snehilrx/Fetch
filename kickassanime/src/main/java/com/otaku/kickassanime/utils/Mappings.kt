@@ -16,7 +16,11 @@ import org.threeten.bp.ZoneOffset
 fun Recent.asAnimeEntity(): AnimeEntity {
     return AnimeEntity(
         animeSlug = slug ?: "",
-        name = this.title ?: "",
+        name = if (!this.titleEn.isNullOrEmpty()) {
+            this.titleEn
+        } else {
+            this.title
+        },
         image = this.poster?.hq?.removeSuffix("-hq") ?: this.poster?.sm?.removeSuffix("-sm"),
         year = year,
         description = this.synopsis
@@ -30,6 +34,7 @@ fun Recent.asEpisodeEntity(): EpisodeEntity {
         duration = this.duration,
         language = this.language,
         episodeNumber = this.episodeNumber,
+        title = this.episodeTitle,
         createdDate = this.createdAt?.let { Utils.parseDateTime(it) },
     )
 }

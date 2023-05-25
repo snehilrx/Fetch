@@ -1,12 +1,12 @@
 package com.otaku.fetch.base.ui
 
 import android.os.Bundle
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -18,7 +18,8 @@ import com.otaku.fetch.base.download.DownloadScreen
 import com.otaku.fetch.base.download.DownloadUtils
 import com.otaku.fetch.base.download.DownloadViewModel
 import com.otaku.fetch.base.settings.Settings
-import com.otaku.fetch.base.utils.UiUtils.statusBarHeight
+import com.otaku.fetch.base.settings.dataStore
+import com.otaku.fetch.base.utils.UiUtils.PREF_STATUS_BAR_HEIGHT
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -40,18 +41,19 @@ class ComposeFragment : BindingFragment<ComposeBinding>(R.layout.compose) {
         super.onBind(binding, savedInstanceState)
         val destination = arguments?.getString("destination")
         binding.compose.setContent {
+            val dataStore = LocalContext.current.dataStore
+            val pref by dataStore.data.collectAsStateWithLifecycle(initialValue = null)
+
             if (destination != null) {
                 (activity?.application as? AppModuleProvider)?.currentModule?.ComposeTheme {
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        BaseNavHost(
-                            modifier = Modifier.statusBarsPadding(),
-                            startDestination = destination,
-                            statusBarHeight = activity?.statusBarHeight?.toFloat(),
-                        )
-                    }
+                    BaseNavHost(
+                        startDestination = destination,
+                        statusBarHeight = pref?.get(PREF_STATUS_BAR_HEIGHT)?.toFloat() ?: 0f,
+                    )
                 }
             }
         }
+
     }
 
     @Composable

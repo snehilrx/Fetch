@@ -28,8 +28,22 @@ data class AnimeEntity(
     }
 }
 
-data class AnimeEntityWithPage(
+class AnimeEntityWithPage(
     @Embedded
     val animeEntity: AnimeEntity,
     val pageNumber: Int
-)
+) {
+    override fun equals(other: Any?): Boolean {
+        return if (other is AnimeEntityWithPage) {
+            other.pageNumber == pageNumber && other.animeEntity.animeSlug == this.animeEntity.animeSlug
+        } else {
+            false
+        }
+    }
+
+    override fun hashCode(): Int {
+        var result = animeEntity.animeSlug.hashCode()
+        result = 31 * result + pageNumber
+        return result
+    }
+}

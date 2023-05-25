@@ -19,7 +19,7 @@ interface SearchResultEntityDao : BaseDao<SearchResultEntity> {
     @Query("SELECT COUNT(DISTINCT ID) from search_results")
     fun uniqueCount(): Int
 
-    @Query("SELECT a.*, s.page as pageNumber from search_results s, anime a where s.id = :id and s.animeSlug = a.animeSlug")
+    @Query("SELECT a.*, s.page as pageNumber from search_results s, anime a where s.id = :id and s.animeSlug = a.animeSlug order by s.page asc, s.`index` asc")
     fun find(id: Int): PagingSource<Int, AnimeEntityWithPage>
 
 }

@@ -40,7 +40,7 @@ ext.versions = [
         livedata                 : '2.6.1',
         preference               : '1.2.0',
         shimmer                  : '0.5.0',
-        media3                   : '1.0.1',
+        media3                   : '1.0.2',
         materialpreference       : '3.8.0',
         ok2curl                  : '0.8.0',
         compose_bom              : '2023.05.01',

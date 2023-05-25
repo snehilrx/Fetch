@@ -11,5 +11,6 @@ data class SearchResultEntity(
     val id: Int,
     val animeSlug: String,
     val page: Int,
+    val index: Int,
     @ColumnInfo(name = "last_accessed") val lastAccessed: Long
 )
