@@ -12,17 +12,24 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.activity.addCallback
 import androidx.core.view.isVisible
+import androidx.datastore.preferences.core.edit
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.lapism.search.widget.MaterialSearchView
 import com.lapism.search.widget.NavigationIconCompat
+import com.otaku.fetch.base.askNotificationPermission
+import com.otaku.fetch.base.settings.Settings
+import com.otaku.fetch.base.settings.dataStore
 import com.otaku.fetch.base.ui.BindingActivity
 import com.otaku.fetch.base.ui.SearchInterface
 import com.otaku.fetch.base.utils.UiUtils.statusBarHeight
 import com.otaku.fetch.databinding.ActivityModuleBinding
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 
 @AndroidEntryPoint
@@ -42,6 +49,26 @@ class ModuleActivity :
         initNavigationView()
         setTransparentStatusBar()
         initSearchView(binding)
+        checkPermissions()
+    }
+
+    private fun checkPermissions() {
+        lifecycleScope.launch {
+            dataStore.data.collectLatest {
+                if (it[Settings.PREF_DEFAULTS_SET] != true) {
+                    dataStore.edit { pref ->
+                        pref[Settings.PREF_DEFAULTS_SET] = true
+                        pref[Settings.SKIP_ENABLED] = true
+                        pref[Settings.NOTIFICATION_ENABLED] = askNotificationPermission()
+                        pref[Settings.AUTO_RESUME] = true
+                        pref[Settings.STREAM_VIDEO_QUALITY] =
+                            resources.getStringArray(com.otaku.fetch.base.R.array.video_qualities)[0]
+                        pref[Settings.DOWNLOADS_VIDEO_QUALITY] =
+                            resources.getStringArray(com.otaku.fetch.base.R.array.video_qualities)[0]
+                    }
+                }
+            }
+        }
     }
 
     private fun initNavigationView() {
