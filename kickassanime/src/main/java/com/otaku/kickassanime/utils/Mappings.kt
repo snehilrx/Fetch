@@ -53,6 +53,7 @@ fun EpisodeApiResponse.asEpisodeEntity(e: EpisodeEntity): EpisodeEntity {
         language = response.language
         thumbnail = response.thumbnail?.hq?.removeSuffix("-hq")
             ?: response.thumbnail?.sm?.removeSuffix("-sm")
+        createdDate = e.createdDate
     }
 }
 

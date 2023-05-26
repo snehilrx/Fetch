@@ -8,7 +8,7 @@ data class AnimeTile(
     val animeSlug: String,
     val episodeSlug: String?,
     val image: String,
-    val rating: String?,
+    val language: String?,
     val episodeNumber: Int,
     val pageNo: Int
 ) : ITileData {
@@ -23,5 +23,5 @@ data class AnimeTile(
     override val imageUrl: String
         get() = "${Strings.KICKASSANIME_URL}image/poster/$image"
     override val tags: List<String>
-        get() = listOfNotNull(rating, "EP $episodeNumber")
+        get() = listOfNotNull(language, "EP $episodeNumber")
 }
