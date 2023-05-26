@@ -1,16 +1,12 @@
 package com.otaku.kickassanime.utils
 
 import android.app.Activity
-import android.util.Base64
-import android.util.Base64InputStream
 import android.util.Log
 import androidx.paging.LoadState
 import androidx.room.withTransaction
-import com.google.android.gms.common.util.Base64Utils
 import com.google.gson.Gson
 import com.otaku.fetch.base.TAG
 import com.otaku.fetch.base.utils.UiUtils
-import com.otaku.kickassanime.api.model.AddKaa
 import com.otaku.kickassanime.api.model.EpisodesResponse
 import com.otaku.kickassanime.api.model.Maverickki
 import com.otaku.kickassanime.api.model.Recent
@@ -72,23 +68,6 @@ object Utils {
         }
     }
 
-    fun parseAddKaaLink(link: String, gson: Gson): AddKaa? {
-        return link.toHttpUrlOrNull()?.let { url ->
-            // read text from url
-            val inputStream = Base64InputStream(url.toUrl().openStream(), Base64.DEFAULT)
-
-            var json = inputStream.bufferedReader().readText()
-            try {
-                for (i in 1..9) {
-                    json = String(Base64Utils.decode(json))
-                }
-            } catch (e: IllegalArgumentException) {
-                // no-op
-            }
-            return@let gson.fromJson(json, AddKaa::class.java)
-        }
-    }
-
     fun <T> List<T>.binarySearchGreater(
         fromIndex: Int = 0,
         toIndex: Int = size,
@@ -139,7 +118,7 @@ object Utils {
             EpisodePageEntity(it.slug(), pageNo)
         }
         database.withTransaction {
-            database.episodeEntityDao().insertAllReplace(episodeEntity)
+            database.episodeEntityDao().insertAll(episodeEntity)
             database.episodePageDao().insertAllReplace(pages)
         }
     }

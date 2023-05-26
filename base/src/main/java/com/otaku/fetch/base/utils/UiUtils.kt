@@ -14,7 +14,9 @@ import androidx.core.graphics.drawable.toBitmap
 import androidx.core.view.WindowInsetsCompat
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.anggrayudi.materialpreference.util.openWebsite
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
@@ -163,8 +165,10 @@ object UiUtils {
     fun AppCompatActivity.statusBarHeight(delayedUpdate: (Int) -> Unit): Int {
         val rootWindowInsets = window?.decorView?.rootWindowInsets
         lifecycleScope.launch {
-            dataStore.data.collectLatest {
-                it[PREF_STATUS_BAR_HEIGHT]?.let { it1 -> delayedUpdate(it1) }
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                dataStore.data.collectLatest {
+                    it[PREF_STATUS_BAR_HEIGHT]?.let { it1 -> delayedUpdate(it1) }
+                }
             }
         }
         return rootWindowInsets?.let {

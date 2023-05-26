@@ -16,7 +16,9 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.os.postDelayed
 import androidx.core.view.*
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.media3.cast.CastPlayer
 import androidx.media3.common.*
 import androidx.media3.common.MediaItem.SubtitleConfiguration
@@ -470,13 +472,15 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
     private fun fetchRemote() {
         val pref = this.dataStore.data
         lifecycleScope.launch {
-            pref.collectLatest {
-                viewModel.fetchEpisode(
-                    args.animeSlug,
-                    args.episodeSlug,
-                    useOfflineMode,
-                    it[Settings.SKIP_ENABLED] == true
-                )
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                pref.collectLatest {
+                    viewModel.fetchEpisode(
+                        args.animeSlug,
+                        args.episodeSlug,
+                        useOfflineMode,
+                        it[Settings.SKIP_ENABLED] == true
+                    )
+                }
             }
         }
     }
