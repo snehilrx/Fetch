@@ -132,7 +132,9 @@ class KickassAppModule @Inject constructor(
                     String.format(
                         context.getString(R.string.new_kickassanime_notification_body),
                         all.take(2).map {
-                            it.title + "\n"
+                            it.titleEn
+                        }.joinToString {
+                            "${it ?: " "}, "
                         }
                     )
                 )
@@ -152,6 +154,7 @@ class KickassAppModule @Inject constructor(
             Utils.saveRecent(it, kickassAnimeDb, 0)
         }
     ): Long {
+
         val newHash = HashUtils.hash64(newEpisodes)
         if (oldHash != newHash) {
             val dbSet = oldEpisodes.map { it.episodeSlug }.toHashSet()

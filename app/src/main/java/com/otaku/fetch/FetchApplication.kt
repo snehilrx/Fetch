@@ -15,8 +15,8 @@ import com.otaku.fetch.base.ui.BindingActivity.Companion.REPO_LINK
 import com.otaku.fetch.work.AnimeNotifier
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.acra.config.mailSenderConfiguration
 import org.acra.data.StringFormat
 import org.acra.ktx.initAcra
@@ -54,15 +54,18 @@ class FetchApplication : MultiDexApplication(), Configuration.Provider, AppModul
         findModules()
         AnimeNotifier().schedulePeriodicWork(WorkManager.getInstance(this.applicationContext))
         createNotificationChannel()
+        checkForUpdates()
+    }
+
+    private fun checkForUpdates() {
         kotlinx.coroutines.MainScope().launch {
-            async(Dispatchers.IO) {
+            withContext(Dispatchers.IO) {
                 val updater = ApkUpdater(this@FetchApplication, REPO_LINK)
                 dataStore.edit {
                     it[Settings.PREF_NEW_UPDATE_FOUND] = updater.isNewUpdateAvailable() ?: false
                 }
-            }.await()
+            }
         }
-
     }
 
     private fun createNotificationChannel() {
