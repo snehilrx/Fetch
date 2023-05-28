@@ -29,7 +29,6 @@ import java.lang.ref.WeakReference
 open class BindingFragment<T : ViewDataBinding>(@LayoutRes private val layoutRes: Int) :
     Fragment() {
 
-    private var mStatusBarHeight: Int = 0
     lateinit var weakReference: WeakReference<T>
     protected val binding: T
         get() = weakReference.get() ?: throw IllegalStateException("Binding is null")
@@ -41,9 +40,6 @@ open class BindingFragment<T : ViewDataBinding>(@LayoutRes private val layoutRes
     ): View? {
         weakReference =
             WeakReference(DataBindingUtil.inflate(inflater, layoutRes, container, false))
-        (activity as? AppCompatActivity)?.statusBarHeight {
-            mStatusBarHeight = it
-        }
         onBind(binding, savedInstanceState)
         return binding.root
     }
@@ -140,11 +136,13 @@ open class BindingFragment<T : ViewDataBinding>(@LayoutRes private val layoutRes
     }
 
     private fun setupToolbar(toolbar: Toolbar) {
-        toolbar.layoutParams = toolbar.layoutParams?.apply {
-            height += mStatusBarHeight
-        }
-        toolbar.apply {
-            setPadding(paddingLeft, paddingTop + mStatusBarHeight, paddingRight, paddingBottom)
+        (activity as? AppCompatActivity)?.statusBarHeight {
+            toolbar.layoutParams = toolbar.layoutParams?.apply {
+                height += it
+            }
+            toolbar.apply {
+                setPadding(paddingLeft, paddingTop + it, paddingRight, paddingBottom)
+            }
         }
     }
 
