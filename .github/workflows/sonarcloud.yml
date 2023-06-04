@@ -45,4 +45,12 @@ jobs:
           property_content="fake=23\nmajorVersion=${major}\nminorVersion=${minor}\npatchVersion=${patch}\nbuildNumber=${build}"
           echo ${property_content} 
           echo ${property_content} > version.properties
+          # Source the version.properties file
+          source version.properties
+
+          # Access the properties
+          echo "Major version: $majorVersion"
+          echo "Minor version: $minorVersion"
+          echo "Patch version: $patchVersion"
+          echo "Build number: $buildNumber"
           ./gradlew build sonarqube --info
