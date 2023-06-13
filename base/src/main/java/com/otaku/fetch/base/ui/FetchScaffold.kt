@@ -31,7 +31,7 @@ fun FetchScaffold(
     statusBarHeight: Float = 0f,
     scrollBehavior: TopAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(),
     setupShineBar: (Shinebar) -> Unit = { _ -> run {} },
-    actions: @Composable() (RowScope.() -> Unit) = {},
+    actions: @Composable (RowScope.() -> Unit) = {},
     content: @Composable () -> Unit,
 ) {
     val top = statusBarHeight.dp

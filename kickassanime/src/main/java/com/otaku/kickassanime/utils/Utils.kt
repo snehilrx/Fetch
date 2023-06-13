@@ -86,7 +86,7 @@ object Utils {
 
             if (cmp <= 0) {
                 low = mid + 1
-            } else if (cmp > 0) {
+            } else {
                 high = mid - 1
                 ans = mid
             }

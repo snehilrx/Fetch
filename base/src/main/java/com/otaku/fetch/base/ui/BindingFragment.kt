@@ -1,3 +1,5 @@
+@file:Suppress("MemberVisibilityCanBePrivate", "MemberVisibilityCanBePrivate")
+
 package com.otaku.fetch.base.ui
 
 import android.os.Bundle
@@ -26,10 +28,11 @@ import io.github.snehilrx.shinebar.Shinebar
 import java.lang.ref.WeakReference
 
 
+@Suppress("MemberVisibilityCanBePrivate")
 open class BindingFragment<T : ViewDataBinding>(@LayoutRes private val layoutRes: Int) :
     Fragment() {
 
-    lateinit var weakReference: WeakReference<T>
+    private lateinit var weakReference: WeakReference<T>
     protected val binding: T
         get() = weakReference.get() ?: throw IllegalStateException("Binding is null")
 
@@ -137,11 +140,13 @@ open class BindingFragment<T : ViewDataBinding>(@LayoutRes private val layoutRes
 
     private fun setupToolbar(toolbar: Toolbar) {
         (activity as? AppCompatActivity)?.statusBarHeight {
-            toolbar.layoutParams = toolbar.layoutParams?.apply {
-                height += it
-            }
             toolbar.apply {
-                setPadding(paddingLeft, paddingTop + it, paddingRight, paddingBottom)
+                if (paddingTop == 0) {
+                    setPadding(paddingLeft, paddingTop + it, paddingRight, paddingBottom)
+                    toolbar.layoutParams = toolbar.layoutParams?.apply {
+                        height += it
+                    }
+                }
             }
         }
     }
@@ -182,7 +187,9 @@ open class BindingFragment<T : ViewDataBinding>(@LayoutRes private val layoutRes
         }
     }
 
-    protected open fun onBind(binding: T, savedInstanceState: Bundle?) {}
+    protected open fun onBind(binding: T, savedInstanceState: Bundle?) {
+        // no-op̊
+    }
 
     override fun onDestroy() {
         super.onDestroy()

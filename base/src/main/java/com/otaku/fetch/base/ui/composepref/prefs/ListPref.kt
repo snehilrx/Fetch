@@ -1,14 +1,27 @@
 package com.otaku.fetch.base.ui.composepref.prefs
 
 import android.util.Log
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.selectable
-import androidx.compose.material.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -30,8 +43,6 @@ import kotlinx.coroutines.launch
  * @param defaultValue Default selected key if this Pref hasn't been saved already. Otherwise the value from the dataStore is used.
  * @param onValueChange Will be called with the selected key when an item is selected
  * @param useSelectedAsSummary If true, uses the current selected item as the summary
- * @param dialogBackgroundColor Background color of the Dialog
- * @param contentColor Preferred content color passed to dialog's children
  * @param textColor Text colour of the [title], [summary] and [entries]
  * @param selectionColor Colour of the radiobutton of the selected item
  * @param buttonColor Colour of the cancel button
@@ -48,7 +59,6 @@ fun ListPref(
     defaultValue: String? = null,
     onValueChange: ((String) -> Unit)? = null,
     useSelectedAsSummary: Boolean = false,
-    dialogBackgroundColor: Color = MaterialTheme.colorScheme.surface,
     textColor: Color = MaterialTheme.colorScheme.onBackground,
     selectionColor: Color = MaterialTheme.colorScheme.primary,
     buttonColor: Color = MaterialTheme.colorScheme.primary,

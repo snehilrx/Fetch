@@ -71,7 +71,6 @@ class ReflectionViewContainer : ConstraintLayout {
         initLayout(attrs, R.attr.reflect_reflectionLayoutStyle)
     }
 
-    @Suppress("unused")
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
         context,
         attrs,

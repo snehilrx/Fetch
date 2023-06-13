@@ -1,5 +1,6 @@
 package com.otaku.kickassanime.ui
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.ColorStateList
 import android.content.res.TypedArray
@@ -11,7 +12,6 @@ import androidx.annotation.ColorInt
 import androidx.annotation.Dimension
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import androidx.compose.ui.graphics.Color
 import com.lapism.search.R
 import com.lapism.search.databinding.MaterialSearchBarBinding
 import com.lapism.search.widget.MaterialSearchLayout
@@ -19,8 +19,9 @@ import com.lapism.search.widget.MaterialSearchToolbar
 import com.lapism.search.widget.NavigationIconCompat
 
 
+@SuppressLint("PrivateResource")
 @Suppress("unused", "MemberVisibilityCanBePrivate")
-class SearchBar @JvmOverloads constructor(
+class MaterialSearchBar @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
@@ -52,6 +53,7 @@ class SearchBar @JvmOverloads constructor(
                     NavigationIconCompat.NONE
                 )!!
             }
+
             a?.hasValue(R.styleable.MaterialSearchBar_search_navigationIcon)!! -> {
                 setNavigationIcon(a?.getDrawable(R.styleable.MaterialSearchBar_search_navigationIcon))
             }
@@ -168,13 +170,14 @@ class SearchBar @JvmOverloads constructor(
 
     override fun onRestoreInstanceState(state: Parcelable?) {
         if (state is ParcelableSparseIntArray) {
-            mCustomMarginsStart = state.get(0, mCustomMarginsStart ?: 0)
-            mCustomMarginsEnd = state.get(1, mCustomMarginsEnd ?: 0)
-            mCustomMarginsTop = state.get(2, mCustomMarginsTop ?: 0)
-            mCustomMarginsBottom = state.get(3, mCustomMarginsBottom ?: 0)
+            mCustomMarginsStart = state[0, mCustomMarginsStart ?: 0]
+            mCustomMarginsEnd = state[1, mCustomMarginsEnd ?: 0]
+            mCustomMarginsTop = state[2, mCustomMarginsTop ?: 0]
+            mCustomMarginsBottom = state[3, mCustomMarginsBottom ?: 0]
         }
         super.onRestoreInstanceState(state)
     }
+
     // *********************************************************************************************
     fun getToolbar(): MaterialSearchToolbar {
         return binding.searchBarToolbar
@@ -205,7 +208,6 @@ class SearchBar @JvmOverloads constructor(
     }
 
     // *********************************************************************************************
-    // TODO set public and requestLayout(), invalidate()
     private fun setMargins(left: Int, top: Int, right: Int, bottom: Int) {
         if (binding.searchBarCard.layoutParams is MarginLayoutParams) {
             val params = binding.searchBarCard.layoutParams as? MarginLayoutParams

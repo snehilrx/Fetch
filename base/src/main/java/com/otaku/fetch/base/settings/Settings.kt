@@ -61,7 +61,7 @@ object Settings {
     val PREF_NEW_UPDATE_FOUND = booleanPreferencesKey("new_update")
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Settings(
     statusBarHeight: Float? = null, setupShineBar: (Shinebar) -> Unit = { _ -> run {} }
@@ -145,6 +145,6 @@ private fun VideoSetting(key: Preferences.Key<String>, pref: Preferences?) {
             id = R.string.video_quality
         ),
         summary = pref?.get(key),
-        entries = stringArrayResource(id = R.array.video_qualities).map { Pair(it, it) }.toMap()
+        entries = stringArrayResource(id = R.array.video_qualities).associateWith { it }
     )
 }

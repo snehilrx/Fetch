@@ -62,7 +62,7 @@ internal class KickassAppModuleTest {
 
         // Validate the notification info
         with(manager.activeNotifications.first()) {
-
+            // write test
         }
     }
 }

@@ -1,7 +1,13 @@
 package com.otaku.fetch.base.ui
 
 import android.content.Context
-import android.graphics.*
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.LinearGradient
+import android.graphics.Paint
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffXfermode
+import android.graphics.Shader
 import android.util.AttributeSet
 import android.util.Log
 import android.util.TypedValue
@@ -18,7 +24,7 @@ import kotlin.math.sin
 
 class ShineView : View, AppBarLayout.OnOffsetChangedListener {
 
-    var statusbarHeight: Float = 0f
+    private var statusbarHeight: Float = 0f
 
     private var toolBarHeight: Float = 0f
     private var scrimHeight: Float = 0f

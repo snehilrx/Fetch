@@ -1,13 +1,11 @@
 package com.otaku.fetch.base.ui
 
 import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.LayerDrawable
-import android.os.AsyncTask
 import android.util.AttributeSet
 import android.util.TypedValue
 import androidx.palette.graphics.Palette
@@ -17,8 +15,6 @@ import com.otaku.fetch.base.utils.UiUtils
 
 class GradientFromImage : ShapeableImageView {
 
-    @Suppress("deprecation")
-    private var task: AsyncTask<Bitmap, Void, Palette>? = null
     private var mFadeSide: FadeSide = FadeSide.NONE
 
     enum class FadeSide {
@@ -80,7 +76,6 @@ class GradientFromImage : ShapeableImageView {
         init()
     }
 
-    @Suppress("unused")
     private fun init() {
         // Enable horizontal fading
         this.isHorizontalFadingEdgeEnabled = true
@@ -93,7 +88,7 @@ class GradientFromImage : ShapeableImageView {
     override fun setImageDrawable(drawable: Drawable?) {
         if (drawable == null) return
         if (drawable is BitmapDrawable) {
-            task = Palette.from(drawable.bitmap).generate {
+            Palette.from(drawable.bitmap).generate {
                 it?.let { palette ->
                     val layerDrawable = LayerDrawable(
                         arrayOf(

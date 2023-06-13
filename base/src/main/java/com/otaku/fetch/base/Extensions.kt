@@ -18,13 +18,12 @@ val Fragment.isLandscape: Boolean
     }
 
 fun BindingActivity<*>.askNotificationPermission(): Boolean {
-
-    when {
+    return when {
         ContextCompat.checkSelfPermission(
             this,
             Manifest.permission.POST_NOTIFICATIONS
         ) == PackageManager.PERMISSION_GRANTED -> {
-            return true
+            true
         }
 
         shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS) -> {
@@ -33,7 +32,7 @@ fun BindingActivity<*>.askNotificationPermission(): Boolean {
                     notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
                 }
             }
-            return false
+            false
         }
 
         else -> {
@@ -42,7 +41,7 @@ fun BindingActivity<*>.askNotificationPermission(): Boolean {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
             }
-            return false
+            false
         }
     }
 }
