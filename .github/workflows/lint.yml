@@ -33,6 +33,7 @@ jobs:
           gradle-version: 8.1
           parallel: true
       - run: |
+          echo "${BASE64_STRING}" | base64 --decode > ${KEY_PATH}
           git fetch --depth=1 origin +refs/tags/*:refs/tags/*
           new="$(git describe --abbrev=0 --tags $(git rev-list --tags --skip=1 --max-count=1))"
           echo ${new}
