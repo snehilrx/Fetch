@@ -145,7 +145,7 @@ class ModuleActivity :
             statusBarHeight {
                 runOnUiThread {
                     findViewById<View>(com.lapism.search.R.id.search_view_background)
-                        ?.setPaddingRelative(0, it, 0, 0)
+                        ?.setPadding(0, it, 0, 0)
                 }
             }
             addView(searchSuggestionsList)

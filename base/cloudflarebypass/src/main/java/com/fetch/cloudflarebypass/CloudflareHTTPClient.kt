@@ -38,7 +38,6 @@ import okhttp3.TlsVersion
  * }
  * </code>
  */
-@Suppress("BlockingMethodInNonBlockingContext")
 open class CloudflareHTTPClient(
     log: Log,
     uamSettingsBlock: (UAMSettings.() -> Unit)? = null

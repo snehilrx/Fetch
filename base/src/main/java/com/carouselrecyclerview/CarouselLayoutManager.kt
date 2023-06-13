@@ -274,10 +274,7 @@ class CarouselLayoutManager constructor(
             val rect = getFrame(index)
             //layout items area of a view if it's first inside the display area
             // and also not already on the screen
-            if (Rect.intersects(displayFrames, rect) && !mHasAttachedItems.get(
-                    index
-                )
-            ) {
+            if (Rect.intersects(displayFrames, rect) && !mHasAttachedItems[index]) {
                 if (itemCount == 0) continue
                 var actualPos = index % itemCount
                 if (actualPos < 0) actualPos += itemCount
@@ -457,7 +454,7 @@ class CarouselLayoutManager constructor(
      */
     fun centerPosition(): Int {
         val intervalPosition = getIntervalDistance()
-        if (intervalPosition == 0) return intervalPosition
+        if (intervalPosition == 0) return 0
 
         var pos = mOffsetAll / intervalPosition
         val more = mOffsetAll % intervalPosition

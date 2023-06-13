@@ -49,7 +49,6 @@ import com.otaku.kickassanime.page.animepage.AnimeActivity
 import com.otaku.kickassanime.page.frontpage.data.FrontPageViewModel
 import com.otaku.kickassanime.utils.Utils.showError
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.FlowPreview
 
 
 @AndroidEntryPoint
@@ -158,7 +157,6 @@ class FrontPageFragment : BindingFragment<FragmentFrontPageBinding>(R.layout.fra
         }
     }
 
-    @OptIn(FlowPreview::class)
     private fun initSearchBar() {
         searchInterface?.setSuggestions(
             ConcatAdapter(

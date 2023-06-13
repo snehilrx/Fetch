@@ -1,6 +1,6 @@
 ext.versions = [
-        paging                   : '3.2.0-alpha05',
-        nav                      : '2.5.3',
+        paging                   : '3.2.0-beta01',
+        nav                      : '2.6.0',
         leak_canary              : '2.10',
         lifecycle                : '2.5.0-alpha05',
         arch                     : '2.1.0',
@@ -11,7 +11,7 @@ ext.versions = [
         hilt_compiler            : '1.0.0',
         retrofit                 : '2.9.0',
         room                     : '2.6.0-alpha01',
-        core_ktx                 : '1.12.0-alpha04',
+        core_ktx                 : '1.12.0-alpha05',
         appcompat                : '1.7.0-alpha02',
         material                 : '1.9.0',
         constraintlayout         : '2.1.4',
@@ -44,13 +44,13 @@ ext.versions = [
         materialpreference       : '3.8.0',
         ok2curl                  : '0.8.0',
         compose_bom              : '2023.05.01',
-        compose_activity         : '1.7.1',
+        compose_activity         : '1.7.2',
         compose_lifecycle        : '2.6.1',
-        compose_paging           : '1.0.0-alpha19',
+        compose_paging           : '1.0.0-alpha20',
         compose_shimmer          : '1.0.5',
         compose_glide            : '1.0.0-alpha.1',
-        compose_material3        : '1.2.0-alpha01',
-        compose_vector_animations: '1.5.0-alpha04',
+        compose_material3        : '1.2.0-alpha02',
+        compose_vector_animations: '1.5.0-beta02',
         compose_text_flow        : '1.1.0',
         kotlin_okhttp            : '1.0',
         datastore                : '1.0.0',
@@ -58,7 +58,8 @@ ext.versions = [
         composeVersion           : "1.1.1",
         assertJ                  : "1.0.1",
         assertJCore              : '3.24.2',
-        mockwebserver            : "5.0.0-alpha.10"
+        mockwebserver            : "5.0.0-alpha.10",
+        jupiter                  : '5.9.1',
 ]
 
 // region automated versioning system

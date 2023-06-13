@@ -57,7 +57,7 @@
                 android:id="@+id/tag1"
                 app:layout_constraintStart_toStartOf="@+id/title"
                 android:ellipsize="end"
-                android:textSize="10sp"
+                android:textSize="11sp"
                 app:layout_constraintTop_toBottomOf="@+id/title" />
 
         <TextView
@@ -73,7 +73,7 @@
                 app:layout_constraintStart_toEndOf="@+id/tag3"
                 android:layout_marginStart="2dp"
                 android:textAllCaps="true"
-                android:textSize="10sp" />
+                android:textSize="11sp" />
 
         <TextView
                 tools:text="TextView"
@@ -88,6 +88,6 @@
                 android:layout_marginStart="2dp"
                 android:ellipsize="end"
                 android:textAllCaps="true"
-                android:textSize="10sp" />
+                android:textSize="11sp" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

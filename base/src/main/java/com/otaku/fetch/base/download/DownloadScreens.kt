@@ -140,17 +140,10 @@ private fun DownloadRepository.TreeNode.toItemTreeIndex(
 
         override fun expand(index: Int): ItemTree? {
             return when (children[index]) {
-                is DownloadRepository.Anime -> {
+                is DownloadRepository.Episode, is DownloadRepository.Anime ->
                     return (children[index] as? DownloadRepository.TreeNode)?.toItemTreeIndex(
                         downloadsVM
                     )
-                }
-
-                is DownloadRepository.Episode -> {
-                    return (children[index] as? DownloadRepository.TreeNode)?.toItemTreeIndex(
-                        downloadsVM
-                    )
-                }
 
                 else -> null
             }
@@ -257,7 +250,6 @@ fun Bundle.toMediaUri(): Uri? {
 
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @androidx.annotation.OptIn(UnstableApi::class)
 @Composable
 private fun LeafItem(
@@ -374,7 +366,6 @@ private fun NodeItem(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DeleteButton(
     modifier: Modifier = Modifier, onClick: () -> Unit, warning: String

@@ -126,7 +126,7 @@ internal class PlayerViewUiHelper(
 
         playerView.subtitleView?.setPadding(
             0, 0, 0,
-            activity.resources.getDimension(com.lapism.search.R.dimen.search_dp_8)
+            activity.resources.getDimension(com.otaku.fetch.base.R.dimen.spacing_md)
                 .toInt()
         )
         playerView.subtitleView?.setFixedTextSize(

@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.Flow
 @AndroidEntryPoint
 class SearchFragment : FrontPageListFragment() {
 
-    val viewModel: SearchViewModel by viewModels()
+    private val viewModel: SearchViewModel by viewModels()
     private val args: SearchFragmentArgs by navArgs()
 
     override fun onBind(binding: FragmentAnimeListBinding, savedInstanceState: Bundle?) {
@@ -47,16 +47,13 @@ class SearchFragment : FrontPageListFragment() {
         viewModel.loadFilters()
         viewModel.getFilters().observe(viewLifecycleOwner) {
             when (it) {
-                is GenericState.FAILED,
-                is GenericState.LOADING -> {
-                    binding.filter.hide()
-                }
-
                 is GenericState.SUCCESS -> {
                     binding.filter.show()
                 }
 
-                else -> {}
+                else -> {
+                    binding.filter.hide()
+                }
             }
         }
         binding.filter.setOnClick {

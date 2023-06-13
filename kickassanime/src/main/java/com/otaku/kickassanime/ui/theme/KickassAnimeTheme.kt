@@ -252,7 +252,7 @@ val sohenTypography = Typography(
 @Composable
 fun KickassAnimeTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    content: @Composable() () -> Unit
+    content: @Composable () -> Unit
 ) {
     val colorSchemeColors = when {
         darkTheme -> DarkColors

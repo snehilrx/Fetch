@@ -63,9 +63,6 @@ class KickassAppModule @Inject constructor(
         TODO("Not yet implemented... Will be used when multiple providers a available")
     }
 
-    override fun initialize(query: String?, link: String) {
-    }
-
     override fun getNavigationGraph(): Int {
         return R.navigation.navigation_kickassanime
     }
@@ -76,7 +73,7 @@ class KickassAppModule @Inject constructor(
 
     @Composable
     override fun ComposeTheme(
-        content: @Composable() () -> Unit
+        content: @Composable () -> Unit
     ) {
         return KickassAnimeTheme(content = content)
     }

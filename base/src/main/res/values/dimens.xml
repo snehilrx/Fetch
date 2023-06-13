@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <dimen name="spacing_xs">4dp</dimen>
+    <dimen name="spacing_sm">8dp</dimen>
+    <dimen name="spacing_md">12dp</dimen>
+    <dimen name="spacing_lg">16dp</dimen>
+    <dimen name="spacing_xl">24dp</dimen>
+
     <dimen name="cardview_height">250dp</dimen>
     <dimen name="cardview_margin">0dp</dimen>
     <dimen name="cardview_height_with_reflection">375dp</dimen>

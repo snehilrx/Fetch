@@ -36,10 +36,9 @@ class FindJsonInTextConverterFactory private constructor(private val gson: Gson?
     }
 
     companion object {
-        // :(\[?\{.*\}\])(,\")
 
         @JvmStatic
-        private val regex: Regex = """appData = (\{.*\})( *\|\| *\{\}\,)""".toRegex()
+        private val regex: Regex = """appData = (\{.*\})( *\|\| *\{\},)""".toRegex()
 
         @JvmStatic
         private val converter = value@{ type: Type, gson: Gson, field: String ->
