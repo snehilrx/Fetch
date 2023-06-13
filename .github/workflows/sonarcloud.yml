@@ -39,14 +39,14 @@ jobs:
           
       - name: Build and analyze
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
           KEY_PATH: ${{ github.workspace }}/${{ secrets.KEY_PATH }}
           STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
           BASE64_STRING: ${{ secrets.KEY_BASE64 }}
+          new: ${{ env.version }}
         run: |
+          echo "${BASE64_STRING}" | base64 --decode > ${KEY_PATH}
           git fetch --depth=1 origin +refs/tags/*:refs/tags/*
           new="$(git describe --abbrev=0 --tags $(git rev-list --tags --skip=1 --max-count=1))"
           major=$(echo "${new}" | awk -F. '{print $1}')
