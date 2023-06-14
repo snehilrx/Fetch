@@ -100,7 +100,7 @@ private static String getVersionName(ext) {
 // endregion
 
 ext.env = [
-        compileSdk               : 33,
+        compileSdk               : 34,
         applicationId            : 'com.otaku.fetch',
         minSdk                   : 26,
         targetSdk                : 33,
