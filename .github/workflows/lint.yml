@@ -26,14 +26,15 @@ jobs:
         env: 
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-          KEY_PATH_DIR: ${{ github.workspace }}/${{ secrets.KEY_PATH }}
+          KEY_PATH_FILE: ${{ github.workspace }}/${{ secrets.KEY_PATH }}
           STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
           BASE64_STRING: ${{ secrets.KEY_BASE64 }}
         with:
           gradle-version: 8.1
           parallel: true
       - run: |
-          echo "${BASE64_STRING}" | base64 --decode > ${KEY_PATH_DIR}
+          touch ${KEY_PATH_FILE}
+          echo "${BASE64_STRING}" | base64 --decode > ${KEY_PATH_FILE}
           git fetch --depth=1 origin +refs/tags/*:refs/tags/*
           new="$(git describe --abbrev=0 --tags $(git rev-list --tags --skip=1 --max-count=1))"
           echo ${new}
