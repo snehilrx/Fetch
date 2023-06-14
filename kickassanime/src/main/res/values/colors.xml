@@ -4,7 +4,6 @@
     <color name="subtitleBackgroundColor">#0fff</color>
     <color name="subtitleEdgeColor">#000</color>
 
-    <color name="seed">#FFC107</color>
     <color name="md_theme_light_primary">#785900</color>
     <color name="md_theme_light_onPrimary">#FFFFFF</color>
     <color name="md_theme_light_primaryContainer">#FFDF9E</color>

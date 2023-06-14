@@ -1,9 +1,7 @@
 package com.otaku.kickassanime.page.adapters.data
 
 import com.carouselrecyclerview.CarouselRecyclerview
-import com.lapism.search.widget.MaterialSearchBar
 import com.otaku.fetch.data.BaseItem
-import com.otaku.kickassanime.databinding.HeadingItemBinding
 
 data class CarouselData(
     val initCarousel: (CarouselRecyclerview) -> Unit

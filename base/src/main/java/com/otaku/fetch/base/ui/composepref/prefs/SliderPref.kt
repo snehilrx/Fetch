@@ -1,5 +1,6 @@
 package com.otaku.fetch.base.ui.composepref.prefs
 
+import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,7 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -45,6 +46,7 @@ import kotlinx.coroutines.launch
  * @param leadingIcon Icon which is positioned at the start of the Pref
  */
 @Composable
+@SuppressLint("UNUSED")
 fun SliderPref(
     key: String,
     title: String,
@@ -65,7 +67,7 @@ fun SliderPref(
     val datastore = LocalPrefsDataStore.current
     val prefs by remember { datastore.data }.collectAsState(initial = null)
 
-    var value by remember { mutableStateOf(defaultValue) }
+    var value by remember { mutableFloatStateOf(defaultValue) }
 
     LaunchedEffect(Unit) {
         prefs?.get(selectionKey)?.also { value = it }

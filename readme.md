@@ -37,7 +37,24 @@ To use Fetch, follow these steps:
 
 2. Open the project in Android Studio.
 
-3. Build and run the application on your Android device or emulator.
+3. Add a `version.properties` file to the root directory of project with the below contents
+   ```
+   majorVersion=1
+   minorVersion=0
+   patchVersion=0
+   buildNumber=3
+   ```
+   
+4. In `local.properties` file add the following properties.
+   ```
+   KEY_PATH=keypath
+   KEY_PASSWORD=****
+   STORE_PASSWORD=***
+   KEY_ALIAS=***
+   ```
+   For creating a signin key, read this https://developer.android.com/studio/publish/app-signing#sign-apk
+      
+5. Build and run the application on your Android device or emulator.
 
 ## How to Contribute
 
@@ -57,7 +74,7 @@ Please make sure to follow the project's coding style, write unit tests for new 
 
 ## License
 
-Fetch is released under the [MIT License](LICENSE). Feel free to use, modify, and distribute this project according to the terms of the license.
+Fetch is released under the [GPLv3 License](https://raw.githubusercontent.com/snehilrx/Fetch/main/LICENSE). Feel free to use, modify, and distribute this project according to the terms of the license.
 
 ## Acknowledgments
 

@@ -2,13 +2,11 @@ package com.otaku.fetch.base.livedata
 
 
 sealed class GenericState<T>(open val exception: Exception?, val obj: T?) {
-    @Suppress("unused")
+
     class LOADING<T> : GenericState<T>(null, null)
 
-    @Suppress("unused")
     class SUCCESS<T>(data: T? = null) : GenericState<T>(null, data)
 
-    @Suppress("unused")
     class FAILED<T>(exception: Exception) : GenericState<T>(exception, null)
 
     override fun equals(other: Any?): Boolean {

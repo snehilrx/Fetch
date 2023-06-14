@@ -1,20 +1,24 @@
 package com.otaku.kickassanime.utils;
 
-import com.google.common.hash.Hashing;
+import com.google.common.hash.HashCode;
 
 import java.util.List;
 
 public class HashUtils {
 
-    public static <T> long hash64(List<T> data) {
-      long hash = 0;
-      for (T t : data) {
-        hash = 31 * hash + t.hashCode();
-      }
-      return hash;
-    }
+  private HashUtils() {
+    // no-op
+  }
 
-    public static int sha256(String data) {
-        return Hashing.sha256().hashBytes(data.getBytes()).asInt();
+  public static <T> long hash64(List<T> data) {
+    long hash = 0;
+    for (T t : data) {
+      hash = 31 * hash + t.hashCode();
     }
+    return hash;
+  }
+
+  public static int sha256(String data) {
+    return (int) HashCode.fromBytes(data.getBytes()).padToLong();
+  }
 }

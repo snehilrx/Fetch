@@ -72,7 +72,8 @@ class KickassAnimeServiceUnitTest {
     @Test
     fun testSearch() {
         runBlocking {
-            val results = kickassAnimeService.search(SearchRequest("dragon"))
+            val results =
+                kickassAnimeService.search(SearchRequest("dragon", filters = "{}", page = 1))
             assertNotNull(results)
         }
     }

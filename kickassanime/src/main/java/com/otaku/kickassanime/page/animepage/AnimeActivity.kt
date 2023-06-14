@@ -70,16 +70,21 @@ class AnimeActivity : AppCompatActivity() {
                         animeViewModel.getEpisodeList(arg.animeSlug, language)
                     }
                 ) { episodeTile ->
-                    val episodeIntent = Intent(currentContext, EpisodeActivity::class.java)
-                    val args = EpisodeActivityArgs(
-                        animeSlug = arg.animeSlug,
-                        episodeSlug = episodeTile.slug ?: return@AnimeMainScreen,
-                        title = arg.name ?: return@AnimeMainScreen
-                    )
-                    episodeIntent.putExtras(args.toBundle())
-                    episodeIntent.flags =
-                        Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or Intent.FLAG_ACTIVITY_CLEAR_TOP
-                    currentContext.startActivity(episodeIntent)
+                    currentContext.startActivity(
+                        Intent(
+                            currentContext,
+                            EpisodeActivity::class.java
+                        ).apply {
+                            putExtras(
+                                EpisodeActivityArgs(
+                                    animeSlug = arg.animeSlug,
+                                    episodeSlug = episodeTile.slug ?: return@AnimeMainScreen,
+                                    title = arg.name ?: return@AnimeMainScreen
+                                ).toBundle()
+                            )
+                            flags =
+                                Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                        })
                 }
             }
         }
@@ -158,7 +163,7 @@ class AnimeActivity : AppCompatActivity() {
                 true,
                 State.SUCCESS(),
                 getAnime = {
-                    flow {
+                    return@AnimeMainScreen flow {
                         emit(AnimeEntity("", "jsaklj", "hodfhjaksdh"))
                     }
                 }

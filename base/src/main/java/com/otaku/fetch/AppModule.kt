@@ -13,17 +13,21 @@ interface AppModule {
 
     val notificationDeeplink: String
 
-    fun onSearch(query: String) {}
+    fun onSearch(query: String) {
+        // no-op
+    }
 
     fun getNavigationGraph(): Int = 0
 
-    suspend fun triggerNotification(context: Context, defaultIntent: TaskStackBuilder) {}
+    suspend fun triggerNotification(context: Context, defaultIntent: TaskStackBuilder) {
+        // defaults to no-op
+    }
 
-    fun initialize(query: String?, link: String = "") {}
     fun getBottomNavigationMenu(): Int = 0
 
     @Composable
-    fun ComposeTheme(content: @Composable() () -> Unit) {
+    fun ComposeTheme(content: @Composable () -> Unit) {
+        // defaults to no-op
     }
 
     suspend fun findEpisode(mediaId: String, mediaLink: String, mediaType: String): DownloadItem? =

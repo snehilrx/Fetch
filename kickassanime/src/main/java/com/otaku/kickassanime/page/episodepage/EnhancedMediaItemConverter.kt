@@ -1,5 +1,6 @@
 package com.otaku.kickassanime.page.episodepage
 
+import android.annotation.SuppressLint
 import androidx.media3.cast.DefaultMediaItemConverter
 import androidx.media3.cast.MediaItemConverter
 import androidx.media3.common.MediaItem
@@ -12,6 +13,7 @@ import com.google.android.gms.cast.MediaTrack
 import com.google.common.collect.ImmutableList
 
 @UnstableApi
+@SuppressLint("VisibleForTests")
 internal class EnhancedMediaItemConverter(private val defaultConverter: DefaultMediaItemConverter = DefaultMediaItemConverter()) :
     MediaItemConverter {
 

@@ -3,7 +3,7 @@ name: Android Build CI
 on:
   push:
     branches:
-      - main
+      - release
 
 jobs:
   build:
@@ -55,6 +55,7 @@ jobs:
           build=$(echo "${old}" | awk -F. '{print $4}')
           build=$((build + 1))
           # Check commit message for version bump keywords
+          echo "${commit}"
           if echo "${commit}" | grep -q -w "major"; then
             major=$((major + 1))
             minor=0

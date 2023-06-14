@@ -8,10 +8,20 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.selectable
-import androidx.compose.material.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -32,13 +42,13 @@ import kotlinx.coroutines.launch
  * @param summary Used to give some more information about what this Pref is for
  * @param defaultValue Default selected key if this Pref hasn't been saved already. Otherwise the value from the dataStore is used.
  * @param onValuesChange Will be called with the [Set] of selected keys when an item is selected/unselected
- * @param dialogBackgroundColor Background color of the Dialog
  * @param textColor Text colour of the [title] and [summary]
  * @param enabled If false, this Pref cannot be clicked and the Dialog cannot be shown.
  * @param entries Map of keys to values for entries that should be shown in the Dialog.
  */
 @ExperimentalComposeUiApi
 @Composable
+@Suppress("unused")
 fun MultiSelectListPref(
     key: String,
     title: String,
