@@ -2,32 +2,36 @@ package com.otaku.kickassanime.pojo
 
 import androidx.annotation.Keep
 import com.google.gson.annotations.SerializedName
-import com.otaku.kickassanime.db.models.CommonVideoLink
 
 @Keep
 data class CrunchyRoll(
-    @SerializedName("sources") var streams: ArrayList<Streams> = arrayListOf()
+    @SerializedName("sources") var sources: ArrayList<Sources> = arrayListOf(),
+    @SerializedName("allSources") var allSources: ArrayList<Sources> = arrayListOf(),
+    @SerializedName("chapters") var chapters: Chapters? = Chapters()
 )
 
-@Keep
-data class Streams(
-    @SerializedName("type") var format: String? = null,
-    @SerializedName("file") var url: String? = null
-) : CommonVideoLink {
-    override fun getLink(): String {
-        return "https:$url"
-    }
+data class Tracks(
+    @SerializedName("kind") var kind: String? = null,
+    @SerializedName("file") var file: String? = null,
+    @SerializedName("label") var label: String? = null,
+    @SerializedName("default") var default: Boolean? = null
+)
 
-    override fun getLinkName(): String {
-        return "Crunchy"
-    }
+data class Sources(
 
-    override fun getVideoType(): Int {
-        return when (format) {
-            "hls" -> CommonVideoLink.HLS
-            "dash" -> CommonVideoLink.DASH
-            else -> CommonVideoLink.HLS
-        }
-    }
+    @SerializedName("default") var default: Boolean? = null,
+    @SerializedName("type") var type: String? = null,
+    @SerializedName("image") var image: String? = null,
+    @SerializedName("file") var file: String? = null,
+    @SerializedName("tracks") var tracks: ArrayList<Tracks> = arrayListOf(),
+    @SerializedName("label") var label: String? = null,
+    @SerializedName("preload") var preload: String? = null
 
-}
+)
+
+data class Chapters(
+
+    @SerializedName("defaultLanguage") var defaultLanguage: String? = null,
+    @SerializedName("timestamps") var timestamps: ArrayList<String> = arrayListOf()
+
+)

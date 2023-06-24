@@ -9,7 +9,6 @@ data class EpisodeApiResponse(
     @SerializedName("title_en") var titleEn: String? = null,
     @SerializedName("synopsis") var synopsis: String? = null,
     @SerializedName("episode_title") var episodeTitle: String? = null,
-    @SerializedName("episode_number") var episodeNumber: Int? = null,
     @SerializedName("episode_string") var episodeString: String? = null,
     @SerializedName("language") var language: String? = null,
     @SerializedName("thumbnail") var thumbnail: Images? = null,

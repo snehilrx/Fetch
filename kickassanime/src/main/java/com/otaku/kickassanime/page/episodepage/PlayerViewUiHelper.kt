@@ -18,6 +18,7 @@ import androidx.media3.ui.CaptionStyleCompat
 import androidx.media3.ui.PlayerControlView
 import androidx.media3.ui.PlayerView
 import com.anggrayudi.materialpreference.PreferenceManager
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.textview.MaterialTextView
 import com.otaku.fetch.base.media.TrackSelectionDialog
 import com.otaku.fetch.base.ui.setOnClick
@@ -34,10 +35,10 @@ internal class PlayerViewUiHelper(
     isFullscreen: Boolean
 ) {
 
-    val skipIntroButton: Button
-    private val chooseServerButton: Button
-    val title: TextView
-    val subtitle: TextView
+    val skipIntroButton: MaterialButton
+    private val chooseServerButton: MaterialButton
+    val title: MaterialTextView
+    val subtitle: MaterialTextView
     val next: View
     val prev: View
     private val progress: ProgressBar
@@ -137,8 +138,12 @@ internal class PlayerViewUiHelper(
         playerView.setShowBuffering(PlayerView.SHOW_BUFFERING_ALWAYS)
     }
 
-    private fun createButton(text: String, context: Context, @GravityInt gravityV: Int): Button {
-        val button = Button(context)
+    private fun createButton(
+        text: String,
+        context: Context,
+        @GravityInt gravityV: Int
+    ): MaterialButton {
+        val button = MaterialButton(context)
         button.isVisible = true
         button.text = text
         button.layoutParams = FrameLayout.LayoutParams(
@@ -240,13 +245,13 @@ internal class PlayerViewUiHelper(
         return linearLayout
     }
 
-    private fun createTitle(context: Context): TextView {
+    private fun createTitle(context: Context): MaterialTextView {
         val materialTextView = MaterialTextView(context)
         materialTextView.setTextAppearance(R.style.TextAppearance_Video_SubTitle)
         return materialTextView
     }
 
-    private fun createSubTitle(context: Context): TextView {
+    private fun createSubTitle(context: Context): MaterialTextView {
         val materialTextView = MaterialTextView(context)
         materialTextView.setTextAppearance(R.style.TextAppearance_Video_Title)
         return materialTextView
