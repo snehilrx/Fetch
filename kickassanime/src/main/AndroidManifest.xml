@@ -10,9 +10,6 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application>
-		<provider android:name=".page.search.AnimeSuggestionProvider"
-			android:authorities="com.otaku.kickassanime.page.search.AnimeSuggestionProvider"
-			android:exported="false" />
 
 		<activity
 			android:name=".page.animepage.AnimeActivity"

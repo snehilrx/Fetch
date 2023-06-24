@@ -14,6 +14,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -59,6 +60,9 @@ object Settings {
 
     @JvmStatic
     val PREF_NEW_UPDATE_FOUND = booleanPreferencesKey("new_update")
+
+    @JvmStatic
+    val PREF_NEW_UPDATE_SHOWN_COUNT = intPreferencesKey("new_update_shown")
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
