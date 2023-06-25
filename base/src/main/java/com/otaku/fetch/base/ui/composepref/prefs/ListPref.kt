@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
+import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.otaku.fetch.base.ui.composepref.LocalPrefsDataStore
@@ -69,27 +70,12 @@ fun ListPref(
     val entryList = entries.toList()
     var showDialog by rememberSaveable { mutableStateOf(false) }
     val selectionKey = stringPreferencesKey(key)
-    val scope = rememberCoroutineScope()
 
     val datastore = LocalPrefsDataStore.current
     val prefs by remember { datastore.data }.collectAsState(initial = null)
 
     var selected = defaultValue
     prefs?.get(selectionKey)?.also { selected = it } // starting value if it exists in datastore
-
-    fun edit(current: Pair<String, String>) = run {
-        scope.launch {
-            try {
-                datastore.edit { preferences ->
-                    preferences[selectionKey] = current.first
-                }
-                onValueChange?.invoke(current.first)
-                showDialog = false
-            } catch (e: Exception) {
-                Log.e("ListPref", "Could not write pref $key to database. ${e.printStackTrace()}")
-            }
-        }
-    }
 
     TextPref(
         title = title,
@@ -108,37 +94,9 @@ fun ListPref(
         AlertDialog(
             onDismissRequest = { showDialog = false },
             text = {
-                Column {
-                    Text(modifier = Modifier.padding(vertical = 16.dp), text = title)
-                    LazyColumn {
-                        items(entryList) { current ->
-
-                            val isSelected = selected == current.first
-                            val onSelected = {
-                                edit(current)
-                            }
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .selectable(
-                                        selected = isSelected,
-                                        onClick = { if (!isSelected) onSelected() }
-                                    ),
-                                verticalAlignment = CenterVertically,
-                            ) {
-                                RadioButton(
-                                    selected = isSelected,
-                                    onClick = { if (!isSelected) onSelected() },
-                                    colors = RadioButtonDefaults.colors(selectedColor = selectionColor)
-                                )
-                                Text(
-                                    text = current.second,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = textColor
-                                )
-                            }
-                        }
-                    }
+                DialogList(title, entryList, selected, selectionColor, textColor, selectionKey) {
+                    onValueChange?.invoke(it)
+                    showDialog = false
                 }
             },
             confirmButton = {
@@ -153,5 +111,72 @@ fun ListPref(
                 usePlatformDefaultWidth = true
             ),
         )
+    }
+}
+
+@Composable
+private fun DialogList(
+    title: String,
+    entryList: List<Pair<String, String>>,
+    selected: String?,
+    selectionColor: Color,
+    textColor: Color,
+    selectionKey: Preferences.Key<String>,
+    onValueChange: ((String) -> Unit)? = null,
+) {
+    val datastore = LocalPrefsDataStore.current
+    val scope = rememberCoroutineScope()
+
+    fun edit(
+        current: Pair<String, String>,
+        selectionKey: Preferences.Key<String>,
+        onValueChange: ((String) -> Unit)? = null,
+    ) = run {
+        scope.launch {
+            try {
+                datastore.edit { preferences ->
+                    preferences[selectionKey] = current.first
+                }
+                onValueChange?.invoke(current.first)
+            } catch (e: Exception) {
+                Log.e(
+                    "ListPref",
+                    "Could not write pref ${selectionKey.name} to database. ${e.printStackTrace()}"
+                )
+            }
+        }
+    }
+
+    Column {
+        Text(modifier = Modifier.padding(vertical = 16.dp), text = title)
+        LazyColumn {
+            items(entryList) { current ->
+
+                val isSelected = selected == current.first
+                val onSelected = {
+                    edit(current, selectionKey, onValueChange)
+                }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .selectable(
+                            selected = isSelected,
+                            onClick = { if (!isSelected) onSelected() }
+                        ),
+                    verticalAlignment = CenterVertically,
+                ) {
+                    RadioButton(
+                        selected = isSelected,
+                        onClick = { if (!isSelected) onSelected() },
+                        colors = RadioButtonDefaults.colors(selectedColor = selectionColor)
+                    )
+                    Text(
+                        text = current.second,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = textColor
+                    )
+                }
+            }
+        }
     }
 }

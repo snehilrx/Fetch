@@ -96,6 +96,7 @@ class FrontPageViewModel @Inject constructor(
                     }
 
                     override fun onQueryTextSubmit(query: CharSequence) {
+                        // no-op as we need only text change listener
                     }
                 }
                 registerCallback(onQueryTextChange)
