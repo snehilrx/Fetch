@@ -61,7 +61,7 @@ class TrackSelectionDialog : Sheet() {
     /**
      * Called when tracks are selected.
      */
-    interface TrackSelectionListener {
+    fun interface TrackSelectionListener {
         /**
          * Called when tracks are selected.
          *

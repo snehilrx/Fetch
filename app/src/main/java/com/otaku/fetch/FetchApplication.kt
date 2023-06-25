@@ -49,10 +49,10 @@ class FetchApplication : MultiDexApplication(), Configuration.Provider, AppModul
             dataStore.data.collectLatest {
                 withContext(Dispatchers.IO) {
                     try {
-                        val updater = ApkUpdater(this@FetchApplication, REPO_LINK)
                         dataStore.edit { editable ->
                             editable[Settings.PREF_NEW_UPDATE_FOUND] =
-                                updater.isNewUpdateAvailable() ?: false
+                                ApkUpdater(this@FetchApplication, REPO_LINK).isNewUpdateAvailable()
+                                    ?: false
                         }
                     } catch (e: UnknownHostException) {
                         // internet not connected

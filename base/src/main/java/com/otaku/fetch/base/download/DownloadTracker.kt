@@ -11,7 +11,6 @@ import androidx.media3.datasource.DataSource
 import androidx.media3.exoplayer.RenderersFactory
 import androidx.media3.exoplayer.offline.*
 import androidx.media3.exoplayer.offline.DownloadHelper.LiveContentUnsupportedException
-import com.google.common.collect.ImmutableMap
 import com.otaku.fetch.base.R
 import com.otaku.fetch.base.media.TrackSelectionDialog
 import java.io.IOException
@@ -57,6 +56,7 @@ class DownloadTracker(
     }
 
     @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
+    @Suppress("unused")
     fun isDownloaded(mediaItem: MediaItem): Boolean {
         val download = downloads[checkNotNull(mediaItem.localConfiguration).uri]
         return download?.let {
@@ -111,6 +111,7 @@ class DownloadTracker(
         }
     }
 
+    @Suppress("unused")
     fun deleteDownload(uri: Uri, context: Context) {
         val download = downloads[uri]
         if (download != null) {
@@ -271,7 +272,7 @@ class DownloadTracker(
                 }
             }
             val downloadRequest: DownloadRequest =
-                buildDownloadRequest(trackSelectionParameters?.overrides)
+                buildDownloadRequest()
             if (downloadRequest.streamKeys.isEmpty()) {
                 // All tracks were deselected in the dialog. Don't start the download.
                 return
@@ -352,7 +353,7 @@ class DownloadTracker(
 
         @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
         private fun startDownload(
-            downloadRequest: DownloadRequest = buildDownloadRequest(null)
+            downloadRequest: DownloadRequest = buildDownloadRequest()
         ) {
             DownloadService.sendAddDownload(
                 context, FetchDownloadService::class.java, downloadRequest, false
@@ -360,7 +361,7 @@ class DownloadTracker(
         }
 
         @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
-        private fun buildDownloadRequest(overrides: ImmutableMap<TrackGroup, TrackSelectionOverride>?): DownloadRequest {
+        private fun buildDownloadRequest(): DownloadRequest {
             return downloadHelper
                 .getDownloadRequest(Util.getUtf8Bytes(mediaItem.mediaId))
         }

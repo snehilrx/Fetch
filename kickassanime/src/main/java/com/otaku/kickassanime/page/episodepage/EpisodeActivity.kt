@@ -492,11 +492,7 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
         viewModel.getLoadState().observe(this) {
             when (it) {
                 is State.FAILED -> {
-                    if (it.shouldTerminateActivity) {
-                        showError(it.exception, this)
-                    } else {
-                        showError(it.exception, this)
-                    }
+                    showError(it.exception, this)
                 }
 
                 is State.LOADING -> showLoading()
