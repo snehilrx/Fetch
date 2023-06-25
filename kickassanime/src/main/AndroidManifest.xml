@@ -17,7 +17,7 @@
         <activity
                 android:name=".page.episodepage.EpisodeActivity"
                 android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|screenLayout|smallestScreenSize|uiMode"
-                android:exported="true"
+                android:exported="false"
                 android:supportsPictureInPicture="true" />
 	</application>
 
