@@ -175,6 +175,7 @@ class CustomWebView : WebView {
         return state
     }
 
+    @Suppress("deprecation")
     override fun onRestoreInstanceState(state: Parcelable?) {
         state?.let { newState ->
             if (newState is Bundle) {
@@ -194,7 +195,7 @@ class CustomWebView : WebView {
 
     companion object {
         @JvmStatic
-        private val blockedLinks = arrayOf(
+        private val blockedLinks = setOf(
             "doctorenticeflashlights.com",
             "kickassanime.disqus.com",
             "simplewebanalysis",

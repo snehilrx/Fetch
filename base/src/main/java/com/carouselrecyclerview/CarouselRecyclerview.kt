@@ -59,6 +59,7 @@ class CarouselRecyclerview : RecyclerView {
      * set flat items in layout manager
      * @param isFlat flat the views and also increase the interval between views
      * */
+    @Suppress("unused")
     fun setFlat(isFlat: Boolean) {
         carouselLayoutManagerBuilder.setIsFlat(isFlat)
         layoutManager = carouselLayoutManagerBuilder.build()
@@ -68,6 +69,7 @@ class CarouselRecyclerview : RecyclerView {
      * set the alpha for each item depends on the position in the layout manager
      * @param isAlpha alpha value and it should in range (0.3f - 1.0f)
      */
+    @Suppress("unused")
     fun setAlpha(isAlpha: Boolean) {
         carouselLayoutManagerBuilder.setIsAlpha(isAlpha)
         layoutManager = carouselLayoutManagerBuilder.build()
@@ -77,6 +79,7 @@ class CarouselRecyclerview : RecyclerView {
      * set the interval ratio which is gap between items (views) in layout manager
      * @param ratio value of gap, it should in range (0.4f - 1f)
      */
+    @Suppress("unused")
     fun setIntervalRatio(ratio: Float) {
         carouselLayoutManagerBuilder.setIntervalRatio(ratio)
         layoutManager = carouselLayoutManagerBuilder.build()
@@ -86,6 +89,7 @@ class CarouselRecyclerview : RecyclerView {
      * Set scroll enabling in layout manager, It helps to remove/add scrolling in the recyclerview
      * @param isScrollingEnabled set scrollingEnabled value
      */
+    @Suppress("unused")
     fun setIsScrollingEnabled(isScrollingEnabled: Boolean) {
         carouselLayoutManagerBuilder.setIsScrollingEnabled(isScrollingEnabled)
         layoutManager = carouselLayoutManagerBuilder.build()
@@ -134,6 +138,7 @@ class CarouselRecyclerview : RecyclerView {
     }
 
 
+    @Suppress("unused")
     fun setItemSelectListener(listener: CarouselLayoutManager.OnSelected) {
         getCarouselLayoutManager().setOnSelectedListener(listener)
     }
@@ -160,7 +165,8 @@ class CarouselRecyclerview : RecyclerView {
      * Get selected position from the layout manager
      * @return center view of the layout manager
      */
-    fun getSelectedPosition() = getCarouselLayoutManager().getSelectedPosition()
+    @Suppress("unused")
+    fun getSelectedPosition() = getCarouselLayoutManager().selectedPosition
 
     private fun restorePosition() {
         if (layoutManagerState != null) {

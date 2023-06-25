@@ -171,7 +171,9 @@ open class BindingActivity<T : ViewDataBinding>(@LayoutRes private val layoutRes
         }
     }
 
-    protected open fun onBind(binding: T, savedInstanceState: Bundle?) {}
+    protected open fun onBind(binding: T, savedInstanceState: Bundle?) {
+        // no-op impl class will use this function to initialize on the binding
+    }
 
     override fun onDestroy() {
         super.onDestroy()

@@ -58,7 +58,12 @@ class DownloadRepository @Inject constructor() {
 
         override fun findChild(child: TreeNode): Anime? {
             val index = indexMap[child.hashCode()] ?: return null
-            return children.getOrNull(index) as? Anime
+            val item = children.getOrNull(index)
+            return if (item is Anime) {
+                item
+            } else {
+                null
+            }
         }
 
         override fun add(node: TreeNode) {
@@ -89,7 +94,12 @@ class DownloadRepository @Inject constructor() {
 
         override fun findChild(child: TreeNode): Episode? {
             val index = indexMap[child.hashCode()] ?: return null
-            return children.getOrNull(index) as? Episode
+            val item = children.getOrNull(index)
+            return if (item is Episode) {
+                item
+            } else {
+                null
+            }
         }
 
         override fun equals(other: Any?): Boolean {
@@ -137,7 +147,12 @@ class DownloadRepository @Inject constructor() {
 
         override fun findChild(child: TreeNode): Link? {
             val index = indexMap[child.hashCode()] ?: return null
-            return children.getOrNull(index) as? Link
+            val item = children.getOrNull(index)
+            return if (item is Link) {
+                item
+            } else {
+                null
+            }
         }
 
         override fun equals(other: Any?): Boolean {

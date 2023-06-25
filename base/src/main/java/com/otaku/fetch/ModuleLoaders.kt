@@ -2,6 +2,6 @@ package com.otaku.fetch
 
 import android.content.Context
 
-interface ModuleLoaders {
+fun interface ModuleLoaders {
     fun load(applicationContext: Context)
 }

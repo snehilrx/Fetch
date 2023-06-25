@@ -28,6 +28,6 @@ sealed class GenericState<T>(open val exception: Exception?, val obj: T?) {
 sealed class State(override val exception: Exception?) : GenericState<Any>(exception, null) {
     class LOADING : State(null)
     class SUCCESS : State(null)
-    class FAILED(exception: Exception, val shouldTerminateActivity: Boolean = true) :
+    class FAILED(exception: Exception) :
         State(exception)
 }
