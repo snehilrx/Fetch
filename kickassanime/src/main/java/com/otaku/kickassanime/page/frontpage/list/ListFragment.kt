@@ -101,7 +101,9 @@ abstract class ListFragment<Binding : ViewDataBinding> :
         animeAdapter.refresh()
     }
 
-    protected open fun filter(binding: FragmentAnimeListBinding) {}
+    protected open fun filter(binding: FragmentAnimeListBinding) {
+        // no-op
+    }
 
     abstract fun getList(): Flow<PagingData<out ITileData>>
 

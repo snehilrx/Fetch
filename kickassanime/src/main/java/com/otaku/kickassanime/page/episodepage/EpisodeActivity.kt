@@ -312,24 +312,7 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
                                 oldPos = currentPos
                                 skipIntroButton.text =
                                     getString(R.string.skip).format(type)
-                                skipIntroButton.isVisible = when (type) {
-                                    TimestampType.INTRO.type -> true
-                                    TimestampType.RECAP.type -> true
-                                    TimestampType.CANON.type -> false
-                                    TimestampType.MUST_WATCH.type -> false
-                                    TimestampType.BRANDING.type -> false
-                                    TimestampType.MIXED_INTRO.type -> true
-                                    TimestampType.NEW_INTRO.type -> true
-                                    TimestampType.FILLER.type -> true
-                                    TimestampType.TRANSITION.type -> true
-                                    TimestampType.CREDITS.type -> true
-                                    TimestampType.MIXED_CREDITS.type -> true
-                                    TimestampType.NEW_CREDITS.type -> true
-                                    TimestampType.PREVIEW.type -> false
-                                    TimestampType.TITLE_CARD.type -> false
-                                    TimestampType.UNKNOWN.type -> false
-                                    else -> false
-                                }
+                                skipIntroButton.isVisible = getSkipButtonVisiblity(type)
                             } else {
                                 skipIntroButton.isVisible = false
                             }
@@ -347,6 +330,25 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
             }
             timeSkipLoop?.let { handler.postDelayed(timeSkipLoop as Runnable, 2000) }
         }
+    }
+
+    private fun getSkipButtonVisiblity(type: String) = when (type) {
+        TimestampType.INTRO.type -> true
+        TimestampType.RECAP.type -> true
+        TimestampType.CANON.type -> false
+        TimestampType.MUST_WATCH.type -> false
+        TimestampType.BRANDING.type -> false
+        TimestampType.MIXED_INTRO.type -> true
+        TimestampType.NEW_INTRO.type -> true
+        TimestampType.FILLER.type -> true
+        TimestampType.TRANSITION.type -> true
+        TimestampType.CREDITS.type -> true
+        TimestampType.MIXED_CREDITS.type -> true
+        TimestampType.NEW_CREDITS.type -> true
+        TimestampType.PREVIEW.type -> false
+        TimestampType.TITLE_CARD.type -> false
+        TimestampType.UNKNOWN.type -> false
+        else -> false
     }
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
