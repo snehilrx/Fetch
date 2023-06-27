@@ -3,6 +3,7 @@ package com.otaku.kickassanime.page.episodepage
 import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.*
+import androidx.media3.common.MimeTypes
 import com.google.gson.Gson
 import com.otaku.fetch.base.livedata.SingleLiveEvent
 import com.otaku.fetch.base.livedata.State
@@ -17,6 +18,7 @@ import com.otaku.kickassanime.db.models.entity.EpisodeEntity
 import com.otaku.kickassanime.page.favourtites.FavouritesRepository
 import com.otaku.kickassanime.page.history.HistoryRepository
 import com.otaku.kickassanime.pojo.CrunchyRoll
+import com.otaku.kickassanime.pojo.Sources
 import com.otaku.kickassanime.utils.Utils
 import com.otaku.kickassanime.utils.asVideoHistory
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -101,8 +103,8 @@ class EpisodeViewModel @Inject constructor(
                         episodeNumber
                     )
                     viewModelScope.launch(default) {
-                        fetchAnimeSkipTime?.let {
-                            timeSkips.postValue(it)
+                        fetchAnimeSkipTime?.let { list ->
+                            timeSkips.postValue(list.sortedBy { it.first })
                         }
                     }
                 } catch (e: Exception) {
@@ -118,6 +120,7 @@ class EpisodeViewModel @Inject constructor(
 
     fun getVideoLink(): LiveData<List<CommonVideoLink>> = videoLink
 
+    @Suppress("unused")
     fun getThumbnailLink(): LiveData<String> = thumbnailLink
 
     fun getTimeSkip(): LiveData<List<Pair<Long, String?>>> = timeSkips
@@ -125,12 +128,6 @@ class EpisodeViewModel @Inject constructor(
     fun getSubtitle(): LiveData<List<CommonSubtitle>> = subtitleLinks
 
     private fun addServerLinks(vararg links: CommonVideoLink) {
-        val newList = ArrayList<CommonVideoLink>(videoLink.value ?: emptyList())
-        newList.addAll(links)
-        videoLink.postValue(newList)
-    }
-
-    private fun addServerLinks(links: List<CommonVideoLink>) {
         val newList = ArrayList<CommonVideoLink>(videoLink.value ?: emptyList())
         newList.addAll(links)
         videoLink.postValue(newList)
@@ -255,7 +252,52 @@ class EpisodeViewModel @Inject constructor(
     fun handleCrunchyRoll(json: String) {
         viewModelScope.launch {
             val crunchyRoll = gson.fromJson(json, CrunchyRoll::class.java)
-            addServerLinks(crunchyRoll.streams)
+            processCrunchyRoll(crunchyRoll.sources)
+            processCrunchyRoll(crunchyRoll.allSources)
+        }
+    }
+
+    private fun processCrunchyRoll(sources: ArrayList<Sources>) {
+        sources.forEach { source ->
+            val streams = object : CommonVideoLink {
+                override fun getLink(): String {
+                    return "https:${source.file}"
+                }
+
+                override fun getLinkName(): String {
+                    return "KAA ${source.label}"
+                }
+
+                override fun getVideoType(): Int {
+                    return if (source.type?.equals("hls") == true) {
+                        CommonVideoLink.HLS
+                    } else {
+                        CommonVideoLink.DASH
+                    }
+                }
+            }
+            addServerLinks(streams)
+            val captions = source.tracks.filter { it.kind == "captions" }.map {
+                return@map object : CommonSubtitle {
+                    override fun getLink(): String {
+                        return "https:${it.file}"
+                    }
+
+                    override fun getLanguage(): String {
+                        return it.label ?: ""
+                    }
+
+                    @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
+                    override fun getFormat(): String {
+                        return if (it.file?.endsWith(".vtt") == true) {
+                            MimeTypes.TEXT_VTT
+                        } else {
+                            MimeTypes.TEXT_UNKNOWN
+                        }
+                    }
+                }
+            }
+            subtitleLinks.postValue(captions)
         }
     }
 }

@@ -61,7 +61,7 @@ class TrackSelectionDialog : Sheet() {
     /**
      * Called when tracks are selected.
      */
-    interface TrackSelectionListener {
+    fun interface TrackSelectionListener {
         /**
          * Called when tracks are selected.
          *
@@ -247,11 +247,9 @@ class TrackSelectionDialog : Sheet() {
                 player.trackSelectionParameters,
                 allowAdaptiveSelections = true,
                 allowMultipleOverrides = false,
-                trackSelectionListener = object : TrackSelectionListener {
-                    override fun onTracksSelected(trackSelectionParameters: TrackSelectionParameters?) {
-                        if (trackSelectionParameters != null) {
-                            player.trackSelectionParameters = trackSelectionParameters
-                        }
+                trackSelectionListener = { trackSelectionParameters ->
+                    if (trackSelectionParameters != null) {
+                        player.trackSelectionParameters = trackSelectionParameters
                     }
                 },
                 onDismissListener = onDismissListener

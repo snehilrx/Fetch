@@ -72,7 +72,8 @@ class CarouselLayoutManager constructor(
     private var mSelectedListener: OnSelected? = null
 
     /** selected position of layout manager (center item)*/
-    private var selectedPosition: Int = 0
+    var selectedPosition: Int = 0
+        private set
 
     /** Previous item which was in center in layout manager */
     private var mLastSelectedPosition: Int = 0
@@ -238,13 +239,7 @@ class CarouselLayoutManager constructor(
         var position = 0
         for (index in 0 until childCount) {
             val child = getChildAt(index) ?: break
-            position = if (child.tag != null) {
-                //get position from tag class define later
-                val tag = checkTAG(child.tag)
-                tag!!.pos
-            } else {
-                getPosition(child)
-            }
+            position = getChildPosition(child)
 
             val rect = getFrame(position)
 
@@ -274,25 +269,43 @@ class CarouselLayoutManager constructor(
             val rect = getFrame(index)
             //layout items area of a view if it's first inside the display area
             // and also not already on the screen
-            if (Rect.intersects(displayFrames, rect) && !mHasAttachedItems[index]) {
-                if (itemCount == 0) continue
-                var actualPos = index % itemCount
-                if (actualPos < 0) actualPos += itemCount
-
-                val scrap = recycler.getViewForPosition(actualPos)
-                checkTAG(scrap.tag)
-                scrap.tag = TAG(index)
-                measureChildWithMargins(scrap, 0, 0)
-
-                if (scrollToDirection == SCROLL_TO_RIGHT) {
-                    addView(scrap, 0)
-                } else addView(scrap)
-
-                layoutItem(scrap, rect)
-                mHasAttachedItems.put(index, true)
-            }
+            checkIfItemsFit(displayFrames, rect, index, recycler, scrollToDirection)
         }
 
+    }
+
+    private fun checkIfItemsFit(
+        displayFrames: Rect,
+        rect: Rect,
+        index: Int,
+        recycler: RecyclerView.Recycler,
+        scrollToDirection: Int
+    ) {
+        if (Rect.intersects(displayFrames, rect) && !mHasAttachedItems[index]) {
+            if (itemCount == 0) return
+            var actualPos = index % itemCount
+            if (actualPos < 0) actualPos += itemCount
+
+            val scrap = recycler.getViewForPosition(actualPos)
+            checkTAG(scrap.tag)
+            scrap.tag = TAG(index)
+            measureChildWithMargins(scrap, 0, 0)
+
+            if (scrollToDirection == SCROLL_TO_RIGHT) {
+                addView(scrap, 0)
+            } else addView(scrap)
+
+            layoutItem(scrap, rect)
+            mHasAttachedItems.put(index, true)
+        }
+    }
+
+    private fun getChildPosition(child: View) = if (child.tag != null) {
+        //get position from tag class define later
+        val tag = checkTAG(child.tag)
+        tag!!.pos
+    } else {
+        getPosition(child)
     }
 
     /**
@@ -668,12 +681,6 @@ class CarouselLayoutManager constructor(
     }
 
     /**
-     * Get the selected position or centered position
-     * @return selectedPosition
-     */
-    internal fun getSelectedPosition() = selectedPosition
-
-    /**
      * Use the builder pattern to get all the required attribute for the layout manager
      */
     class Builder {
@@ -733,7 +740,7 @@ class CarouselLayoutManager constructor(
 
     override fun isAutoMeasureEnabled() = true
 
-    interface OnSelected {
+    fun interface OnSelected {
         fun onItemSelected(position: Int)
     }
 

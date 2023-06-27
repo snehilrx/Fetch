@@ -107,3 +107,6 @@
 -keep public class com.otaku.fetch.ModuleRegistration0 {
     public *;
 }
+-keep public class com.otaku.fetch.BuildConfig {
+    public *;
+}

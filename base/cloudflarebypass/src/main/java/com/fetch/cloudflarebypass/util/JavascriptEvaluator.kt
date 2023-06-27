@@ -5,7 +5,7 @@ package com.fetch.cloudflarebypass.util
  * Interface defining the javascript evaluator methods.
  * It also contains a static reference to the current evaluator
  */
-interface JavascriptEvaluator {
+fun interface JavascriptEvaluator {
 
     /**
      * Evaluates javascript

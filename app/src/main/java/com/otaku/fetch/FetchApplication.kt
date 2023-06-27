@@ -15,11 +15,10 @@ import com.otaku.fetch.base.ui.BindingActivity.Companion.REPO_LINK
 import com.otaku.fetch.work.AnimeNotifier
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.acra.config.mailSenderConfiguration
-import org.acra.data.StringFormat
-import org.acra.ktx.initAcra
+import java.net.UnknownHostException
 import javax.inject.Inject
 
 
@@ -37,20 +36,8 @@ class FetchApplication : MultiDexApplication(), Configuration.Provider, AppModul
             .build()
     }
 
-
     override fun onCreate() {
         super.onCreate()
-        initAcra {
-            reportFormat = StringFormat.JSON
-        }
-        mailSenderConfiguration {
-            mailTo = "analytics4anime@proton.me"
-            reportAsFile = true
-            reportFileName = "Crash.txt"
-            subject = ""
-            body = ""
-        }
-
         findModules()
         AnimeNotifier().schedulePeriodicWork(WorkManager.getInstance(this.applicationContext))
         createNotificationChannel()
@@ -59,10 +46,17 @@ class FetchApplication : MultiDexApplication(), Configuration.Provider, AppModul
 
     private fun checkForUpdates() {
         kotlinx.coroutines.MainScope().launch {
-            withContext(Dispatchers.IO) {
-                val updater = ApkUpdater(this@FetchApplication, REPO_LINK)
-                dataStore.edit {
-                    it[Settings.PREF_NEW_UPDATE_FOUND] = updater.isNewUpdateAvailable() ?: false
+            dataStore.data.collectLatest {
+                withContext(Dispatchers.IO) {
+                    try {
+                        dataStore.edit { editable ->
+                            editable[Settings.PREF_NEW_UPDATE_FOUND] =
+                                ApkUpdater(this@FetchApplication, REPO_LINK).isNewUpdateAvailable()
+                                    ?: false
+                        }
+                    } catch (e: UnknownHostException) {
+                        // internet not connected
+                    }
                 }
             }
         }

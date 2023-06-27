@@ -77,7 +77,9 @@ abstract class ListFragment<Binding : ViewDataBinding> :
     ) {
         loadState.mediator?.refresh?.let {
             if (it is LoadState.Error) {
-                showError(it, requireActivity())
+                if (isVisible) {
+                    showError(it, requireActivity())
+                }
             }
         }
         val isListEmpty =
@@ -101,7 +103,9 @@ abstract class ListFragment<Binding : ViewDataBinding> :
         animeAdapter.refresh()
     }
 
-    protected open fun filter(binding: FragmentAnimeListBinding) {}
+    protected open fun filter(binding: FragmentAnimeListBinding) {
+        // no-op
+    }
 
     abstract fun getList(): Flow<PagingData<out ITileData>>
 

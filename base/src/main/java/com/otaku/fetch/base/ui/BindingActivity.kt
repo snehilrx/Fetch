@@ -55,8 +55,15 @@ open class BindingActivity<T : ViewDataBinding>(@LayoutRes private val layoutRes
 
     private fun checkUpdates() {
         lifecycleScope.launch {
+            dataStore.edit {
+                it[Settings.PREF_NEW_UPDATE_SHOWN_COUNT] =
+                    (it[Settings.PREF_NEW_UPDATE_SHOWN_COUNT] ?: -1) + 1
+            }
             dataStore.data.collectLatest {
-                if (it[Settings.PREF_NEW_UPDATE_FOUND] == true) {
+                if (it[Settings.PREF_NEW_UPDATE_FOUND] == true && it[Settings.PREF_NEW_UPDATE_SHOWN_COUNT]?.mod(
+                        10
+                    ) == 0
+                ) {
                     UiUtils.showUpdate(this@BindingActivity)
                 }
             }
@@ -164,7 +171,9 @@ open class BindingActivity<T : ViewDataBinding>(@LayoutRes private val layoutRes
         }
     }
 
-    protected open fun onBind(binding: T, savedInstanceState: Bundle?) {}
+    protected open fun onBind(binding: T, savedInstanceState: Bundle?) {
+        // no-op impl class will use this function to initialize on the binding
+    }
 
     override fun onDestroy() {
         super.onDestroy()

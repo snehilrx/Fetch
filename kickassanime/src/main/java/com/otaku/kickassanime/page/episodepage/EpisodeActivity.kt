@@ -32,9 +32,6 @@ import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.dash.DashMediaSource
 import androidx.media3.exoplayer.hls.HlsMediaSource
-import androidx.media3.exoplayer.hls.playlist.DefaultHlsPlaylistParserFactory
-import androidx.media3.exoplayer.hls.playlist.FilteringHlsPlaylistParserFactory
-import androidx.media3.exoplayer.hls.playlist.HlsMultivariantPlaylist
 import androidx.media3.exoplayer.offline.DownloadHelper
 import androidx.media3.exoplayer.source.*
 import androidx.media3.exoplayer.trackselection.AdaptiveTrackSelection
@@ -69,6 +66,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import javax.inject.Inject
+import kotlin.math.abs
 
 
 @UnstableApi
@@ -119,12 +117,6 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
     }
     private val hlsMediaSource by lazy {
         HlsMediaSource.Factory(cachingDataSourceFactory)
-            .setPlaylistParserFactory(
-                FilteringHlsPlaylistParserFactory(
-                    DefaultHlsPlaylistParserFactory(),
-                    listOf(StreamKey(HlsMultivariantPlaylist.GROUP_INDEX_VARIANT, 0))
-                )
-            )
     }
     private val dashMediaSource by lazy {
         DashMediaSource.Factory(cachingDataSourceFactory)
@@ -312,39 +304,51 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
                                 x.first.compareTo(currentPos)
                             }
                             val type = ts?.second
-                            if (type != null) {
-                                playerViewUiHelper.skipIntroButton.setOnClick {
+                            val skipIntroButton = playerViewUiHelper.skipIntroButton
+                            if (type != null && abs(currentPos - ts.first) == 5000L) {
+                                skipIntroButton.setOnClick {
                                     ts.first.let { binding.playerView.player?.seekTo(it) }
                                 }
                                 oldPos = currentPos
-                                playerViewUiHelper.skipIntroButton.text =
+                                skipIntroButton.text =
                                     getString(R.string.skip).format(type)
-                                playerViewUiHelper.skipIntroButton.isVisible = when (type) {
-                                    TimestampType.INTRO.type -> true
-                                    TimestampType.RECAP.type -> true
-                                    TimestampType.CANON.type -> false
-                                    TimestampType.MUST_WATCH.type -> false
-                                    TimestampType.BRANDING.type -> false
-                                    TimestampType.MIXED_INTRO.type -> true
-                                    TimestampType.NEW_INTRO.type -> true
-                                    TimestampType.FILLER.type -> true
-                                    TimestampType.TRANSITION.type -> true
-                                    TimestampType.CREDITS.type -> true
-                                    TimestampType.MIXED_CREDITS.type -> true
-                                    TimestampType.NEW_CREDITS.type -> true
-                                    TimestampType.PREVIEW.type -> false
-                                    TimestampType.TITLE_CARD.type -> false
-                                    TimestampType.UNKNOWN.type -> false
-                                    else -> false
-                                }
+                                skipIntroButton.isVisible = getSkipButtonVisiblity(type)
+                            } else {
+                                skipIntroButton.isVisible = false
                             }
+                            skipIntroButton.animate().alpha(
+                                if (skipIntroButton.isVisible) {
+                                    1.0f
+                                } else {
+                                    0.0f
+                                }
+                            )
                         }
                     }
-                    handler.postDelayed(this, 2000)
+                    handler.postDelayed(this, 5000)
                 }
             }
             timeSkipLoop?.let { handler.postDelayed(timeSkipLoop as Runnable, 2000) }
         }
+    }
+
+    private fun getSkipButtonVisiblity(type: String) = when (type) {
+        TimestampType.INTRO.type -> true
+        TimestampType.RECAP.type -> true
+        TimestampType.CANON.type -> false
+        TimestampType.MUST_WATCH.type -> false
+        TimestampType.BRANDING.type -> false
+        TimestampType.MIXED_INTRO.type -> true
+        TimestampType.NEW_INTRO.type -> true
+        TimestampType.FILLER.type -> true
+        TimestampType.TRANSITION.type -> true
+        TimestampType.CREDITS.type -> true
+        TimestampType.MIXED_CREDITS.type -> true
+        TimestampType.NEW_CREDITS.type -> true
+        TimestampType.PREVIEW.type -> false
+        TimestampType.TITLE_CARD.type -> false
+        TimestampType.UNKNOWN.type -> false
+        else -> false
     }
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
@@ -474,12 +478,13 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 pref.collectLatest {
-                    viewModel.fetchEpisode(
-                        args.animeSlug,
-                        args.episodeSlug,
-                        useOfflineMode,
-                        it[Settings.SKIP_ENABLED] == true
-                    )
+                    if (binding.webView.url == null)
+                        viewModel.fetchEpisode(
+                            args.animeSlug,
+                            args.episodeSlug,
+                            useOfflineMode,
+                            it[Settings.SKIP_ENABLED] == true
+                        )
                 }
             }
         }
@@ -489,11 +494,7 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
         viewModel.getLoadState().observe(this) {
             when (it) {
                 is State.FAILED -> {
-                    if (it.shouldTerminateActivity) {
-                        showError(it.exception, this)
-                    } else {
-                        showError(it.exception, this)
-                    }
+                    showError(it.exception, this)
                 }
 
                 is State.LOADING -> showLoading()

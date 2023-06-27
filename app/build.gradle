@@ -4,6 +4,9 @@ plugins {
     id 'kotlin-kapt'
     id "androidx.navigation.safeargs.kotlin"
     id 'dagger.hilt.android.plugin'
+    id 'com.google.gms.google-services'
+    id 'com.google.firebase.crashlytics'
+    id 'com.google.firebase.firebase-perf'
 }
 
 android {
@@ -63,7 +66,9 @@ android {
 }
 
 dependencies {
-    implementation project(path:":base")
+    implementation project(path: ":base")
+    implementation 'com.google.firebase:firebase-crashlytics-ktx:18.3.7'
+    implementation 'com.google.firebase:firebase-analytics-ktx:21.3.0'
     implementation "androidx.core:core-ktx:$versions.core_ktx"
     implementation "androidx.appcompat:appcompat:$versions.appcompat"
     implementation "com.google.android.material:material:$versions.material"
@@ -73,6 +78,7 @@ dependencies {
     implementation "androidx.hilt:hilt-work:$versions.work_hilt"
     implementation "androidx.work:work-runtime-ktx:$versions.work"
     implementation project(path: ':kickassanime')
+    implementation 'com.google.firebase:firebase-perf:20.3.3'
     androidTestImplementation "io.github.rascaler:assertj:$versions.assertJ"
     testImplementation "junit:junit:$versions.junit"
     androidTestImplementation "androidx.test.ext:junit:$versions.androidx_junit"
@@ -116,5 +122,4 @@ dependencies {
     // Optional - Integration with activities
     implementation "androidx.activity:activity-compose:$versions.compose_activity"
     implementation "androidx.compose.runtime:runtime-livedata:$versions.compose_vector_animations"
-    implementation("ch.acra:acra-mail:5.9.7")
 }

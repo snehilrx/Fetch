@@ -22,7 +22,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
+import androidx.paging.LoadStates
 import androidx.paging.PagingData
+import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.otaku.fetch.base.livedata.State
 import com.otaku.fetch.base.ui.composepref.prefs.DialogHeader
@@ -83,14 +85,8 @@ fun AnimeScreen(
                 AnimeDetails(animeEntity = animeEntity)
             }
             item(span = { GridItemSpan(maxCurrentLineSpan) }) {
-                if (languages.isNotEmpty()) {
-                    ComboBox(label = "Language",
-                        options = languages,
-                        toString = { it?.language ?: "Select language" },
-                        getItem = { language }
-                    ) {
-                        language = it
-                    }
+                LanguageChooser(languages, language) {
+                    language = it
                 }
             }
             items(episodes.itemCount, span = {
@@ -103,72 +99,91 @@ fun AnimeScreen(
             }
             val loadState = episodes.loadState.mediator
             item(span = { GridItemSpan(maxCurrentLineSpan) }) {
-                if (loadState?.refresh == LoadState.Loading) {
-                    Column(
-                        modifier = Modifier.fillMaxSize(),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center,
-                    ) {
-                        Text(
-                            modifier = Modifier.padding(8.dp), text = "Refresh Loading"
-                        )
-                        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-                    }
-                }
-
-                if (loadState?.append == LoadState.Loading) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-                    }
+                if (loadState?.refresh == LoadState.Loading || loadState?.append == LoadState.Loading) {
+                    Loading()
                 }
 
                 if (loadState?.refresh is LoadState.Error || loadState?.append is LoadState.Error) {
-                    val isPaginatingError =
-                        (loadState.append is LoadState.Error) || episodes.itemCount > 1
-                    val error =
-                        if (loadState.append is LoadState.Error) (loadState.append as LoadState.Error).error
-                        else (loadState.refresh as LoadState.Error).error
-
-                    Column(
-                        modifier = if (isPaginatingError) {
-                            Modifier.padding(8.dp)
-                        } else {
-                            Modifier.fillMaxSize()
-                        },
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                    ) {
-                        if (!isPaginatingError) {
-                            Icon(
-                                modifier = Modifier.size(64.dp),
-                                imageVector = Icons.Rounded.Warning,
-                                contentDescription = null
-                            )
-                        }
-
-                        Text(
-                            modifier = Modifier.padding(8.dp),
-                            text = error.message ?: error.toString(),
-                            textAlign = TextAlign.Center,
-                        )
-
-                        Button(onClick = {
-                            episodes.refresh()
-                        }, content = {
-                            Text(text = "Refresh")
-                        }, colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            contentColor = Color.White,
-                        )
-                        )
-                    }
+                    PaginationError(loadState, episodes)
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun Loading() {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Text(
+            modifier = Modifier.padding(8.dp), text = "Refreshing"
+        )
+        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+    }
+}
+
+@Composable
+private fun PaginationError(
+    loadState: LoadStates,
+    episodes: LazyPagingItems<EpisodeTile>
+) {
+    val isPaginatingError =
+        (loadState.append is LoadState.Error) || episodes.itemCount > 1
+    val error =
+        if (loadState.append is LoadState.Error) (loadState.append as LoadState.Error).error
+        else (loadState.refresh as LoadState.Error).error
+
+    Column(
+        modifier = if (isPaginatingError) {
+            Modifier.padding(8.dp)
+        } else {
+            Modifier.fillMaxSize()
+        },
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        if (!isPaginatingError) {
+            Icon(
+                modifier = Modifier.size(64.dp),
+                imageVector = Icons.Rounded.Warning,
+                contentDescription = null
+            )
+        }
+
+        Text(
+            modifier = Modifier.padding(8.dp),
+            text = error.message ?: error.toString(),
+            textAlign = TextAlign.Center,
+        )
+
+        Button(onClick = {
+            episodes.refresh()
+        }, content = {
+            Text(text = "Refresh")
+        }, colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = Color.White,
+        )
+        )
+    }
+}
+
+@Composable
+private fun LanguageChooser(
+    languages: List<AnimeLanguageEntity>,
+    language: AnimeLanguageEntity?,
+    onChange: (AnimeLanguageEntity?) -> Unit
+) {
+    if (languages.isNotEmpty()) {
+        ComboBox(label = "Language",
+            options = languages,
+            toString = { it?.language ?: "Select language" },
+            getItem = { language }
+        ) {
+            onChange(it)
         }
     }
 }
