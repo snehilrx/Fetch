@@ -89,7 +89,9 @@ jobs:
           new: ${{ env.version }}
         run: |
           echo "${BASE64_STRING}" | base64 --decode > ${KEY_PATH}
-          echo "${GSM}" > "./google-services.json"
+          echo "${GSM}" > "${{ github.workspace }}/google-services.json"
+          cd ${{ github.workspace }}
+          ls
           major=$(echo "${new}" | awk -F. '{print $1}')
           minor=$(echo "${new}" | awk -F. '{print $2}')
           patch=$(echo "${new}" | awk -F. '{print $3}')
