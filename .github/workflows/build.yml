@@ -88,7 +88,8 @@ jobs:
           GSM: ${{ secrets.GSM }}
           new: ${{ env.version }}
         run: |
-          echo "${GSM}" > "google-services.json"
+          echo "${BASE64_STRING}" | base64 --decode > ${KEY_PATH}
+          echo "${GSM}" > "./google-services.json"
           major=$(echo "${new}" | awk -F. '{print $1}')
           minor=$(echo "${new}" | awk -F. '{print $2}')
           patch=$(echo "${new}" | awk -F. '{print $3}')
