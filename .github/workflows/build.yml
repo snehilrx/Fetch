@@ -85,9 +85,11 @@ jobs:
           KEY_PATH: ${{ github.workspace }}/${{ secrets.KEY_PATH }}
           STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
           BASE64_STRING: ${{ secrets.KEY_BASE64 }}
+          GSM: ${{ secrets.GSM }}
           new: ${{ env.version }}
         run: |
           echo "${BASE64_STRING}" | base64 --decode > ${KEY_PATH}
+          echo "${GSM}" > "./google-services.json"
           major=$(echo "${new}" | awk -F. '{print $1}')
           minor=$(echo "${new}" | awk -F. '{print $2}')
           patch=$(echo "${new}" | awk -F. '{print $3}')
