@@ -100,7 +100,7 @@ data class UAMPageFormParams(
 
             //Remove 'getElementById' references
             importantScriptText = importantScriptText.replace(
-                """[af] = document[^"]*+;""".toRegex(), ""
+                """[af] = document.+?;""".toRegex(), ""
             )
 
             //Add fake 'a' element
