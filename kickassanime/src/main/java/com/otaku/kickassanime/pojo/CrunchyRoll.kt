@@ -10,6 +10,7 @@ data class CrunchyRoll(
     @SerializedName("chapters") var chapters: Chapters? = Chapters()
 )
 
+@Keep
 data class Tracks(
     @SerializedName("kind") var kind: String? = null,
     @SerializedName("file") var file: String? = null,
@@ -17,6 +18,7 @@ data class Tracks(
     @SerializedName("default") var default: Boolean? = null
 )
 
+@Keep
 data class Sources(
 
     @SerializedName("default") var default: Boolean? = null,
@@ -29,9 +31,8 @@ data class Sources(
 
 )
 
+@Keep
 data class Chapters(
-
     @SerializedName("defaultLanguage") var defaultLanguage: String? = null,
     @SerializedName("timestamps") var timestamps: ArrayList<String> = arrayListOf()
-
 )
