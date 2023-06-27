@@ -67,7 +67,7 @@ fun AnimeScreen(
             initialValue = emptyList()
         )
 
-        val language by remember { mutableStateOf(languages.firstOrNull()) }
+        var language by remember { mutableStateOf(languages.firstOrNull()) }
 
         val episodes = getEpisodeList(language?.language)
             .collectAsLazyPagingItems()
@@ -85,7 +85,9 @@ fun AnimeScreen(
                 AnimeDetails(animeEntity = animeEntity)
             }
             item(span = { GridItemSpan(maxCurrentLineSpan) }) {
-                LanguageChooser(languages, language)
+                LanguageChooser(languages, language) {
+                    language = it
+                }
             }
             items(episodes.itemCount, span = {
                 GridItemSpan(1)
@@ -172,16 +174,16 @@ private fun PaginationError(
 @Composable
 private fun LanguageChooser(
     languages: List<AnimeLanguageEntity>,
-    language: AnimeLanguageEntity?
+    language: AnimeLanguageEntity?,
+    onChange: (AnimeLanguageEntity?) -> Unit
 ) {
-    var language1 = language
     if (languages.isNotEmpty()) {
         ComboBox(label = "Language",
             options = languages,
             toString = { it?.language ?: "Select language" },
-            getItem = { language1 }
+            getItem = { language }
         ) {
-            language1 = it
+            onChange(it)
         }
     }
 }

@@ -77,7 +77,9 @@ abstract class ListFragment<Binding : ViewDataBinding> :
     ) {
         loadState.mediator?.refresh?.let {
             if (it is LoadState.Error) {
-                showError(it, requireActivity())
+                if (isVisible) {
+                    showError(it, requireActivity())
+                }
             }
         }
         val isListEmpty =
