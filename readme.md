@@ -1,7 +1,7 @@
 # Fetch [![Github All Releases](https://img.shields.io/github/downloads/snehilrx/Fetch/total.svg)]() [![Github All Releases](https://img.shields.io/github/issues/snehilrx/Fetch/total.svg)]() 
 
 [![Download Apk](https://custom-icon-badges.herokuapp.com/badge/-Download-blue?style=for-the-badge&logo=download&logoColor=white "Download Apk")](https://github.com/snehilrx/Fetch/releases)
-
+⭐ Please remember to star this project here on GitHub! ⭐
 
 <p align="center">
 <img src="https://github.com/snehilrx/Fetch/assets/7668602/e1916e36-6eb3-4941-9136-0d1605286e92"/>
