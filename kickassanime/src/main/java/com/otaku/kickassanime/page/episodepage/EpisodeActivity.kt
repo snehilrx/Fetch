@@ -37,6 +37,7 @@ import androidx.media3.exoplayer.source.*
 import androidx.media3.exoplayer.trackselection.AdaptiveTrackSelection
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import androidx.media3.ui.PlayerControlView
+import androidx.media3.ui.PlayerView.ARTWORK_DISPLAY_MODE_FILL
 import androidx.navigation.navArgs
 import com.google.android.gms.cast.framework.CastButtonFactory
 import com.google.android.gms.cast.framework.CastContext
@@ -88,7 +89,6 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
     private val useOfflineMode by lazy { args.mediaItem != null }
 
     // region Media stuff
-
     @Inject
     lateinit var cache: Cache
 
@@ -198,7 +198,7 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
                 binding.playerView.defaultArtwork = bitmap?.toDrawable(resources)
             }
         }
-        binding.playerView.useArtwork = true
+        binding.playerView.artworkDisplayMode = ARTWORK_DISPLAY_MODE_FILL
         viewModel.getPlaybackTime().observe(this) {
             if (it != null) {
                 binding.playerView.player?.seekTo(it)
@@ -680,15 +680,15 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
     }
 
     private fun onSelectStream(operation: (link: CommonVideoLink) -> Unit) {
-        val chooseStream = AlertDialog.Builder(this)
         val streamList = viewModel.getVideoLink().value ?: return
-        chooseStream.setTitle("Choose Stream")
-        chooseStream.setItems(streamList.map {
-            it.getLinkName()
-        }.toTypedArray()) { _, which ->
-            operation(streamList[which])
-        }
-        chooseStream.create()?.show()
+        AlertDialog.Builder(this)
+            .setTitle("Choose Stream")
+            .setItems(streamList.map {
+                it.getLinkName()
+            }.toTypedArray()) { _, which ->
+                operation(streamList[which])
+            }
+            .create()?.show()
     }
 
 

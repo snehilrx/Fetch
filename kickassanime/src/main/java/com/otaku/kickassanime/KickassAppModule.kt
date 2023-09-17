@@ -57,7 +57,7 @@ class KickassAppModule @Inject constructor(
     override val name: String
         get() = "Kickass Anime"
     override val notificationDeeplink: String
-        get() = "http://kaa.sm/recent"
+        get() = "kaa.sm/recent"
 
     override fun onSearch(query: String) {
         TODO("Not yet implemented... Will be used when multiple providers a available")

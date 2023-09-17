@@ -232,13 +232,15 @@ class DownloadRepository @Inject constructor() {
     val root = Root()
 
 
+    private val downloadItems: HashMap<String, DownloadItem> = HashMap()
+
     @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
     suspend fun findEpisodes(downloads: HashMap<Uri, Download>) {
         downloads.forEach loop@{ (t, u) ->
             ModuleRegistry.getModulesList().forEach moduleLoop@{
                 val key = String(u.request.data)
-                val item = it.appModule?.findEpisode(key, t.toString(), u.request.mimeType ?: "")
-                    ?: return@moduleLoop
+
+                val item = downloadItems[key] ?: createItem(key, u, t, it) ?: return@moduleLoop
                 // update tree
                 var anime = Anime(item.animeKey, item.animeTitle, root)
                 val findAnime = root.findChild(anime)
@@ -275,6 +277,17 @@ class DownloadRepository @Inject constructor() {
                 }
             }
         }
+    }
+
+    @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
+    private suspend fun createItem(
+        key: String, u: Download, t: Uri, moduleData: ModuleRegistry.ModuleData
+    ): DownloadItem? {
+        val downloadItem =
+            (moduleData.appModule?.findEpisode(key, t.toString(), u.request.mimeType ?: "")
+                ?: return null)
+        downloadItems[key] = downloadItem
+        return downloadItem
     }
 
     @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
