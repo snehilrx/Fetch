@@ -17,6 +17,7 @@ import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import java.io.File
+import java.util.concurrent.TimeUnit
 import javax.inject.Named
 import javax.inject.Singleton
 
@@ -26,7 +27,8 @@ object ApplicationModule {
 
     @Provides
     @Singleton
-    fun getHttpLogger() = HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.HEADERS }
+    fun getHttpLogger() =
+        HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.HEADERS }
 
 
     @Provides
@@ -39,7 +41,9 @@ object ApplicationModule {
         override fun e(tag: String, s: String) {
             android.util.Log.e(tag, s)
         }
-    }).okHttpClient.addInterceptor(logger).build()
+    }).okHttpClient.callTimeout(4, TimeUnit.MINUTES)
+        .connectTimeout(4, TimeUnit.MINUTES)
+        .addInterceptor(logger).build()
 
     private const val MAX_CACHE_SIZE: Long = 2000000000
 

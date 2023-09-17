@@ -9,7 +9,6 @@ import androidx.media3.datasource.cronet.CronetDataSource
 import androidx.media3.datasource.cronet.CronetUtil
 import androidx.media3.datasource.okhttp.OkHttpDataSource
 import androidx.media3.exoplayer.offline.DownloadManager
-import androidx.media3.exoplayer.offline.DownloadNotificationHelper
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import org.chromium.net.CronetEngine
@@ -36,7 +35,6 @@ class DownloadUtils constructor(
     private lateinit var databaseProvider: DatabaseProvider
     private lateinit var downloadManager: DownloadManager
     private lateinit var downloadTracker: DownloadTracker
-    private lateinit var downloadNotificationHelper: DownloadNotificationHelper
     private lateinit var httpDataSourceFactory: DataSource.Factory
 
     @Synchronized
@@ -62,16 +60,6 @@ class DownloadUtils constructor(
             }
         }
         return httpDataSourceFactory
-    }
-
-    @Synchronized
-    @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
-    fun getDownloadNotificationHelper(): DownloadNotificationHelper {
-        if (!this::downloadNotificationHelper.isInitialized) {
-            downloadNotificationHelper =
-                DownloadNotificationHelper(context, DOWNLOAD_NOTIFICATION_CHANNEL_ID)
-        }
-        return downloadNotificationHelper
     }
 
     @Synchronized
@@ -112,7 +100,6 @@ class DownloadUtils constructor(
     }
 
     companion object {
-        const val DOWNLOAD_NOTIFICATION_CHANNEL_ID = "download_channel"
         private const val USE_CRONET_FOR_NETWORKING = false
     }
 }
@@ -124,6 +111,10 @@ fun OkHttpClient.changeOrigin(): OkHttpClient {
 
         val request = original.newBuilder()
             .header("origin", "https://kaavid.com")
+            .header(
+                "user-agent",
+                "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1"
+            )
             .method(original.method, original.body)
             .build()
 

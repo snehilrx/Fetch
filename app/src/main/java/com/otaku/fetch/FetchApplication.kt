@@ -14,11 +14,8 @@ import com.otaku.fetch.base.settings.dataStore
 import com.otaku.fetch.base.ui.BindingActivity.Companion.REPO_LINK
 import com.otaku.fetch.work.AnimeNotifier
 import dagger.hilt.android.HiltAndroidApp
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.net.UnknownHostException
 import javax.inject.Inject
 
 
@@ -47,16 +44,14 @@ class FetchApplication : MultiDexApplication(), Configuration.Provider, AppModul
     private fun checkForUpdates() {
         kotlinx.coroutines.MainScope().launch {
             dataStore.data.collectLatest {
-                withContext(Dispatchers.IO) {
-                    try {
-                        dataStore.edit { editable ->
-                            editable[Settings.PREF_NEW_UPDATE_FOUND] =
-                                ApkUpdater(this@FetchApplication, REPO_LINK).isNewUpdateAvailable()
-                                    ?: false
-                        }
-                    } catch (e: UnknownHostException) {
-                        // internet not connected
+                try {
+                    dataStore.edit { editable ->
+                        editable[Settings.PREF_NEW_UPDATE_FOUND] =
+                            ApkUpdater(this@FetchApplication, REPO_LINK).isNewUpdateAvailable()
+                                ?: false
                     }
+                } catch (_: Exception) {
+                    // internet not connected
                 }
             }
         }
@@ -86,7 +81,7 @@ class FetchApplication : MultiDexApplication(), Configuration.Provider, AppModul
                     newInstance.load(this)
                 }
                 count++
-            } catch (e: ClassNotFoundException) {
+            } catch (_: ClassNotFoundException) {
                 break
             }
         }
