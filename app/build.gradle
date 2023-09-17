@@ -46,7 +46,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.4.7"
+        kotlinCompilerExtensionVersion = "1.5.3"
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
@@ -67,7 +67,7 @@ android {
 
 dependencies {
     implementation project(path: ":base")
-    implementation 'com.google.firebase:firebase-crashlytics-ktx:18.3.7'
+    implementation 'com.google.firebase:firebase-crashlytics-ktx:18.4.2'
     implementation 'com.google.firebase:firebase-analytics-ktx:21.3.0'
     implementation "androidx.core:core-ktx:$versions.core_ktx"
     implementation "androidx.appcompat:appcompat:$versions.appcompat"
@@ -78,7 +78,7 @@ dependencies {
     implementation "androidx.hilt:hilt-work:$versions.work_hilt"
     implementation "androidx.work:work-runtime-ktx:$versions.work"
     implementation project(path: ':kickassanime')
-    implementation 'com.google.firebase:firebase-perf:20.3.3'
+    implementation 'com.google.firebase:firebase-perf:20.4.1'
     androidTestImplementation "io.github.rascaler:assertj:$versions.assertJ"
     testImplementation "junit:junit:$versions.junit"
     androidTestImplementation "androidx.test.ext:junit:$versions.androidx_junit"
