@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="TextAppearance.Video.Title" parent="TextAppearance.KickassAnime.TitleMedium">
+
+<style name="TextAppearance.Video.Title" parent="TextAppearance.KickassAnime.TitleMedium">
         <item name="android:textColor">?attr/colorOnSurface</item>
         <item name="android:height">128dp</item>
         <item name="android:textSize">28sp</item>

@@ -6,72 +6,58 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.offline.Download
+import androidx.media3.exoplayer.offline.DownloadManager
+import androidx.media3.exoplayer.offline.DownloadRequest
+import androidx.media3.exoplayer.offline.DownloadService
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.launch
-import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
+import javax.inject.Named
 
 @UnstableApi
 @HiltViewModel
 class DownloadViewModel @Inject constructor(
     private val downloadRepository: DownloadRepository,
-    private val downloadUtils: DownloadUtils
+    private val downloadUtils: DownloadUtils,
+    @Named("io") private val io: CoroutineDispatcher,
 ) : ViewModel() {
 
-    private var running = AtomicBoolean(false)
+    private val downloadUpdates = object : DownloadManager.Listener {
+        override fun onDownloadChanged(
+            downloadManager: DownloadManager,
+            download: Download,
+            finalException: Exception?
+        ) {
+            downloadRepository.update(download)
+        }
 
-    private val downloadProgressTracker = flow {
-        while (running.get()) {
-            delay(1000)
-            val downloads = downloadUtils.getDownloadManager().downloadIndex.getDownloads(
-                Download.STATE_DOWNLOADING
-            )
-            running.set(downloads.count != 0)
-            while (downloads.moveToNext()) {
-                emit(downloads.download)
-            }
+        override fun onDownloadRemoved(downloadManager: DownloadManager, download: Download) {
+            downloadRepository.update(download)
         }
     }
 
-    private val downloadUpdates = object : DownloadTracker.Listener {
-        override fun onDownloadsChanged() {
-            viewModelScope.launch(Dispatchers.IO) {
-                downloadUtils.getDownloadTracker().downloads.let {
-                    downloadRepository.findEpisodes(it)
-                    running.set(true)
-                    downloadProgressTracker.collectLatest { data ->
-                        downloadRepository.update(data)
-                    }
-                }
-            }
-            refreshDownloadState()
-        }
-
-        override fun onIdle() {
-            refreshDownloadState()
-        }
-    }
 
     fun attach() {
-        downloadUtils.getDownloadTracker().attach()
-        if (!downloadUtils.getDownloadTracker().hasListener(downloadUpdates)) {
-            viewModelScope.launch(Dispatchers.IO) {
-                downloadUtils.getDownloadTracker().downloads.let {
-                    downloadRepository.findEpisodes(
-                        it
+        viewModelScope.launch(io) {
+            downloadRepository.findEpisodes(downloadUtils.getDownloadTracker().downloads)
+            downloadUtils.downloadsProgressCallback = object : PTDownloaderFactory.Tracker {
+                override fun onProgressChanged(
+                    request: DownloadRequest,
+                    contentLength: Long,
+                    bytesDownloaded: Long,
+                    percentDownloaded: Float
+                ) {
+                    downloadRepository.update(
+                        request.id,
+                        contentLength,
+                        bytesDownloaded,
+                        percentDownloaded
                     )
                 }
-                running.set(true)
-                downloadProgressTracker.collectLatest {
-                    downloadRepository.update(it)
-                }
             }
-            downloadUtils.getDownloadTracker().addListener(downloadUpdates)
         }
+        downloadUtils.getDownloadManager().addListener(downloadUpdates)
     }
 
     fun anime(): DownloadRepository.Root {
@@ -79,26 +65,27 @@ class DownloadViewModel @Inject constructor(
     }
 
     fun deleteAnime(anime: DownloadRepository.Anime, context: Context) {
-        viewModelScope.launch(Dispatchers.IO) {
-            anime.removeSelf(downloadUtils, context)
+        viewModelScope.launch(io) {
+            downloadRepository.delete(anime, downloadUtils, context)
         }
     }
 
     fun deleteEpisode(episode: DownloadRepository.Episode, context: Context) {
-        viewModelScope.launch(Dispatchers.IO) {
-            episode.removeSelf(downloadUtils, context)
+        viewModelScope.launch(io) {
+            downloadRepository.delete(episode, downloadUtils, context)
         }
     }
 
     fun deleteLink(download: DownloadRepository.Link, context: Context) {
-        viewModelScope.launch(Dispatchers.IO) {
-            download.removeSelf(downloadUtils, context)
+        viewModelScope.launch(io) {
+            downloadRepository.delete(download, downloadUtils, context)
         }
     }
 
-    fun detachListener() {
-        running.set(false)
-        downloadUtils.getDownloadTracker().removeListener(downloadUpdates)
+    public override fun onCleared() {
+        downloadUtils.downloadsProgressCallback = null
+        downloadUtils.getDownloadManager().removeListener(downloadUpdates)
+        super.onCleared()
     }
 
     fun pause(context: Context) {
@@ -109,10 +96,40 @@ class DownloadViewModel @Inject constructor(
         downloadUtils.getDownloadTracker().resumeDownload(context)
     }
 
-    fun refreshDownloadState() {
-        val downloadManager = downloadUtils.getDownloadManager()
-        isDownloadPaused.value = downloadManager.downloadsPaused
+    fun pause(link: DownloadRepository.Link, applicationContext: Context?) {
+        applicationContext?.let {
+            DownloadService.sendSetStopReason(
+                it,
+                FetchDownloadService::class.java,
+                link.download.download.value.request.id,
+                1,
+                false
+            )
+        }
     }
 
-    var isDownloadPaused = mutableStateOf(false)
+    fun resume(link: DownloadRepository.Link, applicationContext: Context?) {
+        applicationContext?.let {
+            DownloadService.sendSetStopReason(
+                it,
+                FetchDownloadService::class.java,
+                link.download.download.value.request.id,
+                Download.STOP_REASON_NONE,
+                false
+            )
+        }
+    }
+
+    fun retry(link: DownloadRepository.Link, applicationContext: Context?) {
+        applicationContext?.let {
+            DownloadService.sendAddDownload(
+                it,
+                FetchDownloadService::class.java,
+                link.download.download.value.request,
+                false
+            )
+        }
+    }
+
+    var isDownloadPaused = mutableStateOf(downloadUtils.getDownloadManager().downloadsPaused)
 }

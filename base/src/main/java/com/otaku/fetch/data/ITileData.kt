@@ -11,9 +11,11 @@ interface ITileData : BaseItem {
     override fun areItemsTheSame(newItem: BaseItem): Boolean {
         return newItem is ITileData && areItemsTheSame(newItem)
     }
+
     override fun areContentsTheSame(newItem: BaseItem): Boolean {
         return newItem is ITileData && areContentsTheSame(newItem)
     }
+
     override fun getItemViewType(): Int {
         return BaseItem.ITEM_TYPE_LIST
     }

@@ -109,7 +109,8 @@ class SearchRepository @Inject constructor(
                     Log.d("JSON", this)
                 }.encodeToByteArray()
             )
-        ))
+        )
+        )
     }
 
 

@@ -8,7 +8,8 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class FavouritesViewModel @Inject constructor(private val repository: FavouritesRepository): ViewModel() {
+class FavouritesViewModel @Inject constructor(private val repository: FavouritesRepository) :
+    ViewModel() {
     fun removeFavourite(animeSlug: String) {
         viewModelScope.launch {
             repository.removeFavourite(animeSlug)

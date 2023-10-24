@@ -2,31 +2,30 @@
 <layout>
 
     <merge xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools">
+            xmlns:tools="http://schemas.android.com/tools">
 
-    <Button
-            android:id="@+id/retryBtn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|center"
-            android:text="@string/retry" />
+        <Button
+                android:id="@+id/retryBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|center"
+                android:text="@string/retry" />
 
         <com.google.android.material.progressindicator.LinearProgressIndicator
-            android:id="@+id/progressBar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:indeterminate="true" />
+                android:id="@+id/progressBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:indeterminate="true" />
 
         <TextView
-            android:id="@+id/emptyList"
-            android:text="@string/nothing_found"
-            android:textStyle="bold"
-            android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
-            android:gravity="center"
+                android:id="@+id/emptyList"
+                android:text="@string/nothing_found"
+                android:textAppearance="@style/TextAppearance.Material3.DisplaySmall"
+                android:gravity="center"
                 android:visibility="gone"
                 android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:contentDescription="@string/empty_list_icon"
-            tools:src="@tools:sample/avatars" />
+                android:layout_height="match_parent"
+                android:contentDescription="@string/empty_list_icon"
+                tools:src="@tools:sample/avatars" />
     </merge>
 </layout>

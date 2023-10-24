@@ -7,33 +7,33 @@ import androidx.annotation.NonNull;
 
 public class ParcelableSparseIntArray extends SparseIntArray implements Parcelable {
 
-    public static final Creator<ParcelableSparseIntArray> CREATOR =
-        new Creator<>() {
-          @NonNull
-          @Override
-          public ParcelableSparseIntArray createFromParcel(@NonNull Parcel source) {
-            int size = source.readInt();
-            ParcelableSparseIntArray read = new ParcelableSparseIntArray(size);
+  public static final Creator<ParcelableSparseIntArray> CREATOR =
+      new Creator<>() {
+        @NonNull
+        @Override
+        public ParcelableSparseIntArray createFromParcel(@NonNull Parcel source) {
+          int size = source.readInt();
+          ParcelableSparseIntArray read = new ParcelableSparseIntArray(size);
 
-            int[] keys = new int[size];
-            int[] values = new int[size];
+          int[] keys = new int[size];
+          int[] values = new int[size];
 
-            source.readIntArray(keys);
-            source.readIntArray(values);
+          source.readIntArray(keys);
+          source.readIntArray(values);
 
-            for (int i = 0; i < size; i++) {
-              read.put(keys[i], values[i]);
-            }
-
-            return read;
+          for (int i = 0; i < size; i++) {
+            read.put(keys[i], values[i]);
           }
 
-          @NonNull
-          @Override
-          public ParcelableSparseIntArray[] newArray(int size) {
-            return new ParcelableSparseIntArray[size];
-          }
-        };
+          return read;
+        }
+
+        @NonNull
+        @Override
+        public ParcelableSparseIntArray[] newArray(int size) {
+          return new ParcelableSparseIntArray[size];
+        }
+      };
 
   public ParcelableSparseIntArray(int initialCapacity) {
     super(initialCapacity);

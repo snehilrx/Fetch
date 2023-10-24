@@ -55,7 +55,8 @@ fun TextAroundImage(
 @Composable
 fun KickassLoadingImage(
     url: String?, description: String, modifier: Modifier,
-    contentScale: ContentScale = ContentScale.Fit,
+    contentScale: ContentScale = ContentScale.Crop,
+    onDrawable: (Drawable) -> Unit = {}
 ) {
     if (url?.isNotEmpty() == true) {
         val urls = arrayOf(
@@ -105,10 +106,12 @@ fun KickassLoadingImage(
                     dataSource: DataSource,
                     isFirstResource: Boolean
                 ): Boolean {
+                    onDrawable(resource)
                     shimmer = padding
                     return false
                 }
-            }).centerCrop().transform(RoundedCorners(24.dp.value.toInt()))
+            }).centerCrop()
+                .transform(RoundedCorners(24.dp.value.toInt()))
         }
     }
 }

@@ -2,8 +2,8 @@
 <layout>
 
     <com.carouselrecyclerview.CarouselRecyclerview xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/carousel"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/cardview_height_with_reflection"
-        android:nestedScrollingEnabled="false" />
+            android:id="@+id/carousel"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/cardview_height_with_reflection"
+            android:nestedScrollingEnabled="false" />
 </layout>

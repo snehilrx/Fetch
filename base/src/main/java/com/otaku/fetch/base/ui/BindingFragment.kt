@@ -16,7 +16,6 @@ import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
-import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.CollapsingToolbarLayout
@@ -139,7 +138,7 @@ open class BindingFragment<T : ViewDataBinding>(@LayoutRes private val layoutRes
     }
 
     private fun setupToolbar(toolbar: Toolbar) {
-        (activity as? AppCompatActivity)?.statusBarHeight {
+        statusBarHeight {
             toolbar.apply {
                 if (paddingTop == 0) {
                     setPadding(paddingLeft, paddingTop + it, paddingRight, paddingBottom)
@@ -157,7 +156,7 @@ open class BindingFragment<T : ViewDataBinding>(@LayoutRes private val layoutRes
         navController: NavController?,
         hideBackButton: Boolean
     ) {
-        (activity as AppCompatActivity).setSupportActionBar(toolbar)
+        bindingActivity.setSupportActionBar(toolbar)
         if (toolbar != null) {
             setupToolbar(toolbar)
             if (collapsingToolbar != null && navController != null) {
@@ -166,23 +165,19 @@ open class BindingFragment<T : ViewDataBinding>(@LayoutRes private val layoutRes
                 } else {
                     null
                 }
+
                 NavigationUI.setupWithNavController(
                     collapsingToolbar,
                     toolbar,
                     navController,
-                    AppBarConfiguration(
+                    bindingActivity.createConfiguration(
+                        navController,
                         setOfNotNull(
                             navController.graph.startDestinationId,
                             idToRemove
-                        ), null
-                    ) {
-                        if (!navController.popBackStack()) {
-                            activity?.finish()
-                        }
-                        return@AppBarConfiguration true
-                    }
+                        )
+                    )
                 )
-
             }
         }
     }

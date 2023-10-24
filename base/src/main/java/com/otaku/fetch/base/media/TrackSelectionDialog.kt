@@ -17,7 +17,6 @@ import androidx.media3.ui.R
 import androidx.media3.ui.TrackSelectionView
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.google.android.material.tabs.TabLayoutMediator
-import com.google.common.collect.ImmutableList
 import com.maxkeppeler.sheets.core.Sheet
 import com.otaku.fetch.base.databinding.TrackSelectionDialogBinding
 
@@ -138,7 +137,8 @@ class TrackSelectionDialog : Sheet() {
             return tabTrackTypes.size
         }
 
-        override fun createFragment(position: Int): TrackSelectionViewFragment = tabFragments[tabTrackTypes[position]]
+        override fun createFragment(position: Int): TrackSelectionViewFragment =
+            tabFragments[tabTrackTypes[position]]
     }
 
     /**
@@ -206,8 +206,8 @@ class TrackSelectionDialog : Sheet() {
     }
 
     companion object {
-        val SUPPORTED_TRACK_TYPES: ImmutableList<Int> =
-            ImmutableList.of(C.TRACK_TYPE_VIDEO, C.TRACK_TYPE_AUDIO, C.TRACK_TYPE_TEXT)
+        val SUPPORTED_TRACK_TYPES: List<Int> =
+            listOf(C.TRACK_TYPE_VIDEO, C.TRACK_TYPE_AUDIO, C.TRACK_TYPE_TEXT)
 
         /**
          * Returns whether a track selection dialog will have content to display if initialized with the
@@ -310,12 +310,15 @@ class TrackSelectionDialog : Sheet() {
                 C.TRACK_TYPE_VIDEO -> resources.getString(
                     R.string.exo_track_selection_title_video
                 )
+
                 C.TRACK_TYPE_AUDIO -> resources.getString(
                     R.string.exo_track_selection_title_audio
                 )
+
                 C.TRACK_TYPE_TEXT -> resources.getString(
                     R.string.exo_track_selection_title_text
                 )
+
                 else -> throw IllegalArgumentException()
             }
         }

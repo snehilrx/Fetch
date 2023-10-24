@@ -34,10 +34,10 @@ data class Episodes(
     @SerializedName("timestamps") var timestamps: ArrayList<Timestamps> = arrayListOf()
 )
 
-data class Data (
+data class Data(
     @SerializedName("findEpisodesByShowId") var episodes: ArrayList<Episodes> = arrayListOf()
 )
 
-data class Timeline (
-    @SerializedName("data" ) var data : Data? = Data()
+data class Timeline(
+    @SerializedName("data") var data: Data? = Data()
 )

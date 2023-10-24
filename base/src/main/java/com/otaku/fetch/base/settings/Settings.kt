@@ -1,11 +1,14 @@
 package com.otaku.fetch.base.settings
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringArrayResource
@@ -28,8 +31,10 @@ import com.otaku.fetch.base.ui.composepref.prefs.ListPref
 import com.otaku.fetch.base.ui.composepref.prefs.SwitchPref
 import dagger.hilt.android.internal.managers.ViewComponentManager.FragmentContextWrapper
 import io.github.snehilrx.shinebar.Shinebar
+import java.util.Locale
 
-val Context.dataStore by preferencesDataStore(name = "settings")
+
+val Context.dataStore by preferencesDataStore(name = "settings_v2")
 
 @Composable
 @Preview(heightDp = 700, widthDp = 300)
@@ -48,6 +53,12 @@ object Settings {
 
     @JvmStatic
     val STREAM_VIDEO_QUALITY = stringPreferencesKey("stream_video_quality")
+
+    @JvmStatic
+    val AUDIO_LANGUAGE = stringPreferencesKey("audio_language")
+
+    @JvmStatic
+    val SUBTITLE_LANGUAGE = stringPreferencesKey("sub_language")
 
     @JvmStatic
     val DOWNLOADS_VIDEO_QUALITY = stringPreferencesKey("download_video_quality")
@@ -119,6 +130,27 @@ fun Settings(
                 }
                 prefsGroup({
                     GroupHeader(
+                        title = stringResource(id = R.string.language),
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                }) {
+                    prefsItem {
+                        LanguageSetting(
+                            stringResource(id = R.string.subtitle_language),
+                            Settings.SUBTITLE_LANGUAGE,
+                            pref
+                        )
+                    }
+                    prefsItem {
+                        LanguageSetting(
+                            stringResource(id = R.string.audio_language),
+                            Settings.AUDIO_LANGUAGE,
+                            pref
+                        )
+                    }
+                }
+                prefsGroup({
+                    GroupHeader(
                         title = stringResource(id = R.string.streaming),
                         color = MaterialTheme.colorScheme.secondary
                     )
@@ -143,12 +175,53 @@ fun Settings(
 
 @Composable
 @OptIn(ExperimentalComposeUiApi::class)
-private fun VideoSetting(key: Preferences.Key<String>, pref: Preferences?) {
+private fun VideoSetting(
+    key: Preferences.Key<String>,
+    pref: Preferences?
+) {
+    val qualities = stringArrayResource(id = R.array.video_qualities)
+
+    val entries by remember(qualities) {
+        derivedStateOf {
+            qualities.mapIndexed { index, s ->
+                index.toString() to s
+            }.toMap()
+        }
+    }
+    val summary = pref?.get(key)
+    Log.e(key.name, summary ?: "NULL")
     ListPref(
-        key = key.name, title = stringResource(
+        key = key.name,
+        title = stringResource(
             id = R.string.video_quality
         ),
-        summary = pref?.get(key),
-        entries = stringArrayResource(id = R.array.video_qualities).associateWith { it }
+        summary = summary,
+        entries = entries,
+        defaultValue = "0",
+        useSelectedAsSummary = true
     )
 }
+
+@Composable
+@OptIn(ExperimentalComposeUiApi::class)
+private fun LanguageSetting(title: String, key: Preferences.Key<String>, pref: Preferences?) {
+    val languages by remember {
+        derivedStateOf {
+            val locales: Array<Locale> = Locale.getAvailableLocales()
+            val localCountries = HashMap<String, String>()
+            for (l in locales) {
+                localCountries[l.language] = l.displayLanguage.toString()
+            }
+            return@derivedStateOf localCountries
+        }
+    }
+    ListPref(
+        key = key.name,
+        title = title,
+        summary = pref?.get(key),
+        entries = languages,
+        defaultValue = androidx.compose.ui.text.intl.Locale.current.language,
+        useSelectedAsSummary = true
+    )
+}
+

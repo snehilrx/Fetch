@@ -2,7 +2,7 @@ package com.otaku.kickassanime.page.frontpage.data
 
 import com.otaku.kickassanime.api.KickassAnimeService
 import com.otaku.kickassanime.db.KickassAnimeDb
-import com.otaku.kickassanime.utils.Constraints.cacheTimeoutInHours
+import com.otaku.kickassanime.utils.Constants.cacheTimeoutInHours
 import com.otaku.kickassanime.utils.Utils
 import org.threeten.bp.LocalDateTime
 import javax.inject.Inject

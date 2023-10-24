@@ -67,8 +67,8 @@ android {
 
 dependencies {
     implementation project(path: ":base")
-    implementation 'com.google.firebase:firebase-crashlytics-ktx:18.4.2'
-    implementation 'com.google.firebase:firebase-analytics-ktx:21.3.0'
+    implementation 'com.google.firebase:firebase-crashlytics-ktx:18.5.0'
+    implementation 'com.google.firebase:firebase-analytics-ktx:21.4.0'
     implementation "androidx.core:core-ktx:$versions.core_ktx"
     implementation "androidx.appcompat:appcompat:$versions.appcompat"
     implementation "com.google.android.material:material:$versions.material"
@@ -78,7 +78,7 @@ dependencies {
     implementation "androidx.hilt:hilt-work:$versions.work_hilt"
     implementation "androidx.work:work-runtime-ktx:$versions.work"
     implementation project(path: ':kickassanime')
-    implementation 'com.google.firebase:firebase-perf:20.4.1'
+    implementation 'com.google.firebase:firebase-perf:20.5.0'
     androidTestImplementation "io.github.rascaler:assertj:$versions.assertJ"
     testImplementation "junit:junit:$versions.junit"
     androidTestImplementation "androidx.test.ext:junit:$versions.androidx_junit"

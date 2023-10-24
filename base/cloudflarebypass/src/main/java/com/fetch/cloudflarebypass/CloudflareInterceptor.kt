@@ -3,9 +3,7 @@ package com.fetch.cloudflarebypass
 import com.fetch.cloudflarebypass.exceptions.UnsupportedChallengeException
 import com.fetch.cloudflarebypass.uam.UAMPageAtributes
 import com.fetch.cloudflarebypass.uam.UAMSettings
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 import okhttp3.FormBody
 import okhttp3.Headers
 import okhttp3.HttpUrl.Companion.toHttpUrl
@@ -13,7 +11,11 @@ import okhttp3.Interceptor
 import okhttp3.Request
 import okhttp3.Response
 
-class CloudflareInterceptor(private val log: Log, private val uamSettings: UAMSettings) : Interceptor {
+class CloudflareInterceptor(
+    private val log: Log,
+    private val uamSettings: UAMSettings
+) :
+    Interceptor {
 
     override fun intercept(chain: Interceptor.Chain): Response {
         val oldRequest: Request = chain.request()
@@ -33,19 +35,19 @@ class CloudflareInterceptor(private val log: Log, private val uamSettings: UAMSe
         return when {
             isIUAMChallenge(response, page) -> runBlocking {
                 log.i(TAG, "intercept: got IUAMChallenge")
-                withContext(Dispatchers.IO) {
-                    chain.proceed(
-                        solveCFChallenge(
-                            response,
-                            page
-                        )
+                chain.proceed(
+                    solveCFChallenge(
+                        response,
+                        page
                     )
-                }
+                )
             }
+
             isCaptchaChallenge(response, page) -> {
                 log.e(TAG, "Unsupported challenge $page")
                 throw UnsupportedChallengeException()
             }
+
             else -> {
                 log.i(TAG, "intercept: got normal request")
                 response

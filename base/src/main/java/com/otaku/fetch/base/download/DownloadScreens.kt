@@ -1,16 +1,16 @@
 package com.otaku.fetch.base.download
 
 import android.content.Intent
-import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import androidx.compose.animation.*
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -52,9 +52,9 @@ fun DownloadScreen(
     statusBarHeight: Float? = null,
     setupShineBar: (Shinebar) -> Unit = { _ -> run {} }
 ) {
+
     val items = downloadsVM.anime()
-    downloadsVM.refreshDownloadState()
-    val context = LocalContext.current
+    val context = LocalContext.current.applicationContext
     FetchScaffold(
         title = stringResource(id = R.string.downloads),
         statusBarHeight ?: 0f,
@@ -67,10 +67,9 @@ fun DownloadScreen(
         },
         setupShineBar = setupShineBar
     ) {
-        DownloadList(
-            items.toItemTreeIndex(downloadsVM), downloadsVM
-        )
+        DownloadList(items.toItemTreeIndex(downloadsVM))
     }
+    downloadsVM.attach()
 }
 
 @Composable
@@ -106,7 +105,7 @@ fun PlayPauseButton(
 
 @Composable
 @androidx.annotation.OptIn(UnstableApi::class)
-fun DownloadList(tree: ItemTree, downloadsVM: DownloadViewModel) {
+fun DownloadList(tree: ItemTree) {
     LazyTreeList(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -126,22 +125,22 @@ fun DownloadList(tree: ItemTree, downloadsVM: DownloadViewModel) {
             )
         }
     }
-    downloadsVM.attach()
 }
 
 @androidx.annotation.OptIn(UnstableApi::class)
 @OptIn(ExperimentalFoundationApi::class)
-private fun DownloadRepository.TreeNode.toItemTreeIndex(
+private fun DownloadRepository.TreeNode<*>.toItemTreeIndex(
     downloadsVM: DownloadViewModel
 ): ItemTree {
+    val node = this
     return object : ItemTree() {
         override val size: Int
-            get() = children.size
+            get() = node.size
 
         override fun expand(index: Int): ItemTree? {
-            return when (children[index]) {
+            return when (val child = node[index]) {
                 is DownloadRepository.Episode, is DownloadRepository.Anime ->
-                    return (children[index] as? DownloadRepository.TreeNode)?.toItemTreeIndex(
+                    return (child as? DownloadRepository.TreeNode<*>)?.toItemTreeIndex(
                         downloadsVM
                     )
 
@@ -151,10 +150,8 @@ private fun DownloadRepository.TreeNode.toItemTreeIndex(
 
         @androidx.annotation.OptIn(UnstableApi::class)
         override fun key(index: Int): Any {
-            return when (children.getOrNull(index)) {
-                is DownloadRepository.Anime -> (children[index] as DownloadRepository.Anime).anime
-                is DownloadRepository.Episode -> (children[index] as DownloadRepository.Episode).episode
-                is DownloadRepository.Link -> (children[index] as DownloadRepository.Link).download.download.request.id
+            return when (val child = node[index]) {
+                is DownloadRepository.Node -> child.key
                 else -> 0
             }
         }
@@ -168,7 +165,8 @@ private fun DownloadRepository.TreeNode.toItemTreeIndex(
             expanded: Boolean,
             onExpand: () -> Unit
         ) {
-            val localContext = LocalContext.current
+            val applicationContext = LocalContext.current.applicationContext
+            val context = LocalContext.current
             DepthStyle(
                 depth = depth
             ) {
@@ -176,7 +174,7 @@ private fun DownloadRepository.TreeNode.toItemTreeIndex(
                     .fillMaxWidth()
                     .animateItemPlacement()
                     .animateContentSize()
-                when (val item = children.getOrNull(index)) {
+                when (val item = node[index]) {
                     is DownloadRepository.Anime -> NodeItem(
                         name = item.animeName,
                         isExpanded = expanded,
@@ -184,9 +182,7 @@ private fun DownloadRepository.TreeNode.toItemTreeIndex(
                         modifier = modifier,
                         color = it
                     ) {
-                        downloadsVM.deleteAnime(
-                            children[index] as DownloadRepository.Anime, localContext
-                        )
+                        downloadsVM.deleteAnime(item, applicationContext)
                     }
 
                     is DownloadRepository.Episode -> NodeItem(
@@ -196,31 +192,42 @@ private fun DownloadRepository.TreeNode.toItemTreeIndex(
                         modifier = modifier,
                         color = it
                     ) {
-                        downloadsVM.deleteEpisode(
-                            children[index] as DownloadRepository.Episode, localContext
-                        )
+                        downloadsVM.deleteEpisode(item, applicationContext)
                     }
 
-                    is DownloadRepository.Link -> LeafItem(children[index] as DownloadRepository.Link,
+                    is DownloadRepository.Link -> LeafItem(
+                        item,
                         color = it,
                         deleteAction = {
-                            downloadsVM.deleteLink(
-                                children[index] as DownloadRepository.Link, localContext
-                            )
+                            downloadsVM.deleteLink(item, applicationContext)
                         },
-                        resumeAction = {
-                            downloadsVM.resume(localContext)
+                        retryAction = {
+                            downloadsVM.retry(item, applicationContext)
                         },
                         playAction = {
                             val bundle = item.download.launchBundle
-                            val additionalData = item.download.download.request.toOfflineBundle()
+                            val additionalData =
+                                item.download.download.value.request.toOfflineBundle()
                             bundle.putBundle("mediaItem", additionalData)
-                            localContext.startActivity(Intent(
-                                localContext, item.download.launchActivity
+                            context.startActivity(Intent(
+                                context, item.download.launchActivity
                             ).apply {
                                 putExtras(bundle)
                             })
-                        })
+                        },
+                        pauseAction = {
+                            downloadsVM.pause(
+                                item,
+                                applicationContext
+                            )
+                        },
+                        resumeAction = {
+                            downloadsVM.resume(
+                                item,
+                                applicationContext
+                            )
+                        }
+                    )
                 }
             }
         }
@@ -239,31 +246,45 @@ private fun DownloadRequest.toOfflineBundle(): Bundle {
 }
 
 
-@Suppress("deprecation")
-@androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
-fun Bundle.toMediaUri(): Uri? {
-    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        getParcelable("uri", Uri::class.java)
-    } else {
-        getParcelable("uri")
-    }
-
-}
-
+@OptIn(ExperimentalFoundationApi::class)
 @androidx.annotation.OptIn(UnstableApi::class)
 @Composable
 private fun LeafItem(
     downloadLink: DownloadRepository.Link,
     color: Color,
     deleteAction: () -> Unit,
-    resumeAction: () -> Unit,
+    retryAction: () -> Unit,
     playAction: () -> Unit,
+    pauseAction: () -> Unit,
+    resumeAction: () -> Unit
 ) {
     var size by remember { mutableStateOf(IntSize.Zero) }
-    val download = downloadLink.download.download
-    Card(colors = CardDefaults.cardColors(containerColor = color),
+    val download by remember { downloadLink.download.download }
+    val (label, action) = getStateTextAndAction(
+        download.state, retryAction, playAction, pauseAction, resumeAction,
+    )
+
+    var warn by remember {
+        mutableStateOf(false)
+    }
+    if (warn) {
+        DeleteWarning("Do you want to delete the selected episode?", deleteAction) {
+            warn = false
+        }
+    }
+
+    Card(
+        colors = CardDefaults.cardColors(containerColor = color),
         modifier = Modifier
             .fillMaxSize()
+            .combinedClickable(
+                onClick = { action?.invoke() },
+                onLongClick = {
+                    warn = true
+                },
+                onLongClickLabel = "Delete",
+                onClickLabel = "Play"
+            )
             .onSizeChanged {
                 size = it
             }) {
@@ -271,52 +292,33 @@ private fun LeafItem(
             LinearProgressIndicator(
                 progress = download.percentDownloaded / 100f,
                 modifier = Modifier
-                    .height(42.dp)
+                    .matchParentSize()
                     .width(size.width.dp)
             )
-            Text(
-                text = String.format("%.2f", download.percentDownloaded) + " %",
-                color = MaterialTheme.colorScheme.inverseOnSurface
-            )
-        }
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(24.dp)
-        ) {
-            SuggestionChip(label = { Text(text = "Episode") }, onClick = {}, enabled = false
-            )
-            Column(modifier = Modifier.weight(2f), horizontalAlignment = Alignment.End) {
-                DeleteButton(
-                    onClick = {
-                        deleteAction()
-                    }, warning = "Do you want to delete the selected episode"
-                )
-            }
-        }
-        Row(
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier
-                .padding(16.dp)
-                .wrapContentHeight(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                modifier = Modifier.weight(1f),
-                text = "Downloaded : ${readableDownloadSize(download.bytesDownloaded)}",
-                textAlign = TextAlign.Start
-            )
             Column(
-                modifier = Modifier.weight(1f),
-                horizontalAlignment = Alignment.End,
-                verticalArrangement = Arrangement.Center
+                modifier = Modifier
+                    .wrapContentHeight()
+                    .padding(16.dp)
+                    .width(size.width.dp),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                val (label, action) = getStateTextAndAction(
-                    download.state, resumeAction, playAction
+                val displayMedium = MaterialTheme.typography.displayMedium
+                val style = displayMedium.copy(fontSize = displayMedium.fontSize * 0.6)
+                Text(
+                    text = label?.uppercase() ?: "",
+                    color = MaterialTheme.colorScheme.inverseOnSurface,
+                    style = style,
                 )
-                SuggestionChip(label = {
-                    Text(label)
-                }, onClick = { action?.invoke() }, enabled = action != null
+                Text(
+                    text = String.format("%.2f", download.percentDownloaded) + " %",
+                    color = MaterialTheme.colorScheme.inverseOnSurface,
+                    style = MaterialTheme.typography.bodySmall
+                )
+                Text(
+                    text = readableDownloadSize(download.bytesDownloaded),
+                    color = MaterialTheme.colorScheme.inverseOnSurface,
+                    style = MaterialTheme.typography.bodySmall
                 )
             }
         }
@@ -344,23 +346,24 @@ private fun NodeItem(
             Modifier
                 .padding(horizontal = 8.dp)
                 .fillMaxSize(),
-            horizontalArrangement = Arrangement.SpaceBetween,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                name, modifier = Modifier.weight(6f)
-            )
-
             DeleteButton(
-                modifier = Modifier.weight(3f),
+                modifier = Modifier
+                    .wrapContentWidth(),
                 warning = "Do you want to delete $name",
                 onClick = deleteAction
             )
+            Text(
+                name, modifier = Modifier.weight(1f)
+            )
             Icon(
-                if (!isExpanded) Icons.Default.KeyboardArrowRight
+                if (!isExpanded) Icons.AutoMirrored.Filled.KeyboardArrowRight
                 else Icons.Default.KeyboardArrowDown,
                 contentDescription = null,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier
+                    .wrapContentWidth(),
             )
         }
     }
@@ -374,36 +377,51 @@ private fun DeleteButton(
         mutableStateOf(false)
     }
     if (warn) {
-        AlertDialog(title = {
-            Text(text = "Delete")
-        }, text = {
-            Text(text = warning)
-        }, onDismissRequest = { warn = false }, confirmButton = {
-            Button(onClick = {
-                warn = false
-                onClick()
-            }) {
-                Text(text = "Okay")
-            }
-        }, dismissButton = {
-            Button(onClick = {
-                warn = false
-            }) {
-                Text(text = "Cancel")
-            }
-        })
-    }
-    SuggestionChip(label = {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                Icons.Default.Delete, contentDescription = null
-            )
-            Text(text = "DELETE")
+        DeleteWarning(warning, onClick) {
+            warn = false
         }
-    }, onClick = {
-        warn = true
-    }, modifier = modifier
-    )
+    }
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier
+            .padding(4.dp)
+            .clickable {
+                warn = true
+            }
+    ) {
+        Icon(
+            Icons.Default.Delete, contentDescription = null
+        )
+    }
+}
+
+@Composable
+private fun DeleteWarning(
+    warning: String,
+    onClick: () -> Unit,
+    dismiss: () -> Unit
+) {
+    AlertDialog(title = {
+        Text(text = "Delete")
+    }, text = {
+        Text(text = warning)
+    }, onDismissRequest = {
+        dismiss()
+    }, confirmButton = {
+        Button(onClick = {
+            dismiss()
+            onClick()
+        }) {
+            Text(text = "Okay")
+        }
+    }, dismissButton = {
+        Button(onClick = {
+            dismiss()
+        }) {
+            Text(text = "Cancel")
+        }
+    })
 }
 
 @Composable
@@ -426,36 +444,27 @@ fun Color.darker(factor: Float): Color {
 @androidx.annotation.OptIn(UnstableApi::class)
 fun getStateTextAndAction(
     @Download.State state: Int,
-    resumeAction: () -> Unit,
+    retryAction: () -> Unit,
     playAction: () -> Unit,
-): Pair<String, (() -> Unit)?> {
+    pauseAction: () -> Unit,
+    resumeAction: () -> Unit
+): Pair<String?, (() -> Unit)?> {
     return when (state) {
         Download.STATE_COMPLETED -> {
             Pair("Play", playAction)
         }
 
-        Download.STATE_DOWNLOADING -> {
-            Pair("Downloading", null)
-        }
-
         Download.STATE_FAILED -> {
-            Pair("Failed", resumeAction)
+            Pair("Retry", retryAction)
         }
 
+        Download.STATE_DOWNLOADING,
         Download.STATE_QUEUED -> {
-            Pair("Queued", null)
-        }
-
-        Download.STATE_REMOVING -> {
-            Pair("Deleting", null)
-        }
-
-        Download.STATE_RESTARTING -> {
-            Pair("Restarting", null)
+            Pair("Downloading", pauseAction)
         }
 
         Download.STATE_STOPPED -> {
-            Pair("Stopped", resumeAction)
+            Pair("Paused", resumeAction)
         }
 
         else -> {

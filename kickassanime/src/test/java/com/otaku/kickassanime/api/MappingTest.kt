@@ -17,10 +17,18 @@ class MappingTest {
     @Before
     fun setup() {
         kickassAnimeService = Retrofit.Builder()
-            .addConverterFactory(FindJsonInTextConverterFactory.create(GsonBuilder().serializeNulls().create()))
-            .addConverterFactory(GsonConverterFactory.create(GsonBuilder().serializeNulls().create()))
+            .addConverterFactory(
+                FindJsonInTextConverterFactory.create(
+                    GsonBuilder().serializeNulls().create()
+                )
+            )
+            .addConverterFactory(
+                GsonConverterFactory.create(
+                    GsonBuilder().serializeNulls().create()
+                )
+            )
             .client(CloudflareHTTPClient(
-                object: com.fetch.cloudflarebypass.Log {
+                object : com.fetch.cloudflarebypass.Log {
                     override fun i(tag: String, s: String) {
                         println("$tag, $s")
                     }
@@ -37,7 +45,7 @@ class MappingTest {
     }
 
     @Test
-    fun testAnimeInformationToAnimeEntity(){
+    fun testAnimeInformationToAnimeEntity() {
         runBlocking {
 //            val animeInformation =
 //                kickassAnimeService.getAnimeInformation("/anime/dungeon-ni-deai-wo-motomeru-no-wa-machigatteiru-darou-ka-iv-shin-shou-meikyuu-hen-732841")

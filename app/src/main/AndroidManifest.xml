@@ -39,15 +39,16 @@
                     android:name="android.app.searchable"
                     android:resource="@xml/searchable" />
         </activity>
-		<provider
-			android:name="androidx.startup.InitializationProvider"
-			android:authorities="${applicationId}.androidx-startup"
-			tools:node="remove">
-		</provider>
 
-		<meta-data android:name="com.google.android.gms.cast.framework.OPTIONS_PROVIDER_CLASS_NAME"
-			android:value="androidx.media3.cast.DefaultCastOptionsProvider"/>
+        <provider
+                android:name="androidx.startup.InitializationProvider"
+                android:authorities="${applicationId}.androidx-startup"
+                tools:node="remove" />
 
-	</application>
+        <meta-data
+                android:name="com.google.android.gms.cast.framework.OPTIONS_PROVIDER_CLASS_NAME"
+                android:value="androidx.media3.cast.DefaultCastOptionsProvider" />
+
+    </application>
 
 </manifest>

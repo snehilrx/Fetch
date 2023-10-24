@@ -26,7 +26,6 @@
     <string name="home">Home</string>
     <string name="filter">filter</string>
     <string name="skip">Skip %s</string>
-    <string name="offline">Offline</string>
     <string name="notification_channel_description">Kickass anime new release feeds</string>
     <string name="group_notification_title">New animes were recently added on kickass anime.</string>
     <string name="new_kickassanime_notification_body">%s\nClick to view more animes</string>
@@ -39,5 +38,10 @@
     <string name="year">Year</string>
     <string name="type">Type</string>
     <string name="apply">Apply</string>
+    <string name="downloading_episode">Downloading Episode</string>
+    <string name="your_requested_episode_is_being_downloaded">"Your requested episode is being downloaded "</string>
+    <string name="meanwhile_we_will_switch_the_playback_server_to_offline">. Meanwhile we will switch the playback server to offline</string>
+    <string name="downloading_episode_failed">Downloading episode failed</string>
+    <string name="listing_out_video_files">Listing out video files</string>
 
 </resources>

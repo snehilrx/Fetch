@@ -7,7 +7,8 @@ object ModuleRegistry {
     data class ModuleData constructor(
         val displayName: String
     ) {
-        @DrawableRes var displayIcon: Int? = null
+        @DrawableRes
+        var displayIcon: Int? = null
         var appModule: AppModule? = null
 
         constructor(
@@ -21,7 +22,7 @@ object ModuleRegistry {
     }
 
     @JvmStatic
-    private val modules = HashSet<ModuleData>()
+    val modules = HashMap<String, ModuleData>()
 
     /**
      * Registers a [AppModule]
@@ -32,10 +33,10 @@ object ModuleRegistry {
      * @param displayName injected name tag of AppModule
      * */
     fun registerModule(displayName: String, @DrawableRes displayIcon: Int, appModule: AppModule) {
-        modules.add(ModuleData(displayName, displayIcon, appModule))
+        modules[displayName] = ModuleData(displayName, displayIcon, appModule)
     }
 
     fun getModulesList(): List<ModuleData> {
-        return modules.toList()
+        return modules.values.toList()
     }
 }

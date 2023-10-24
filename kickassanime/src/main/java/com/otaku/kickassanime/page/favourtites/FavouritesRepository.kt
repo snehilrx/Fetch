@@ -5,7 +5,7 @@ import androidx.paging.PagingConfig
 import com.otaku.kickassanime.db.KickassAnimeDb
 import javax.inject.Inject
 
-class FavouritesRepository @Inject constructor(private val kickassAnimeDb: KickassAnimeDb){
+class FavouritesRepository @Inject constructor(private val kickassAnimeDb: KickassAnimeDb) {
     suspend fun removeFavourite(animeSlug: String) {
         kickassAnimeDb.favouritesDao().setFavourite(animeSlug, 0)
     }

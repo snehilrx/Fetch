@@ -4,17 +4,14 @@ import android.app.Activity
 import android.util.Log
 import androidx.paging.LoadState
 import androidx.room.withTransaction
-import com.google.gson.Gson
 import com.otaku.fetch.base.TAG
 import com.otaku.fetch.base.utils.UiUtils
 import com.otaku.kickassanime.api.model.EpisodesResponse
-import com.otaku.kickassanime.api.model.Maverickki
 import com.otaku.kickassanime.api.model.Recent
 import com.otaku.kickassanime.db.KickassAnimeDb
 import com.otaku.kickassanime.db.models.entity.EpisodePageEntity
 import com.otaku.kickassanime.db.models.entity.RecentEntity
-import com.otaku.kickassanime.utils.Constraints.patternDateTime
-import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
+import com.otaku.kickassanime.utils.Constants.patternDateTime
 import org.threeten.bp.LocalDateTime
 import org.threeten.bp.format.DateTimeFormatter
 
@@ -58,14 +55,6 @@ object Utils {
 
     fun showError(loadingError: Throwable?, activity: Activity) {
         UiUtils.showError(loadingError, activity)
-    }
-
-    fun parseMaverickkiLink(link: String, gson: Gson): Maverickki? {
-        return link.toHttpUrlOrNull()?.let {
-            // read text from url
-            val jsonText = it.toUrl().readText()
-            gson.fromJson(jsonText, Maverickki::class.java)
-        }
     }
 
     fun <T> List<T>.binarySearchGreater(
@@ -122,5 +111,4 @@ object Utils {
             database.episodePageDao().insertAllReplace(pages)
         }
     }
-
 }

@@ -1,6 +1,7 @@
 plugins {
     id "com.android.library"
     id 'org.jetbrains.kotlin.android'
+    id 'com.google.devtools.ksp'
     id 'dagger.hilt.android.plugin'
     id 'kotlin-kapt'
     id "androidx.navigation.safeargs.kotlin"
@@ -66,6 +67,7 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:$versions.okhttp")
     implementation("com.squareup.okhttp3:logging-interceptor:$versions.okhttp")
     implementation project(path: ':shinebar')
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
 
     debugImplementation "com.squareup.leakcanary:leakcanary-android:$versions.leak_canary"
 
@@ -93,7 +95,7 @@ dependencies {
     androidTestImplementation "com.google.dagger:hilt-android-testing:$versions.hilt"
     kaptAndroidTest "com.google.dagger:hilt-android-compiler:$versions.hilt"
 
-    kapt "com.github.bumptech.glide:compiler:$versions.glide"
+    ksp("com.github.bumptech.glide:ksp:$versions.glide")
     implementation "com.github.bumptech.glide:glide:$versions.glide"
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:$versions.swipe_refresh_layout"
 
@@ -127,7 +129,7 @@ dependencies {
     implementation "androidx.room:room-ktx:$versions.room"
     implementation "androidx.room:room-common:$versions.room"
     implementation "androidx.room:room-paging:$versions.room"
-    kapt "androidx.room:room-compiler:$versions.room"
+    ksp "androidx.room:room-compiler:$versions.room"
 
 
     // Optional - Integration with activities
@@ -143,7 +145,7 @@ dependencies {
     implementation "androidx.media3:media3-datasource-cronet:$versions.media3"
     // For loading data using the OkHttp network stack
     implementation "androidx.media3:media3-datasource-okhttp:$versions.media3"
-    implementation "androidx.hilt:hilt-navigation-compose:1.1.0-alpha01"
+    implementation 'androidx.hilt:hilt-navigation-compose:1.1.0-rc01'
     implementation "androidx.media3:media3-exoplayer:$versions.media3"
     implementation "androidx.media3:media3-datasource-okhttp:$versions.media3"
     implementation "androidx.media3:media3-ui:$versions.media3"

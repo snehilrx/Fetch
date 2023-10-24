@@ -69,6 +69,7 @@ dependencies {
     implementation "androidx.constraintlayout:constraintlayout:$versions.constraintlayout"
     implementation "androidx.preference:preference:$versions.preference"
     implementation project(path: ':shinebar')
+    implementation 'androidx.palette:palette-ktx:1.0.0'
     testImplementation "androidx.paging:paging-common:$versions.paging"
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:$versions.swipe_refresh_layout"
     implementation "com.squareup.retrofit2:converter-gson:$versions.gson_conveter"
@@ -93,7 +94,7 @@ dependencies {
     implementation "androidx.room:room-common:$versions.room"
     implementation "androidx.room:room-paging:$versions.room"
     testImplementation "org.junit.jupiter:junit-jupiter:$versions.jupiter"
-    kapt "androidx.room:room-compiler:$versions.room"
+    kapt("androidx.room:room-compiler:$versions.room")
 
     testImplementation project(path: ':base:cloudflarebypass')
 

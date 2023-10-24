@@ -49,7 +49,11 @@ class ReflectionViewContainer : ConstraintLayout {
 
     // constructor for programmatically adding view
     @Suppress("unused")
-    constructor(context: Context, view: View) : super(context, null, R.attr.reflect_reflectionLayoutStyle) {
+    constructor(context: Context, view: View) : super(
+        context,
+        null,
+        R.attr.reflect_reflectionLayoutStyle
+    ) {
         addView(view)
         mReflect = Reflect(this.context).apply {
             setupView(view, mReflectionGap, mRelativeDepth)
