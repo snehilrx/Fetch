@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
@@ -23,7 +25,7 @@ import kotlinx.coroutines.delay
 inline fun ExpansionIndicator(
     modifier: Modifier = Modifier,
     state: ExpansionState,
-    crossinline content: @Composable BoxScope.(depth: Int, index: Int, key: Any) -> Unit,
+    crossinline content: @Composable BoxScope.(Int, Int, Any) -> Unit,
 ) {
     val listState = rememberLazyListState()
 
@@ -43,13 +45,13 @@ inline fun ExpansionIndicator(
     ) {
         item {
             Icon(
-                imageVector = Icons.Default.KeyboardArrowRight,
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription = null
             )
         }
         items(count = state.size) { depth ->
             if (depth > 0) Icon(
-                imageVector = Icons.Default.KeyboardArrowRight,
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription = null
             )
             Box(
@@ -62,7 +64,7 @@ inline fun ExpansionIndicator(
                 contentAlignment = Alignment.Center
             ) {
                 val entry = state[depth]
-                content(depth = depth, index = entry.index, key = entry.key)
+                content(depth, entry.index, entry.key)
             }
         }
     }

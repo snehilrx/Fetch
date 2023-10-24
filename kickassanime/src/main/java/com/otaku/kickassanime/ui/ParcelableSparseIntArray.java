@@ -8,7 +8,7 @@ import androidx.annotation.NonNull;
 public class ParcelableSparseIntArray extends SparseIntArray implements Parcelable {
 
   public static final Creator<ParcelableSparseIntArray> CREATOR =
-      new Creator<>() {
+      new Creator<ParcelableSparseIntArray>() {
         @NonNull
         @Override
         public ParcelableSparseIntArray createFromParcel(@NonNull Parcel source) {
