@@ -1,9 +1,12 @@
 package com.otaku.kickassanime.api.model
 
+import androidx.annotation.Keep
 import androidx.media3.exoplayer.offline.Download
 
+@Keep
 sealed class ServerLinks(open val serverName: String) {
 
+    @Keep
     class OnlineServerLink(override val serverName: String, val link: String) :
         ServerLinks(serverName) {
         override fun equals(other: Any?): Boolean {
@@ -20,6 +23,7 @@ sealed class ServerLinks(open val serverName: String) {
         }
     }
 
+    @Keep
     class OfflineServerLink(override val serverName: String, val download: Download) :
         ServerLinks(serverName) {
         override fun equals(other: Any?): Boolean {

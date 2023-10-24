@@ -29,12 +29,12 @@ jobs:
       - uses: actions/setup-java@v3
         with:
           distribution: temurin
-          java-version: 17
+          java-version: 1.8
 
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
         with:
-          gradle-version: 8.1
+          gradle-version: 8.1.2
 
       - name: Make gradlew executable
         run: chmod +x ./gradlew

@@ -39,6 +39,10 @@
     public *;
 }
 
+-keepclassmembers class com.otaku.kickassanime.api.model.ServerLinks {
+    <init>(...);
+}
+
 -dontwarn com.lapism.search.R$dimen
 -dontwarn com.lapism.search.R$styleable
 -dontwarn com.otaku.fetch.base.R*
