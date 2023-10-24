@@ -2,7 +2,6 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/navigation_kickassanime"
         app:startDestination="@id/home">
     <fragment
             tools:layout="@layout/fragment_front_page"
@@ -10,13 +9,12 @@
             android:name="com.otaku.kickassanime.page.home.HomeFragment"
             android:label="@string/module_name">
         <deepLink
-                android:id="@+id/deepLink"
                 app:uri="kaa.sm"
                 android:autoVerify="true"
                 app:action="ACTION_VIEW" />
     </fragment>
     <activity
-            android:id="@+id/episodeActivity"
+            android:id="@+id/episodeActivityKick"
             android:name="com.otaku.kickassanime.page.episodepage.EpisodeActivity"
             android:label="{title}"
             tools:layout="@layout/activity_episode">
@@ -43,12 +41,12 @@
                 android:id="@+id/action_favouritesFragment_to_animeActivity"
                 app:destination="@id/animeActivity" />
     </fragment>
-	<activity
-		android:id="@+id/animeActivity"
-		android:name="com.otaku.kickassanime.page.animepage.AnimeActivity"
-		android:label="AnimeActivity" >
-		<argument
-			android:name="anime_args"
+    <activity
+            android:id="@+id/animeActivity"
+            android:name="com.otaku.kickassanime.page.animepage.AnimeActivity"
+            android:label="AnimeActivity">
+        <argument
+                android:name="anime_args"
                 app:argType="com.otaku.kickassanime.db.models.entity.AnimeEntity" />
     </activity>
     <fragment
@@ -57,12 +55,11 @@
             android:label="Recents">
         <action
                 android:id="@+id/action_historyFragment_to_episodeActivity"
-                app:destination="@id/episodeActivity" />
+                app:destination="@id/episodeActivityKick" />
     </fragment>
     <fragment
             android:id="@+id/settings"
-            android:name="com.otaku.fetch.base.ui.ComposeFragment"
-            android:label="ComposeFragment">
+            android:name="com.otaku.fetch.base.ui.ComposeFragment">
         <argument
                 android:name="destination"
                 app:argType="string"
@@ -70,12 +67,13 @@
     </fragment>
     <fragment
             android:id="@+id/downloads"
-            android:name="com.otaku.fetch.base.ui.ComposeFragment"
-            android:label="ComposeFragment">
+            android:name="com.otaku.fetch.base.ui.ComposeFragment">
         <argument
                 android:name="destination"
                 app:argType="string"
                 android:defaultValue="downloads" />
     </fragment>
-    <include app:graph="@navigation/navigation_home" />
+    <include
+            android:id="@id/nav_home"
+            app:graph="@navigation/navigation_home" />
 </navigation>

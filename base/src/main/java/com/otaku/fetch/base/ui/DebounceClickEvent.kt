@@ -12,11 +12,12 @@ class DebounceClickEvent(val event: () -> Unit) : OnClickListener {
     @Synchronized
     override fun onClick(v: View?) {
         val currentTime = SystemClock.elapsedRealtime()
-        if(currentTime-lastClick > TIMEOUT) {
+        if (currentTime - lastClick > TIMEOUT) {
             event()
             lastClick = SystemClock.elapsedRealtime()
         }
     }
 }
 
-fun View.setOnClick(debounceClickEvent: () -> Unit) = this.setOnClickListener(DebounceClickEvent(debounceClickEvent))
+fun View.setOnClick(debounceClickEvent: () -> Unit) =
+    this.setOnClickListener(DebounceClickEvent(debounceClickEvent))

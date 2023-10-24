@@ -33,8 +33,16 @@ class KickassAnimeServiceUnitTest {
 
         }).okHttpClient.build()
         kickassAnimeService = Retrofit.Builder()
-            .addConverterFactory(FindJsonInTextConverterFactory.create(GsonBuilder().setLenient().serializeNulls().create()))
-            .addConverterFactory(GsonConverterFactory.create(GsonBuilder().setLenient().serializeNulls().create()))
+            .addConverterFactory(
+                FindJsonInTextConverterFactory.create(
+                    GsonBuilder().setLenient().serializeNulls().create()
+                )
+            )
+            .addConverterFactory(
+                GsonConverterFactory.create(
+                    GsonBuilder().setLenient().serializeNulls().create()
+                )
+            )
             .client(okHttpClient)
             .baseUrl(Strings.KICKASSANIME_URL)
             .build()

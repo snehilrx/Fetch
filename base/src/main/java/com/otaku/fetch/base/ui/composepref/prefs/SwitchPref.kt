@@ -51,7 +51,11 @@ fun SwitchPref(
     val scope = rememberCoroutineScope()
 
     val datastore = LocalPrefsDataStore.current
-    val prefs by remember { datastore.data }.collectAsState(initial = null)
+    val prefs by remember { datastore.data }
+        .collectAsState(initial = null)
+
+
+    if (prefs == null) return
 
     var checked = defaultChecked
     prefs?.get(selectionKey)?.also { checked = it } // starting value if it exists in datastore

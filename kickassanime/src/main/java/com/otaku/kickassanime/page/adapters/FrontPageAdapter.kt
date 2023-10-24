@@ -2,6 +2,7 @@ package com.otaku.kickassanime.page.adapters
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.databinding.ViewDataBinding
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
@@ -25,21 +26,28 @@ class BaseItemDiff : DiffUtil.ItemCallback<BaseItem>() {
 }
 
 class FrontPageAdapter(
-    private val onBind: (TileItemBinding, ITileData) -> Unit
+    private val onBind: (TileItemBinding, ITileData) -> Unit,
+    private val unbind: (ViewDataBinding) -> Unit
 ) : ListAdapter<BaseItem, ViewHolder>(BaseItemDiff()) {
 
     class ListViewHolder(
         parent: ViewGroup,
         onBind: (TileItemBinding, ITileData) -> Unit,
-        binding: TileItemBinding = TileItemBinding.inflate(
+        private val unbind: (ViewDataBinding) -> Unit,
+        private val binding: TileItemBinding = TileItemBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
             false
         )
-    ) : AnimeTileAdapter.AnimeTileViewHolder<TileItemBinding>(binding, onBind)
+    ) : AnimeTileAdapter.AnimeTileViewHolder<TileItemBinding>(binding, onBind) {
+        fun unbind() {
+            unbind.invoke(binding)
+        }
+    }
 
     class HeaderCarouselViewHolder(
         parent: ViewGroup,
+        private val unbind: (ViewDataBinding) -> Unit,
         private val binding: HeaderFrontPageBinding = HeaderFrontPageBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
@@ -50,10 +58,15 @@ class FrontPageAdapter(
         fun bind(carouselData: CarouselData) {
             carouselData.initCarousel(binding.carousel)
         }
+
+        fun unbind() {
+            unbind.invoke(binding)
+        }
     }
 
     class HeadingTitleViewHolder(
         parent: ViewGroup,
+        private val unbind: (ViewDataBinding) -> Unit,
         private val headingItemBinding: HeadingItemBinding = HeadingItemBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
@@ -65,19 +78,28 @@ class FrontPageAdapter(
             headerData.initHeading(headingItemBinding)
         }
 
+        fun unbind() {
+            unbind.invoke(headingItemBinding)
+        }
+
     }
 
     class SearchBarViewHolder(
         parent: ViewGroup,
-        private val headingItemBinding: HeaderMaterialSearchBarBinding = HeaderMaterialSearchBarBinding.inflate(
+        private val unbind: (ViewDataBinding) -> Unit,
+        private val searchBarBinding: HeaderMaterialSearchBarBinding = HeaderMaterialSearchBarBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
             false
         )
-    ) : ViewHolder(headingItemBinding.root) {
+    ) : ViewHolder(searchBarBinding.root) {
 
         fun bind(searchBarData: SearchBarData) {
-            searchBarData.initSearchBar(headingItemBinding)
+            searchBarData.initSearchBar(searchBarBinding)
+        }
+
+        fun unbind() {
+            unbind.invoke(searchBarBinding)
         }
 
     }
@@ -87,38 +109,66 @@ class FrontPageAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        return when(viewType) {
+        return when (viewType) {
             BaseItem.ITEM_TYPE_HEADER_TITLE -> {
-                HeadingTitleViewHolder(parent)
+                HeadingTitleViewHolder(parent, unbind)
             }
+
             BaseItem.ITEM_TYPE_LIST -> {
-                ListViewHolder(parent, onBind)
+                ListViewHolder(parent, onBind, unbind)
             }
+
             BaseItem.ITEM_TYPE_HEADER_CAROUSEL -> {
-                HeaderCarouselViewHolder(parent)
+                HeaderCarouselViewHolder(parent, unbind)
             }
+
             BaseItem.ITEM_TYPE_SEARCH -> {
-                SearchBarViewHolder(parent)
+                SearchBarViewHolder(parent, unbind)
             }
+
             else -> throw Exception("Illegal Item")
         }
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        when(holder) {
+        when (holder) {
             is HeaderCarouselViewHolder -> {
                 holder.bind(getItem(position) as CarouselData)
             }
+
             is HeadingTitleViewHolder -> {
                 holder.bind(getItem(position) as HeaderData)
             }
+
             is ListViewHolder -> {
                 holder.bind(getItem(position) as ITileData)
             }
+
             is SearchBarViewHolder -> {
                 holder.bind(getItem(position) as SearchBarData)
             }
         }
+    }
+
+    override fun onViewRecycled(holder: ViewHolder) {
+        when (holder) {
+            is HeaderCarouselViewHolder -> {
+                holder.unbind()
+            }
+
+            is HeadingTitleViewHolder -> {
+                holder.unbind()
+            }
+
+            is ListViewHolder -> {
+                holder.unbind()
+            }
+
+            is SearchBarViewHolder -> {
+                holder.unbind()
+            }
+        }
+        super.onViewRecycled(holder)
     }
 
 }

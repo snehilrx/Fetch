@@ -4,7 +4,7 @@ import androidx.annotation.Keep
 import com.google.gson.annotations.SerializedName
 
 @Keep
-data class CrunchyRoll(
+data class PlayData(
     @SerializedName("sources") var sources: ArrayList<Sources> = arrayListOf(),
     @SerializedName("allSources") var allSources: ArrayList<Sources> = arrayListOf(),
     @SerializedName("chapters") var chapters: Chapters? = Chapters()

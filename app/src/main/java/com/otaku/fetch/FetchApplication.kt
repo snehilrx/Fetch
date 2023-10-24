@@ -8,7 +8,6 @@ import androidx.hilt.work.HiltWorkerFactory
 import androidx.multidex.MultiDexApplication
 import androidx.work.Configuration
 import androidx.work.WorkManager
-import com.AppModuleProvider
 import com.otaku.fetch.base.settings.Settings
 import com.otaku.fetch.base.settings.dataStore
 import com.otaku.fetch.base.ui.BindingActivity.Companion.REPO_LINK

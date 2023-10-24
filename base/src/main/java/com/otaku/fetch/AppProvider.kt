@@ -1,6 +1,4 @@
-package com
-
-import com.otaku.fetch.AppModule
+package com.otaku.fetch
 
 interface AppModuleProvider {
     val currentModule: AppModule?

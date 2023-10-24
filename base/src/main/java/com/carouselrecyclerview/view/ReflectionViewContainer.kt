@@ -48,7 +48,12 @@ class ReflectionViewContainer : LinearLayout {
     private var mReflectionGap: Float = DEFAULT_GAP
 
     // constructor for programmatically adding view
-    constructor(context: Context, view: View) : super(context, null, R.attr.reflect_reflectionLayoutStyle) {
+    @Suppress("unused")
+    constructor(context: Context, view: View) : super(
+        context,
+        null,
+        R.attr.reflect_reflectionLayoutStyle
+    ) {
         addView(view)
         mReflect = Reflect(this.context).apply {
             setupView(view, mReflectionGap, mRelativeDepth)
@@ -78,6 +83,7 @@ class ReflectionViewContainer : LinearLayout {
         initLayout(attrs, defStyleAttr)
     }
 
+    @Suppress("unused")
     constructor(
         context: Context,
         attrs: AttributeSet?,
@@ -196,7 +202,7 @@ class ReflectionViewContainer : LinearLayout {
             // I didn't find any way around this draw allocation as it required the size of the view
             mShader = LinearGradient(
                 0f,
-                height/2f, 0f, height.toFloat(),  0x7FFFFFFF, 0x00000000,
+                height / 2f, 0f, height.toFloat(), 0x7FFFFFFF, 0x00000000,
                 Shader.TileMode.CLAMP
             )
             mPaint.shader = mShader
@@ -208,8 +214,16 @@ class ReflectionViewContainer : LinearLayout {
             val p = layoutParams
             val q = toReflect.layoutParams
             /** [ MATCHING REFLECTION VIEW DIMENSIONS WITH THE MAIN VIEW ] */
-            toReflect.measure(MeasureSpec.makeMeasureSpec(resources.displayMetrics.widthPixels, MeasureSpec.AT_MOST),
-                MeasureSpec.makeMeasureSpec(resources.displayMetrics.heightPixels, MeasureSpec.AT_MOST))
+            toReflect.measure(
+                MeasureSpec.makeMeasureSpec(
+                    resources.displayMetrics.widthPixels,
+                    MeasureSpec.AT_MOST
+                ),
+                MeasureSpec.makeMeasureSpec(
+                    resources.displayMetrics.heightPixels,
+                    MeasureSpec.AT_MOST
+                )
+            )
             val msWidth = toReflect.measuredWidth
             val msHeight = toReflect.measuredHeight
 
@@ -217,6 +231,7 @@ class ReflectionViewContainer : LinearLayout {
                 q.width >= 0 -> {
                     p.width = q.width
                 }
+
                 else -> {
                     p.width = msWidth
                 }
@@ -226,12 +241,16 @@ class ReflectionViewContainer : LinearLayout {
                 q.height >= 0 -> {
                     p.height = (mRelDepth * q.height + mGap + toReflect.paddingBottom).toInt()
                 }
+
                 else -> {
-                    p.height =  (mRelDepth *  msHeight).toInt()
+                    p.height = (mRelDepth * msHeight).toInt()
                 }
             }
 
-            this.setMeasuredDimension(toReflect.measuredWidth, (mRelDepth *  toReflect.measuredHeight).toInt())
+            this.setMeasuredDimension(
+                toReflect.measuredWidth,
+                (mRelDepth * toReflect.measuredHeight).toInt()
+            )
             layoutParams = p
 
             /** END */
@@ -248,14 +267,14 @@ class ReflectionViewContainer : LinearLayout {
                 canvas.rotate(-180f, cx, cy)
                 canvas.scale(-1f, 1f, cx, cy)
 
-                val gap =  height - mRelDepth * toReflect.height
+                val gap = height - mRelDepth * toReflect.height
                 val mTranslateY = toReflect.height - height + gap
 
                 canvas.translate(0f, -mTranslateY)
                 canvas.clipRect(left, top, width, height)
                 toReflect.draw(canvas)
                 canvas.restore()
-                canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(),  mPaint)
+                canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), mPaint)
             }
         }
     }

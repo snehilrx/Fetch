@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+        xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <merge>
+    <merge android:animateLayoutChanges="true">
 
         <io.github.snehilrx.shinebar.Shinebar
                 android:id="@+id/shinebar"
@@ -13,7 +13,7 @@
         <com.google.android.material.appbar.AppBarLayout
                 android:id="@+id/appbarLayout"
                 android:layout_width="match_parent"
-                android:layout_height="200dp"
+                android:layout_height="?attr/collapsingToolbarLayoutLargeSize"
                 android:background="@android:color/transparent"
                 android:elevation="0dp">
 

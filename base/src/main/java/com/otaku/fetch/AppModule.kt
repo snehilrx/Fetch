@@ -1,6 +1,7 @@
 package com.otaku.fetch
 
 import android.content.Context
+import android.webkit.WebView
 import androidx.compose.runtime.Composable
 import androidx.core.app.TaskStackBuilder
 import com.otaku.fetch.base.download.DownloadItem
@@ -32,4 +33,6 @@ interface AppModule {
 
     suspend fun findEpisode(mediaId: String, mediaLink: String, mediaType: String): DownloadItem? =
         null
+
+    val webView: WebView
 }

@@ -2,28 +2,37 @@ package com.otaku.kickassanime.page.episodepage
 
 import android.net.Uri
 import android.util.Log
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
 import androidx.lifecycle.*
 import androidx.media3.common.MimeTypes
+import androidx.media3.exoplayer.offline.Download
 import com.google.gson.Gson
+import com.otaku.fetch.ModuleRegistry
+import com.otaku.fetch.base.download.DownloadUtils
 import com.otaku.fetch.base.livedata.SingleLiveEvent
 import com.otaku.fetch.base.livedata.State
+import com.otaku.fetch.base.settings.Settings
 import com.otaku.kickassanime.Strings
 import com.otaku.kickassanime.Strings.KICKASSANIME_URL
 import com.otaku.kickassanime.api.model.CommonSubtitle
 import com.otaku.kickassanime.api.model.ServerLinks
 import com.otaku.kickassanime.db.models.CommonVideoLink
 import com.otaku.kickassanime.db.models.EpisodeAnime
-import com.otaku.kickassanime.db.models.LinkVideoObject
 import com.otaku.kickassanime.db.models.entity.EpisodeEntity
 import com.otaku.kickassanime.page.favourtites.FavouritesRepository
 import com.otaku.kickassanime.page.history.HistoryRepository
-import com.otaku.kickassanime.pojo.CrunchyRoll
+import com.otaku.kickassanime.pojo.PlayData
 import com.otaku.kickassanime.pojo.Sources
-import com.otaku.kickassanime.utils.Utils
 import com.otaku.kickassanime.utils.asVideoHistory
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import java.lang.ref.WeakReference
+import java.util.TreeSet
 import java.util.concurrent.atomic.AtomicReference
 import javax.inject.Inject
 import javax.inject.Named
@@ -34,29 +43,43 @@ class EpisodeViewModel @Inject constructor(
     private val favoriteRepository: FavouritesRepository,
     private val historyRepository: HistoryRepository,
     @Named("io") private val io: CoroutineDispatcher,
-    @Named("default") private val default: CoroutineDispatcher,
-    private val gson: Gson
+    private val gson: Gson,
+    private val downloadUtils: DownloadUtils
 ) : ViewModel() {
 
     private val loadState = MutableLiveData<State>()
-    private val isPlaying = MutableLiveData<Boolean>()
     private val playTime = MutableLiveData<Long>()
     private val serverLinksLD = SingleLiveEvent<Set<ServerLinks>>()
-    private val server = MutableLiveData<String>()
+    private val server = MutableLiveData<ServerLinks?>()
     private val videoLink = SingleLiveEvent<List<CommonVideoLink>>()
     private val thumbnailLink = SingleLiveEvent<String>()
     private val posterLink = SingleLiveEvent<String>()
-    private val serverLinks = hashSetOf<ServerLinks>()
+    private val serverLinks = TreeSet<ServerLinks>(Comparator { o1, o2 ->
+        // offline items should always be on top
+        val to1 = o1 is ServerLinks.OfflineServerLink
+        val to2 = o2 is ServerLinks.OfflineServerLink
+        return@Comparator if (to1 && !to2) {
+            -1
+        } else {
+            1
+        }
+    })
     private val timeSkips = MutableLiveData<List<Pair<Long, String?>>>()
     private val subtitleLinks = MutableLiveData<List<CommonSubtitle>>()
 
+    @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
     fun fetchEpisode(
         animeSlug: String,
         episodeSlug: String,
-        useOffline: Boolean,
-        fetchTimeStamps: Boolean
+        dataStore: DataStore<Preferences>
     ) {
         viewModelScope.launch(io) {
+            // offline links
+
+            val offlineDownloads = findOfflineDownloads(episodeSlug)
+
+            val fetchTimeStamps = dataStore.data.first()[Settings.SKIP_ENABLED] ?: false
+
             loadState.postValue(State.LOADING())
             try {
                 val currentPlaytime = historyRepository.getCurrentPlaytime(episodeSlug)
@@ -65,23 +88,31 @@ class EpisodeViewModel @Inject constructor(
                 //noop
             }
             try {
-                val data = if (useOffline) {
-                    episodeRepository.fetchLocal(animeSlug, episodeSlug)
-                } else {
-                    episodeRepository.fetchRemote(animeSlug, episodeSlug)
+                var data = episodeRepository.fetchLocal(animeSlug, episodeSlug)
+                if (data?.second == null || data.first == null) {
+                    data = episodeRepository.fetchRemote(animeSlug, episodeSlug)
                 }
                 val episode = data?.first
                 val anime = data?.second
                 if (episode != null && anime != null) {
                     addToHistory(episode)
-                    if (!useOffline) {
-                        loadDustUrls("$KICKASSANIME_URL$animeSlug/$episodeSlug")
+                    launch {
+                        loadOfflineFile(offlineDownloads)
+                    }
+                    launch {
+                        val link = "$KICKASSANIME_URL$animeSlug/$episodeSlug"
+                        try {
+                            loadEpisodePage(link)
+                        } catch (e: Exception) {
+                            Log.e("Episode", "Failed to load episode from $link", e)
+                        }
                     }
                     try {
                         if (fetchTimeStamps) {
                             fetchIntroTimestamp(anime.name, episode.episodeNumber ?: 1f)
                         }
                     } catch (ignored: Exception) {
+                        Log.e("ANIME SKIP", "failed to retrieve anime timestamps", ignored)
                     }
                 } else {
                     throw Exception("No episode found!")
@@ -94,6 +125,35 @@ class EpisodeViewModel @Inject constructor(
         }
     }
 
+    fun checkOfflineServers(episodeSlug: String) {
+        viewModelScope.launch {
+            val offlineDownloads = findOfflineDownloads(episodeSlug)
+            loadOfflineFile(offlineDownloads)
+        }
+    }
+
+    private fun loadOfflineFile(offlineDownloads: Map<Uri, Download>) {
+        serverLinksLD.postValue(serverLinks.apply {
+            addAll(
+                offlineDownloads.map {
+                    ServerLinks.OfflineServerLink("Offline - ${it.key.host}", it.value)
+                }
+            )
+        })
+    }
+
+    @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
+    private fun findOfflineDownloads(episodeSlug: String): Map<Uri, Download> {
+        val uriDownloadMap = downloadUtils.getDownloadTracker().downloads.filter { (_, u) ->
+            episodeSlug.equals(
+                String(u.request.data),
+                true
+            )
+        }
+
+        return uriDownloadMap
+    }
+
     private fun fetchIntroTimestamp(displayTitle: String?, episodeNumber: Float) {
         viewModelScope.launch(io) {
             if (displayTitle != null) {
@@ -102,10 +162,8 @@ class EpisodeViewModel @Inject constructor(
                         displayTitle,
                         episodeNumber
                     )
-                    viewModelScope.launch(default) {
-                        fetchAnimeSkipTime?.let { list ->
-                            timeSkips.postValue(list.sortedBy { it.first })
-                        }
+                    fetchAnimeSkipTime?.let { list ->
+                        timeSkips.postValue(list.sortedBy { it.first })
                     }
                 } catch (e: Exception) {
                     Log.e("anime-skip", "api call failed", e)
@@ -133,28 +191,7 @@ class EpisodeViewModel @Inject constructor(
         videoLink.postValue(newList)
     }
 
-    private fun fetchMaverickki(link: String) {
-        viewModelScope.launch(io) {
-            try {
-                val data = Utils.parseMaverickkiLink(link, gson) ?: return@launch
-                data.link()
-                    ?.let { link -> addServerLinks(LinkVideoObject(link, CommonVideoLink.HLS)) }
-                data.thumbnail.let { poster -> posterLink.postValue(poster) }
-                data.timelineThumbnail.let { thumbnail -> thumbnailLink.postValue(thumbnail) }
-                data.subtitles.let { subtitles -> subtitleLinks.postValue(subtitles) }
-            } catch (e: Exception) {
-                loadState.postValue(State.FAILED(e))
-            }
-        }
-    }
-
     fun getLoadState(): LiveData<State> = loadState
-
-    fun getIsPlaying(): LiveData<Boolean> = isPlaying
-
-    fun setIsPlaying(playing: Boolean) {
-        isPlaying.postValue(playing)
-    }
 
     fun addToFavourites(animeSlug: String) {
         viewModelScope.launch {
@@ -176,7 +213,7 @@ class EpisodeViewModel @Inject constructor(
 
     private val atomicHash = AtomicReference<HashSet<Int>>(hashSetOf())
 
-    private fun loadDustUrls(link1: String?) {
+    private fun loadEpisodePage(link1: String?) {
         viewModelScope.launch {
             link1?.let { link ->
                 val hashCode = link.hashCode()
@@ -184,7 +221,7 @@ class EpisodeViewModel @Inject constructor(
                 if (!atomicHash.get().contains(hashCode)) {
                     serverLinksLD.postValue(serverLinks.apply {
                         add(
-                            ServerLinks(host, link)
+                            ServerLinks.OnlineServerLink(host, link)
                         )
                     })
                 }
@@ -195,44 +232,21 @@ class EpisodeViewModel @Inject constructor(
 
     fun getServersLinks(): LiveData<Set<ServerLinks>> = serverLinksLD
 
-    fun getCurrentServer(): LiveData<String> = server
+    fun getCurrentServer(): LiveData<ServerLinks?> = server
 
     fun getPlaybackTime(): LiveData<Long> = playTime
 
-    fun setCurrentServer(first: String) {
-        server.postValue(first)
+    fun setCurrentServer(link: ServerLinks) {
+        server.postValue(link)
     }
 
     private val videoLinks = hashSetOf<Uri>()
 
-    fun handleVideoLinks(uri: Uri) {
-        if (videoLinks.contains(uri)) {
-            return
-        }
-        videoLinks.add(uri)
-        when (uri.host) {
-            Strings.VRV -> {
-                // hardcode video format
-                addServerLinks(LinkVideoObject(uri.toString(), CommonVideoLink.HLS))
-            }
-
-            Strings.KAA_URL, Strings.KAA2_URL -> {
-                // hardcode video format
-                addServerLinks(LinkVideoObject(uri.toString(), CommonVideoLink.HLS))
-            }
-
-            Strings.MAVERICKKI_URL -> {
-                fetchMaverickki(uri.toString())
-            }
-        }
-    }
-
     fun clearServers() {
         loadState.value = State.LOADING()
-        isPlaying.value = false
         playTime.value = 0
         serverLinksLD.value = LinkedHashSet()
-        server.value = ""
+        server.value = null
         atomicHash.get().clear()
         videoLink.value = emptyList()
         thumbnailLink.value = ""
@@ -245,59 +259,84 @@ class EpisodeViewModel @Inject constructor(
     }
 
     override fun onCleared() {
+        val webView =
+            ModuleRegistry.modules[Strings.KICKASSANIME]?.appModule?.webView as? CustomWebView
+        webView?.release()
+        viewModelScope.cancel()
         super.onCleared()
         clearServers()
     }
 
-    fun handleCrunchyRoll(json: String) {
+    private fun processPageData(json: String) {
         viewModelScope.launch {
-            val crunchyRoll = gson.fromJson(json, CrunchyRoll::class.java)
-            processCrunchyRoll(crunchyRoll.sources)
-            processCrunchyRoll(crunchyRoll.allSources)
+            val playData = gson.fromJson(json, PlayData::class.java)
+            processPlayData(playData.allSources).forEach { (streams, captions) ->
+                subtitleLinks.postValue(captions)
+                addServerLinks(streams)
+            }
         }
     }
 
-    private fun processCrunchyRoll(sources: ArrayList<Sources>) {
-        sources.forEach { source ->
-            val streams = object : CommonVideoLink {
-                override fun getLink(): String {
-                    return "https:${source.file}"
+    fun loadPage(url: String?) {
+        if (url != null) {
+            val ref = WeakReference(this)
+            viewModelScope.launch {
+                val webView =
+                    ModuleRegistry.modules[Strings.KICKASSANIME]?.appModule?.webView as? CustomWebView
+                val json = webView?.enqueue(url) ?: return@launch
+                if (!coroutineContext.isActive) {
+                    ref.clear()
                 }
-
-                override fun getLinkName(): String {
-                    return "KAA ${source.label}"
-                }
-
-                override fun getVideoType(): Int {
-                    return if (source.type?.equals("hls") == true) {
-                        CommonVideoLink.HLS
-                    } else {
-                        CommonVideoLink.DASH
-                    }
-                }
+                ref.get()?.processPageData(json)
             }
-            addServerLinks(streams)
-            val captions = source.tracks.filter { it.kind == "captions" }.map {
-                return@map object : CommonSubtitle {
+        }
+    }
+
+    companion object {
+        @JvmStatic
+        fun processPlayData(sources: ArrayList<Sources>): List<Pair<CommonVideoLink, List<CommonSubtitle>>> {
+            return sources.map { source ->
+                val streams = object : CommonVideoLink {
                     override fun getLink(): String {
-                        return "https:${it.file}"
+                        return "https:${source.file}"
                     }
 
-                    override fun getLanguage(): String {
-                        return it.label ?: ""
+                    override fun getLinkName(): String {
+                        return "KAA ${source.label}"
                     }
 
-                    @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
-                    override fun getFormat(): String {
-                        return if (it.file?.endsWith(".vtt") == true) {
-                            MimeTypes.TEXT_VTT
+                    override fun getVideoType(): Int {
+                        return if (source.type?.equals("hls") == true) {
+                            CommonVideoLink.HLS
                         } else {
-                            MimeTypes.TEXT_UNKNOWN
+                            CommonVideoLink.DASH
                         }
                     }
                 }
+                val captions = source.tracks.filter { it.kind == "captions" }
+                    .map captionMap@{
+                        return@captionMap object : CommonSubtitle {
+                            override fun getLink(): String {
+                                return "https:${it.file}"
+                            }
+
+                            override fun getLanguage(): String {
+                                return it.label ?: ""
+                            }
+
+                            @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
+                            override fun getFormat(): String {
+                                return if (it.file?.endsWith(".vtt") == true) {
+                                    MimeTypes.TEXT_VTT
+                                } else {
+                                    MimeTypes.TEXT_UNKNOWN
+                                }
+                            }
+                        }
+                    }
+                Pair(streams, captions)
             }
-            subtitleLinks.postValue(captions)
         }
     }
+
 }

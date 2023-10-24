@@ -133,7 +133,8 @@
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toBottomOf="@+id/aspectRatioFrameLayout"
-                            tools:layout="@layout/fragment_episode_controls" />
+                            tools:layout="@layout/fragment_episode_controls"
+                            app:layout_constraintBottom_toBottomOf="parent" />
 
                     <androidx.media3.ui.AspectRatioFrameLayout
                             android:id="@+id/aspectRatioFrameLayout"
@@ -153,12 +154,6 @@
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </androidx.core.widget.NestedScrollView>
-
-            <com.otaku.kickassanime.page.episodepage.CustomWebView
-                    android:id="@+id/webView"
-                    android:visibility="gone"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent" />
         </androidx.coordinatorlayout.widget.CoordinatorLayout>
     </FrameLayout>
 

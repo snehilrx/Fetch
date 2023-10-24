@@ -3,7 +3,6 @@ package com.otaku.kickassanime.api.model
 import androidx.media3.common.MimeTypes
 import com.google.gson.annotations.SerializedName
 import java.util.*
-import kotlin.collections.ArrayList
 
 data class Maverickki(
     @SerializedName("videoId") var videoId: String? = null,
@@ -18,6 +17,7 @@ data class Maverickki(
         internal const val BASE_URL = "https://maverickki.com"
     }
 
+    @Suppress("unused")
     fun link(): String? {
         return if (hls != null) BASE_URL + hls else null
     }
@@ -31,6 +31,7 @@ data class Subtitles(
         return when (name) {
             "Traditional Chinese",
             "Simplified Chinese" -> "chinese"
+
             "Indonesian" -> "in"
             "Vietnamese" -> "vi"
             else -> name ?: ""

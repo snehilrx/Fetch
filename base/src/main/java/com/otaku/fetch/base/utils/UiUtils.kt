@@ -14,7 +14,10 @@ import androidx.core.graphics.drawable.toBitmap
 import androidx.core.view.WindowInsetsCompat
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.anggrayudi.materialpreference.util.openWebsite
@@ -34,6 +37,7 @@ import com.otaku.fetch.base.settings.dataStore
 import com.otaku.fetch.base.ui.BindingActivity.Companion.REPO_LINK
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import java.lang.ref.WeakReference
 import kotlin.math.roundToInt
 
 
@@ -120,16 +124,18 @@ object UiUtils {
 
         val errorIcon = IconicsDrawable(activity, FontAwesome.Icon.faw_bug)
         Log.e(TAG, "showError: $message")
-        InfoSheet().show(activity) {
-            title("What the fuck just happened?")
-            content(message ?: "Something went wrong")
-            displayNegativeButton(false)
-            positiveButtonStyle(
-                ButtonStyle.OUTLINED
-            )
-            onPositive(text, errorIcon) {
-                dismiss()
-                onPositive()
+        if (!activity.isDestroyed) {
+            InfoSheet().show(activity) {
+                title("What the fuck just happened?")
+                content(message ?: "Something went wrong")
+                displayNegativeButton(false)
+                positiveButtonStyle(
+                    ButtonStyle.OUTLINED
+                )
+                onPositive(text, errorIcon) {
+                    dismiss()
+                    onPositive()
+                }
             }
         }
     }
@@ -159,16 +165,56 @@ object UiUtils {
         }
     }
 
-
-    fun AppCompatActivity.statusBarHeight(delayedUpdate: (Int) -> Unit): Int {
-        val rootWindowInsets = window?.decorView?.rootWindowInsets
-        lifecycleScope.launch {
+    fun Fragment.statusBarHeight(delayedUpdate: (Int) -> Unit): Int {
+        val ref = WeakReference(delayedUpdate)
+        val rootWindowInsets = activity?.window?.decorView?.rootWindowInsets
+        val dataStore = context?.dataStore ?: return 0
+        val job = lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 dataStore.data.collectLatest {
-                    it[PREF_STATUS_BAR_HEIGHT]?.let { it1 -> delayedUpdate(it1) }
+                    it[PREF_STATUS_BAR_HEIGHT]?.let { it1 -> ref.get()?.invoke(it1) }
                 }
             }
         }
+        lifecycle.addObserver(object : DefaultLifecycleObserver {
+            override fun onDestroy(owner: LifecycleOwner) {
+                super.onDestroy(owner)
+                job.cancel()
+                ref.clear()
+            }
+        })
+
+        return rootWindowInsets?.let {
+            val insets = WindowInsetsCompat.toWindowInsetsCompat(rootWindowInsets)
+                .getInsets(WindowInsetsCompat.Type.statusBars())
+            StatusBarHeight.value = insets.top
+            lifecycleScope.launch {
+                dataStore.edit {
+                    it[PREF_STATUS_BAR_HEIGHT] = insets.top
+                }
+            }
+            StatusBarHeight.value
+        } ?: StatusBarHeight.value
+    }
+
+    fun AppCompatActivity.statusBarHeight(delayedUpdate: (Int) -> Unit): Int {
+        val ref = WeakReference(delayedUpdate)
+        val rootWindowInsets = window?.decorView?.rootWindowInsets
+        val job = lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                dataStore.data.collectLatest {
+                    it[PREF_STATUS_BAR_HEIGHT]?.let { it1 -> ref.get()?.invoke(it1) }
+                }
+            }
+        }
+        lifecycle.addObserver(object : DefaultLifecycleObserver {
+            override fun onDestroy(owner: LifecycleOwner) {
+                super.onDestroy(owner)
+                ref.clear()
+                job.cancel()
+            }
+        })
+
         return rootWindowInsets?.let {
             val insets = WindowInsetsCompat.toWindowInsetsCompat(rootWindowInsets)
                 .getInsets(WindowInsetsCompat.Type.statusBars())

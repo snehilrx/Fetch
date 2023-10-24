@@ -21,6 +21,8 @@ import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavController
+import androidx.navigation.ui.AppBarConfiguration
 import com.google.android.material.appbar.AppBarLayout
 import com.otaku.fetch.base.R
 import com.otaku.fetch.base.databinding.AppbarImageBinding
@@ -181,6 +183,14 @@ open class BindingActivity<T : ViewDataBinding>(@LayoutRes private val layoutRes
         if (this::weakReference.isInitialized) weakReference.clear()
     }
 
+    fun createConfiguration(navController: NavController, topLevelDestinations: Set<Int>) =
+        AppBarConfiguration(topLevelDestinations, null) {
+            if (!navController.popBackStack()) {
+                finish()
+            }
+            return@AppBarConfiguration true
+        }
+
     companion object {
         const val REPO_LINK = "https://github.com/snehilrx/Fetch/releases/latest"
     }
@@ -194,7 +204,7 @@ fun View.consumeBottomInsets(view: View) {
 
         val layoutParams = view.layoutParams as MarginLayoutParams
         if (layoutParams.bottomMargin == 0) {
-          layoutParams.bottomMargin += (bottomMargin)
+            layoutParams.bottomMargin += (bottomMargin)
         }
         insets
     }

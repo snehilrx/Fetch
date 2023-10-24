@@ -45,17 +45,17 @@ object ImageViewBindings {
                                             .load(urls[3])
                                             .error(
                                                 Glide.with(view.context)
-                                    .load(urls[4])
-                                    .error(
-                                        GlideApp.with(view.context)
-                                            .load(urls[5])
+                                                    .load(urls[4])
+                                                    .error(
+                                                        GlideApp.with(view.context)
+                                                            .load(urls[5])
+                                                    )
+                                            )
                                     )
-                                )
                             )
-                        )
                     )
                     .centerCrop()
-                    .listener(object : RequestListener<Drawable>{
+                    .listener(object : RequestListener<Drawable> {
                         override fun onLoadFailed(
                             e: GlideException?,
                             model: Any?,

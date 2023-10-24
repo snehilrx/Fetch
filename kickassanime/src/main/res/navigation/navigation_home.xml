@@ -2,7 +2,7 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/navigation_home"
+        android:id="@+id/nav_home"
         app:startDestination="@id/frontPageFragment">
 
     <fragment
@@ -20,12 +20,11 @@
                 app:destination="@id/trending" />
         <action
                 android:id="@+id/action_frontPageFragment_to_episodeActivity"
-                app:destination="@id/episodeActivity" />
+                app:destination="@id/episodeActivityHome" />
         <action
                 android:id="@+id/action_frontPageFragment_to_searchFragment"
                 app:destination="@id/searchFragment" />
         <deepLink
-                android:id="@+id/deepLink3"
                 app:uri="https://kaas.am"
                 android:autoVerify="true"
                 app:action="ACTION_VIEW" />
@@ -37,9 +36,8 @@
             tools:layout="@layout/fragment_anime_list">
         <action
                 android:id="@+id/action_recent_to_episodeFragment"
-                app:destination="@id/episodeActivity" />
+                app:destination="@id/episodeActivityHome" />
         <deepLink
-                android:id="@+id/deepLink2"
                 app:uri="https://kaas.am/recent"
                 android:autoVerify="true"
                 app:action="ACTION_VIEW" />
@@ -51,7 +49,7 @@
             tools:layout="@layout/fragment_anime_list">
         <action
                 android:id="@+id/action_trending_to_episodeActivity"
-                app:destination="@id/episodeActivity" />
+                app:destination="@id/episodeActivityHome" />
     </fragment>
     <fragment
             android:id="@+id/popular"
@@ -60,10 +58,10 @@
             tools:layout="@layout/fragment_anime_list">
         <action
                 android:id="@+id/action_popular_to_episodeActivity"
-                app:destination="@id/episodeActivity" />
+                app:destination="@id/episodeActivityHome" />
     </fragment>
     <activity
-            android:id="@+id/episodeActivity"
+            android:id="@+id/episodeActivityHome"
             android:name="com.otaku.kickassanime.page.episodepage.EpisodeActivity"
             android:label="{title}"
             tools:layout="@layout/activity_episode">

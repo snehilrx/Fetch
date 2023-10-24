@@ -5,22 +5,23 @@ import androidx.media3.cast.SessionAvailabilityListener
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.ui.PlayerView
 import com.google.android.gms.cast.framework.CastContext
+import java.lang.ref.WeakReference
 
 
 @UnstableApi
 class CastHelper(
     context: CastContext?,
     private val simpleExoPlayer: ExoPlayer,
-    playerView: PlayerView
+    setCurrentPlayer: ((Player) -> Unit)
 ) : SessionAvailabilityListener {
 
-    private var castPlayer: CastPlayer? = context?.let { CastPlayer(it, EnhancedMediaItemConverter()) }
+
+    private var castPlayer: CastPlayer? =
+        context?.let { CastPlayer(it, EnhancedMediaItemConverter()) }
 
     init {
         castPlayer?.setSessionAvailabilityListener(this)
-        playerView.player = simpleExoPlayer
     }
 
     override fun onCastSessionAvailable() {
@@ -32,8 +33,14 @@ class CastHelper(
     }
 
     private fun setCurrentPlayer(currentPlayer: Player) {
-        setCurrentPlayer?.invoke(currentPlayer)
+        setCurrentPlayer.get()?.invoke(currentPlayer)
     }
 
-    var setCurrentPlayer: ((Player) -> Unit)? = null
+    fun release() {
+        castPlayer?.release()
+        castPlayer?.setSessionAvailabilityListener(null)
+        setCurrentPlayer.clear()
+    }
+
+    private val setCurrentPlayer = WeakReference(setCurrentPlayer)
 }

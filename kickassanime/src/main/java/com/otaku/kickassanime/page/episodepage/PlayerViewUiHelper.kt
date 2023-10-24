@@ -104,7 +104,7 @@ internal class PlayerViewUiHelper(
         next = playerView.findViewById(androidx.media3.ui.R.id.exo_next)
         prev = playerView.findViewById(androidx.media3.ui.R.id.exo_prev)
 
-        val setting = PreferenceManager.getDefaultSharedPreferences(activity)
+        val setting = PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
         playerView.subtitleView?.setStyle(
             CaptionStyleCompat(
                 setting.getInt(

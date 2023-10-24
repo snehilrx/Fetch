@@ -3,279 +3,187 @@ package com.otaku.fetch.base.download
 import android.content.Context
 import android.net.Uri
 import android.os.Bundle
-import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.media3.exoplayer.offline.Download
+import androidx.media3.exoplayer.offline.DownloadProgress
 import com.otaku.fetch.ModuleRegistry
 import javax.inject.Inject
 
-class DownloadRepository @Inject constructor() {
-    abstract class TreeNode(
-        open val parent: TreeNode? = null,
-        open val children: SnapshotStateList<in TreeNode> = SnapshotStateList(),
-        val parentIndex: Int
-    ) {
-        // remove itself and children
-        abstract fun removeSelf(downloadUtils: DownloadUtils, context: Context)
+class DownloadRepository @Inject constructor(
+    val downloadUtils: DownloadUtils
+) {
 
-        abstract fun removeFromParent()
-
-        abstract fun findChild(child: TreeNode): TreeNode?
-
-        protected val indexMap = hashMapOf<Int, Int>()
-
-        open fun add(node: TreeNode) {
-            indexMap[node.hashCode()] = size++
-        }
-
-        fun removeAt(index: Int) {
-            size--
-            children.removeAt(index)
-        }
-
-        fun replaceAt(index: Int, node: TreeNode) {
-            children[index] = node
-        }
-
-        fun invalidate() {
-            if (size == 0) {
-                parent?.removeAt(parentIndex)
-                parent?.invalidate()
-            }
-        }
-
-        var size = 0
+    abstract class Node(val parent: Node? = null, val key: String) {
+        abstract fun delete(downloadUtils: DownloadUtils, context: Context)
+        abstract val size: Int
+        abstract fun remove(key: String)
+        abstract fun sort()
     }
 
-    data class Root(override val children: SnapshotStateList<in TreeNode> = SnapshotStateList()) :
-        TreeNode(parentIndex = 0) {
-        override fun removeSelf(downloadUtils: DownloadUtils, context: Context) {
-            // Ignore
-        }
+    open class TreeNode<T : Node>(parent: Node? = null, key: String) : Node(parent, key) {
 
-        override fun removeFromParent() {
-            // Ignore
-        }
+        private val children = SnapshotStateMap<String, T>()
+        protected val list = ArrayList<T>()
 
-        override fun findChild(child: TreeNode): Anime? {
-            val index = indexMap[child.hashCode()] ?: return null
-            val item = children.getOrNull(index)
-            return if (item is Anime) {
-                item
-            } else {
-                null
+        override val size: Int
+            get() = children.size
+
+        override fun delete(downloadUtils: DownloadUtils, context: Context) {
+            children.forEach { (key, node) ->
+                node.delete(downloadUtils, context)
+                remove(key)
+            }
+
+            var upNode: Node? = this
+            while (upNode != null) {
+                if (upNode.size == 0)
+                    upNode.parent?.remove(upNode.key)
+                else
+                    break
+                upNode = upNode.parent
             }
         }
 
-        override fun add(node: TreeNode) {
-            if (node is Anime) {
-                super.add(node)
-                children.add(node)
+        fun putIfAbsent(id: String, value: T) {
+            if (!children.containsKey(id)) {
+                children[id] = value
+                list.add(value)
             }
         }
 
-        val leafReference = hashMapOf<String, Link>()
+        operator fun get(key: String): T? = children[key]
+        operator fun get(key: Int): T? = list.getOrNull(key)
+
+        fun isEmpty(): Boolean = children.isEmpty()
+
+        override fun remove(key: String) {
+            val remove = children.remove(key)
+            list.remove(remove)
+        }
+
+        override fun sort() {
+            children.forEach { (_, u) -> u.sort() }
+        }
     }
 
-    data class Anime(
-        val anime: String,
+    class Root : TreeNode<Anime>(key = "root")
+
+    class Anime(
+        anime: String,
         val animeName: String,
-        override val parent: Root,
-        override val children: SnapshotStateList<in TreeNode> = SnapshotStateList()
-    ) : TreeNode(parentIndex = parent.size) {
-        override fun removeSelf(downloadUtils: DownloadUtils, context: Context) {
-            children.forEach { node ->
-                (node as? TreeNode)?.removeSelf(downloadUtils, context)
-            }
-        }
+        val root: Root
+    ) : TreeNode<Episode>(parent = root, key = anime) {
 
-        override fun removeFromParent() {
-            parent.removeAt(parentIndex)
-        }
-
-        override fun findChild(child: TreeNode): Episode? {
-            val index = indexMap[child.hashCode()] ?: return null
-            val item = children.getOrNull(index)
-            return if (item is Episode) {
-                item
-            } else {
-                null
-            }
-        }
 
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
-            if (javaClass != other?.javaClass) return false
+            if (other !is Anime) return false
 
-            other as Anime
-
-            if (anime != other.anime) return false
-            if (animeName != other.animeName) return false
+            if (key != other.key) return false
 
             return true
         }
 
         override fun hashCode(): Int {
-            var result = anime.hashCode()
-            result = 31 * result + animeName.hashCode()
-            return result
+            return key.hashCode()
         }
 
-        override fun add(node: TreeNode) {
-            if (node is Episode) {
-                super.add(node)
-                children.add(node)
-            }
+        override fun sort() {
+            list.sortedBy { it.episodeNumber }
         }
     }
 
-    data class Episode(
-        val episode: String,
+    class Episode(
+        episode: String,
         val episodeNumber: Float,
-        override val parent: Anime,
-        override val children: SnapshotStateList<in TreeNode> = SnapshotStateList()
-    ) : TreeNode(parentIndex = parent.size) {
-
-        override fun removeSelf(downloadUtils: DownloadUtils, context: Context) {
-            children.forEach { node ->
-                (node as? TreeNode)?.removeSelf(downloadUtils, context)
-            }
-        }
-
-        override fun removeFromParent() {
-            parent.removeAt(parentIndex)
-        }
-
-        override fun findChild(child: TreeNode): Link? {
-            val index = indexMap[child.hashCode()] ?: return null
-            val item = children.getOrNull(index)
-            return if (item is Link) {
-                item
-            } else {
-                null
-            }
-        }
+        val anime: Anime
+    ) : TreeNode<Link>(anime, episode) {
 
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
-            if (javaClass != other?.javaClass) return false
+            if (other !is Episode) return false
 
-            other as Episode
-
-            if (episode != other.episode) return false
-            if (episodeNumber != other.episodeNumber) return false
-            if (children != other.children) return false
+            if (key != other.key) return false
 
             return true
         }
 
         override fun hashCode(): Int {
-            var result = episode.hashCode()
-            result = 31 * result + episodeNumber.hashCode()
-            return result
+            return key.hashCode()
         }
-
-        override fun add(node: TreeNode) {
-            if (node is Link) {
-                super.add(node)
-                children.add(node)
-            }
-        }
-
     }
 
+    @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
     data class Link(
-        val download: DownloadWrapper,
-        override val parent: Episode,
-        val index: Int = parent.size
-    ) : TreeNode(parentIndex = index) {
-
-        override fun removeSelf(downloadUtils: DownloadUtils, context: Context) {
-            downloadUtils.getDownloadTracker().deleteDownload(download.download, context)
-            removeFromParent()
-            parent.invalidate()
+        var download: DownloadWrapper,
+        val episode: Episode
+    ) : TreeNode<Nothing>(episode, download.download.value.request.id) {
+        override fun delete(downloadUtils: DownloadUtils, context: Context) {
+            super.delete(downloadUtils, context)
+            downloadUtils.getDownloadTracker().deleteDownload(download.download.value, context)
         }
+    }
 
-        override fun removeFromParent() {
-            parent.removeAt(parentIndex)
-        }
+    @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
+    class DownloadWrapper(
+        val download: MutableState<Download>,
+        val launchBundle: Bundle,
+        val launchActivity: Class<*>
+    ) {
 
-        override fun findChild(child: TreeNode): TreeNode? {
-            return null
-        }
-
-        @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
             if (javaClass != other?.javaClass) return false
 
-            other as Link
-
-            if (download != other.download) return false
+            other as DownloadWrapper
+            if (download.value.state != other.download.value.state) return false
+            if (download.value.bytesDownloaded != other.download.value.bytesDownloaded) return false
+            if (download.value.startTimeMs != other.download.value.startTimeMs) return false
+            if (download.value.stopReason != other.download.value.stopReason) return false
+            if (download.value.failureReason != other.download.value.failureReason) return false
+            if (download.value.percentDownloaded != other.download.value.percentDownloaded) return false
+            if (download.value.contentLength != other.download.value.contentLength) return false
+            if (download.value.request.id != other.download.value.request.id) return false
 
             return true
         }
 
-        @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
+
         override fun hashCode(): Int {
-            return download.hashCode()
+            return download.value.request.id.hashCode()
         }
 
-        fun replace(downloadWrapper: DownloadWrapper) {
-            parent.replaceAt(
-                parentIndex, Link(
-                    downloadWrapper, parent, parentIndex
-                )
-            )
-        }
     }
 
     val root = Root()
 
-
-    private val downloadItems: HashMap<String, DownloadItem> = HashMap()
+    private val links = HashMap<String, Link>()
 
     @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
     suspend fun findEpisodes(downloads: HashMap<Uri, Download>) {
         downloads.forEach loop@{ (t, u) ->
             ModuleRegistry.getModulesList().forEach moduleLoop@{
                 val key = String(u.request.data)
+                // Check if an item with the given key exists in the downloadItems map
+                val item = createItem(key, u, t, it) ?: return@moduleLoop
 
-                val item = downloadItems[key] ?: createItem(key, u, t, it) ?: return@moduleLoop
-                // update tree
-                var anime = Anime(item.animeKey, item.animeTitle, root)
-                val findAnime = root.findChild(anime)
-                val downloadWrapper = DownloadWrapper(u, item.launchBundle, item.launchActivity)
-                if (findAnime == null) {
-                    val episode = Episode(item.episodeKey, item.episodeNumber, anime)
-                    val link = Link(downloadWrapper, episode)
-                    episode.add(link)
-                    anime.add(episode)
-                    root.add(anime)
-                    root.leafReference[downloadWrapper.download.request.id] = link
-                    return@moduleLoop
-                } else {
-                    anime = findAnime
-                }
-                var episode = Episode(item.episodeKey, item.episodeNumber, anime)
-                val findEpisode = anime.findChild(episode)
-                if (findEpisode == null) {
-                    val link = Link(downloadWrapper, episode)
-                    episode.add(link)
-                    anime.add(episode)
-                    root.leafReference[downloadWrapper.download.request.id] = link
-                    return@moduleLoop
-                } else {
-                    episode = findEpisode
-                }
+                val anime = root[item.animeKey] ?: Anime(item.animeKey, item.animeTitle, root)
+                val episode = anime[item.episodeKey] ?: Episode(
+                    item.episodeKey,
+                    item.episodeNumber,
+                    anime
+                )
+                val downloadWrapper =
+                    DownloadWrapper(mutableStateOf(u), item.launchBundle, item.launchActivity)
                 val link = Link(downloadWrapper, episode)
-                val findLink = episode.findChild(link)
-                if (findLink == null) {
-                    episode.add(link)
-                    root.leafReference[downloadWrapper.download.request.id] = link
-                } else {
-                    findLink.replace(downloadWrapper)
-                }
+                links.putIfAbsent(link.download.download.value.request.id, link)
+                episode.putIfAbsent(link.download.download.value.request.id, link)
+                anime.putIfAbsent(episode.key, episode)
+                root.putIfAbsent(anime.key, anime)
             }
+            root.sort()
         }
     }
 
@@ -283,53 +191,38 @@ class DownloadRepository @Inject constructor() {
     private suspend fun createItem(
         key: String, u: Download, t: Uri, moduleData: ModuleRegistry.ModuleData
     ): DownloadItem? {
-        val downloadItem =
-            (moduleData.appModule?.findEpisode(key, t.toString(), u.request.mimeType ?: "")
-                ?: return null)
-        downloadItems[key] = downloadItem
-        return downloadItem
+        return (moduleData.appModule?.findEpisode(key, t.toString(), u.request.mimeType ?: ""))
     }
 
     @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
-    fun update(download: Download) {
-        val link = root.leafReference[download.request.id]
-        link?.replace(
-            DownloadWrapper(
-                download,
-                link.download.launchBundle,
-                link.download.launchActivity
-            )
+    fun update(id: String, contentLength: Long, bytesDownloaded: Long, percentDownloaded: Float) {
+        val link = links[id] ?: return
+        val download = link.download.download
+        val oldDownload = download.value
+        download.value = Download(
+            oldDownload.request,
+            oldDownload.state,
+            oldDownload.startTimeMs,
+            oldDownload.updateTimeMs,
+            contentLength,
+            oldDownload.failureReason,
+            oldDownload.stopReason,
+            DownloadProgress().apply {
+                this.percentDownloaded = percentDownloaded
+                this.bytesDownloaded = bytesDownloaded
+            }
         )
     }
 
     @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
-    class DownloadWrapper(
-        val download: Download,
-        val launchBundle: Bundle,
-        val launchActivity: Class<*>
-    ) {
-        override fun equals(other: Any?): Boolean {
-            if (this === other) return true
-            if (javaClass != other?.javaClass) return false
-
-            other as DownloadWrapper
-
-            if (download.state != other.download.state) return false
-            if (download.bytesDownloaded != other.download.bytesDownloaded) return false
-            if (download.startTimeMs != other.download.startTimeMs) return false
-            if (download.stopReason != other.download.stopReason) return false
-            if (download.failureReason != other.download.failureReason) return false
-            if (download.percentDownloaded != other.download.percentDownloaded) return false
-            if (download.contentLength != other.download.contentLength) return false
-            if (download.request.id != other.download.request.id) return false
-
-            return true
-        }
-
-
-        override fun hashCode(): Int {
-            return download.request.id.hashCode()
-        }
+    fun update(download: Download) {
+        val link = links[download.request.id] ?: return
+        link.download.download.value = download
 
     }
+
+    fun delete(item: Node?, downloadUtils: DownloadUtils, context: Context) {
+        item?.delete(downloadUtils, context)
+    }
+
 }

@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Fetch</string>
+    <string name="fetch">Fetch!</string>
 </resources>

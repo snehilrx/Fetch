@@ -1,21 +1,40 @@
 package com.otaku.kickassanime.api.model
 
-class ServerLinks(val serverName: String, val link: String) {
+import androidx.media3.exoplayer.offline.Download
 
+sealed class ServerLinks(open val serverName: String) {
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
+    class OnlineServerLink(override val serverName: String, val link: String) :
+        ServerLinks(serverName) {
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (other !is OnlineServerLink) return false
 
-        other as ServerLinks
+            if (link != other.link) return false
 
-        if (link != other.link) return false
+            return true
+        }
 
-        return true
+        override fun hashCode(): Int {
+            return link.hashCode()
+        }
     }
 
-    override fun hashCode(): Int {
-        return link.hashCode()
+    class OfflineServerLink(override val serverName: String, val download: Download) :
+        ServerLinks(serverName) {
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (other !is OfflineServerLink) return false
+
+            if (serverName != other.serverName) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            return serverName.hashCode()
+        }
     }
+
 
 }

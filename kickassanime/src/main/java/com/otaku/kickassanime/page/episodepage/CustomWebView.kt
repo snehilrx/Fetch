@@ -2,33 +2,46 @@ package com.otaku.kickassanime.page.episodepage
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
 import android.util.AttributeSet
 import android.util.Log
 import android.webkit.*
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import java.util.*
+import kotlin.coroutines.resume
 
 
+@SuppressLint("ViewConstructor")
 class CustomWebView : WebView {
 
-    var onPageFinished: (() -> Unit)? = null
-    var videoLinksCallback: ((url: Uri) -> Unit)? = null
-    var crunchyRollCallback: ((json: String) -> Unit)? = null
+    private lateinit var mainThread: CoroutineDispatcher
+    private lateinit var otherThread: CoroutineDispatcher
+    private val mutex = Mutex(false)
 
-    constructor(context: Context) : super(context)
-    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
-    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
-        context,
-        attrs,
-        defStyleAttr
-    )
+    constructor(
+        context: Context,
+        main: CoroutineDispatcher = Dispatchers.Main,
+        other: CoroutineDispatcher = Dispatchers.IO
+    ) : super(
+        context
+    ) {
+        this.mainThread = main
+        this.otherThread = other
+    }
+
 
     @Suppress("UNUSED")
-    constructor(
+    private constructor(
         context: Context,
         attrs: AttributeSet?,
         defStyleAttr: Int,
@@ -36,12 +49,26 @@ class CustomWebView : WebView {
     ) : super(context, attrs, defStyleAttr, defStyleRes)
 
     @Suppress("UNUSED", "DEPRECATION")
-    constructor(
+    private constructor(
         context: Context,
         attrs: AttributeSet?,
         defStyleAttr: Int,
         privateBrowsing: Boolean
     ) : super(context, attrs, defStyleAttr, privateBrowsing)
+
+
+    @Suppress("unused")
+    private constructor(context: Context) : super(context)
+
+    @Suppress("unused")
+    private constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
+
+    @Suppress("unused")
+    private constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
+        context,
+        attrs,
+        defStyleAttr
+    )
 
     init {
         setWebContentsDebuggingEnabled(true)
@@ -61,9 +88,6 @@ class CustomWebView : WebView {
         settings.displayZoomControls = false
         settings.cacheMode = WebSettings.LOAD_CACHE_ELSE_NETWORK
         settings.userAgentString = "Android"
-        addJavascriptInterface(KAACrunchyInterface {
-            crunchyRollCallback?.invoke(it)
-        }, "android")
 
         webViewClient = object : WebViewClient() {
             override fun shouldInterceptRequest(
@@ -78,23 +102,13 @@ class CustomWebView : WebView {
                 if (blockedLinks.contains(urlString)
                     || mimeType?.startsWith("font") == true
                     || mimeType?.startsWith("image") == true
+                    || mimeType?.startsWith("stylesheet") == true
                 ) {
                     return WebResourceResponse(
                         mimeType,
                         "UTF-8",
                         null
                     )
-                }
-                if (mimeType != null && extension != "html") {
-                    // check if any of the requestUrls contain the url of a video file
-                    if (mimeType.startsWith("video/") || mimeType.startsWith("audio/")) {
-                        videoLinksCallback?.invoke(requestUrl)
-                        return WebResourceResponse(
-                            mimeType,
-                            "UTF-8",
-                            null
-                        )
-                    }
                 }
                 if (urlString.contains("player.php", true)) {
                     return injectToIframe(urlString)
@@ -140,11 +154,6 @@ class CustomWebView : WebView {
                 }
                 return super.shouldOverrideUrlLoading(view, request)
             }
-
-            override fun onPageFinished(view: WebView, url: String) {
-                super.onPageFinished(view, url)
-                onPageFinished?.invoke()
-            }
         }
 
 
@@ -189,6 +198,51 @@ class CustomWebView : WebView {
                 webState?.let {
                     restoreState(it)
                 }
+            }
+        }
+    }
+
+    private var cancel: () -> Unit = {}
+
+    fun release() {
+        cancel()
+    }
+
+    private val linksCache = HashMap<String, String>()
+
+    suspend fun enqueue(url: String): String? {
+        // web view must be accessed on main thread
+        mutex.withLock {
+            return if (linksCache.containsKey(url)) linksCache[url]
+            else withContext(mainThread) {
+                loadUrl(url)
+                // we should block other thread to wait for web view call back
+                val callback = withContext(otherThread) call@{
+                    return@call withTimeoutOrNull(30000) {
+                        return@withTimeoutOrNull suspendCancellableCoroutine { continuation ->
+                            val kaaCrunchyInterface = KAACrunchyInterface {
+                                if (continuation.isActive) {
+                                    continuation.resume(it)
+                                }
+                            }
+                            cancel = {
+                                if (continuation.isActive) {
+                                    continuation.resume(null)
+                                }
+                            }
+                            runBlocking {
+                                withContext(mainThread) {
+                                    addJavascriptInterface(kaaCrunchyInterface, "android")
+                                }
+                            }
+                        }
+                    }
+                }
+                removeJavascriptInterface("android")
+                callback?.let {
+                    linksCache[url] = it
+                }
+                return@withContext callback
             }
         }
     }

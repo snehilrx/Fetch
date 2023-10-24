@@ -13,7 +13,7 @@ buildscript {
     repositories {
         google()
     }
-    configurations.all {
+    configurations.configureEach {
         it.resolutionStrategy.cacheDynamicVersionsFor(5, 'minutes')
         it.resolutionStrategy.cacheChangingModulesFor(0, 'seconds')
     }
@@ -25,16 +25,17 @@ plugins {
     id 'org.jetbrains.kotlin.android' version '1.9.10' apply false
     id 'com.android.dynamic-feature' version '8.0.2' apply false
     id "org.sonarqube" version "4.2.1.3168"
+    id 'com.google.devtools.ksp' version '1.9.10-1.0.13' apply false
 }
 
 sonarqube {
-  properties {
-    property "sonar.projectKey", "snehilrx_Fetch"
-    property "sonar.organization", "snehilrx"
-    property "sonar.host.url", "https://sonarcloud.io"
-  }
+    properties {
+        property "sonar.projectKey", "snehilrx_Fetch"
+        property "sonar.organization", "snehilrx"
+        property "sonar.host.url", "https://sonarcloud.io"
+    }
 }
 
-task clean(type: Delete) {
+tasks.register('clean', Delete) {
     delete rootProject.buildDir
 }

@@ -55,7 +55,7 @@ class MainActivity : AppCompatActivity() {
                         ) {
                             Row(horizontalArrangement = Arrangement.Center) {
                                 Text(
-                                    text = "Fetch!",
+                                    text = getString(com.otaku.fetch.R.string.fetch),
                                     fontFamily = sohen,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 42.sp

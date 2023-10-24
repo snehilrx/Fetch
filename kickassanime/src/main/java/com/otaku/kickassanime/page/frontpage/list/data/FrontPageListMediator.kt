@@ -9,7 +9,7 @@ import com.otaku.fetch.base.TAG
 import com.otaku.kickassanime.api.model.BaseApiResponse
 import com.otaku.kickassanime.db.KickassAnimeDb
 import com.otaku.kickassanime.db.models.AnimeTile
-import com.otaku.kickassanime.utils.Constraints.cacheTimeoutInHours
+import com.otaku.kickassanime.utils.Constants.cacheTimeoutInHours
 import org.threeten.bp.LocalDateTime
 import retrofit2.HttpException
 import java.io.IOException

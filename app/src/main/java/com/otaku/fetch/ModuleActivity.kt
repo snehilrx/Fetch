@@ -61,10 +61,8 @@ class ModuleActivity :
                         pref[Settings.SKIP_ENABLED] = true
                         pref[Settings.NOTIFICATION_ENABLED] = askNotificationPermission()
                         pref[Settings.AUTO_RESUME] = true
-                        pref[Settings.STREAM_VIDEO_QUALITY] =
-                            resources.getStringArray(com.otaku.fetch.base.R.array.video_qualities)[0]
-                        pref[Settings.DOWNLOADS_VIDEO_QUALITY] =
-                            resources.getStringArray(com.otaku.fetch.base.R.array.video_qualities)[0]
+                        pref[Settings.STREAM_VIDEO_QUALITY] = "0"
+                        pref[Settings.DOWNLOADS_VIDEO_QUALITY] = "0"
                     }
                 }
             }
@@ -93,6 +91,9 @@ class ModuleActivity :
         }
         val navHostFragment = binding.fragmentContainerView.getFragment<NavHostFragment>()
         navHostFragment.navController.setGraph(appModule.getNavigationGraph())
+        navHostFragment.allowEnterTransitionOverlap = true
+        navHostFragment.allowReturnTransitionOverlap = true
+        navHostFragment.navController
         deepLink?.let { navHostFragment.navController.navigate(it) }
         binding.bottomNavigation?.inflateMenu(appModule.getBottomNavigationMenu())
         binding.bottomNavigation?.setupWithNavController(navHostFragment.navController)
@@ -204,6 +205,7 @@ class ModuleActivity :
     override fun setQueryListener(listener: MaterialSearchView.OnQueryTextListener?) {
         binding.searchView.setOnQueryTextListener(listener)
     }
+
     companion object {
         const val ARG_MODULE_DEEPLINK = "data"
         const val ARG_MODULE_NAME = "name"
