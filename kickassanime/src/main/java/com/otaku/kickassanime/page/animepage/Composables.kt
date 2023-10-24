@@ -16,8 +16,6 @@ import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeJoin
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -53,6 +51,7 @@ import com.otaku.kickassanime.work.DownloadAllEpisodeTask
 import com.otaku.kickassanime.work.ListAllEpisodeTask
 import com.valentinilk.shimmer.shimmer
 import kotlinx.coroutines.flow.Flow
+import kotlin.math.min
 
 
 @Composable
@@ -384,7 +383,6 @@ fun <T> ComboBox(
 @Composable
 @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
 fun Episode(episodeTile: EpisodeTile, onEpisodeClick: (EpisodeTile) -> Unit) {
-
     Card(
         modifier = Modifier
             .width(160.dp)
@@ -412,7 +410,7 @@ fun Episode(episodeTile: EpisodeTile, onEpisodeClick: (EpisodeTile) -> Unit) {
                     val episodeNumber = episodeTile.episodeNumber.toString()
                     append(episodeNumber)
                     appendLine()
-                    append(episodeTile.title?.subSequence(0, 18))
+                    append(episodeTile.title?.subSequence(0, min(episodeTile.title.length, 18)))
                     appendLine()
                     val readableDuration = episodeTile.readableDuration()
                     append(readableDuration)
@@ -428,11 +426,7 @@ fun Episode(episodeTile: EpisodeTile, onEpisodeClick: (EpisodeTile) -> Unit) {
                     .padding(18.dp, 16.dp)
                     .fillMaxWidth(),
                 style = MaterialTheme.typography.bodyMedium.copy(
-                    drawStyle = Stroke(
-                        miter = 10f,
-                        width = 2f,
-                        join = StrokeJoin.Round,
-                    )
+                    color = MaterialTheme.colorScheme.error
                 ),
             )
         }
