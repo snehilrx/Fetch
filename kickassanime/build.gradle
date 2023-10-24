@@ -67,10 +67,10 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$versions.livedata"
     implementation "androidx.appcompat:appcompat:$versions.appcompat"
     implementation "androidx.constraintlayout:constraintlayout:$versions.constraintlayout"
-    implementation "androidx.preference:preference:$versions.preference"
+    implementation "androidx.preference:preference-ktx:$versions.preference"
     implementation project(path: ':shinebar')
     implementation 'androidx.palette:palette-ktx:1.0.0'
-    testImplementation "androidx.paging:paging-common:$versions.paging"
+    testImplementation "androidx.paging:paging-common-ktx:$versions.paging"
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:$versions.swipe_refresh_layout"
     implementation "com.squareup.retrofit2:converter-gson:$versions.gson_conveter"
     implementation "com.mikepenz:iconics-core:$versions.iconics"
@@ -79,8 +79,9 @@ dependencies {
     implementation "com.maxkeppeler.sheets:info:$versions.sheets"
     implementation "com.maxkeppeler.sheets:input:$versions.sheets"
     implementation "com.mikepenz:iconics-views:$versions.iconics"
+    implementation "com.mikepenz:iconics-compose:$versions.iconics"
     // paging
-    implementation "androidx.paging:paging-runtime:$versions.paging"
+    implementation "androidx.paging:paging-runtime-ktx:$versions.paging"
     implementation "com.squareup.retrofit2:converter-scalars:$versions.retrofit"
 
     // OkHttp / Retrofit

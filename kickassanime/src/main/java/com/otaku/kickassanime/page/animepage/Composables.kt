@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -16,6 +17,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -36,6 +38,8 @@ import androidx.work.Constraints
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkManager
+import com.mikepenz.iconics.compose.Image
+import com.mikepenz.iconics.typeface.library.fontawesome.FontAwesome
 import com.otaku.fetch.base.livedata.State
 import com.otaku.fetch.base.ui.composepref.prefs.DialogHeader
 import com.otaku.fetch.base.utils.UiUtils
@@ -51,7 +55,6 @@ import com.otaku.kickassanime.work.DownloadAllEpisodeTask
 import com.otaku.kickassanime.work.ListAllEpisodeTask
 import com.valentinilk.shimmer.shimmer
 import kotlinx.coroutines.flow.Flow
-import kotlin.math.min
 
 
 @Composable
@@ -61,14 +64,15 @@ fun AnimeScreen(
     getAnime: () -> Flow<AnimeEntity?>,
     getLanguage: () -> Flow<List<AnimeLanguageEntity>>,
     getEpisodeList: (String?) -> Flow<PagingData<EpisodeTile>>,
-    onEpisodeClick: (EpisodeTile) -> Unit
+    isDownloadClicked: MutableState<Boolean>,
+    onEpisodeClick: (EpisodeTile) -> Unit,
 ) {
     val anime = getAnime().collectAsStateWithLifecycle(null)
     anime.value?.let { animeEntity ->
         var nextModifier: Modifier = modifier
 
         if (state is State.LOADING) {
-            nextModifier = Modifier.shimmer()
+            nextModifier = nextModifier.shimmer()
         } else if (state is State.FAILED) {
             UiUtils.showError(
                 state.exception, LocalContext.current as AppCompatActivity
@@ -84,37 +88,37 @@ fun AnimeScreen(
 
         val episodes = getEpisodeList(language?.language).collectAsLazyPagingItems()
 
-        LazyVerticalGrid(
+        DownloadAlert(getEpisodeList, animeEntity, language?.language, isDownloadClicked)
+        LazyColumn(
             verticalArrangement = Arrangement.spacedBy(4.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
             modifier = nextModifier
                 .padding(12.dp, 0.dp, 24.dp, 0.dp)
                 .fillMaxWidth()
                 .fillMaxHeight(),
-            columns = GridCells.Adaptive(140.dp)
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            item(span = { GridItemSpan(maxCurrentLineSpan) }) {
+            item(key = "details") {
                 AnimeDetails(animeEntity = animeEntity)
             }
-            item(span = { GridItemSpan(maxCurrentLineSpan) }) {
+            item(key = "language") {
                 LanguageChooser(languages, language) {
                     language = it
                 }
             }
-
-            item(span = { GridItemSpan(maxCurrentLineSpan) }) {
-                language?.language?.let { DownloadButton(episodes, animeEntity, it) }
-            }
-            items(episodes.itemCount, key = episodes.itemKey { it.slug ?: "" }, span = {
-                GridItemSpan(1)
-            }) {
+            items(episodes.itemCount,
+                key = episodes.itemKey { it.slug ?: "" }) {
                 val episodeTile = episodes[it]
                 if (episodeTile != null) {
                     Episode(episodeTile, onEpisodeClick)
+                    if (it < episodes.itemCount - 1) {
+                        HorizontalDivider(
+                            modifier = Modifier.padding(0.dp, 8.dp)
+                        )
+                    }
                 }
             }
             val loadState = episodes.loadState.mediator
-            item(span = { GridItemSpan(maxCurrentLineSpan) }) {
+            item(key = "load_state") {
                 if (loadState?.refresh == LoadState.Loading || loadState?.append == LoadState.Loading) {
                     Loading()
                 }
@@ -129,17 +133,14 @@ fun AnimeScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DownloadButton(
-    episodes: LazyPagingItems<EpisodeTile>,
+fun DownloadAlert(
+    getEpisodeList: (String?) -> Flow<PagingData<EpisodeTile>>,
     animeEntity: AnimeEntity,
-    language: String
+    language: String?,
+    isDownloadClicked: MutableState<Boolean>
 ) {
-    var showAlert by remember {
-        mutableStateOf(false)
-    }
-
-
-    if (showAlert) {
+    val episodes = getEpisodeList(language).collectAsLazyPagingItems()
+    if (isDownloadClicked.value) {
         val applicationContext = LocalContext.current.applicationContext
         val selectedEpisodes = remember { mutableStateMapOf<String, EpisodeTile>() }
         var selectedAll by remember { mutableStateOf(false) }
@@ -156,7 +157,19 @@ fun DownloadButton(
                 else -> ToggleableState.Indeterminate
             }
         }
-        AlertDialog(title = { Text(text = "Download Episodes") }, text = {
+        if (language == null) {
+            AlertDialog(
+                title = { Text(text = stringResource(R.string.error)) },
+                text = { Text(text = stringResource(R.string.please_select_a_language_first_to_download_episode)) },
+                onDismissRequest = { isDownloadClicked.value = false },
+                confirmButton = {
+                    Button(onClick = { isDownloadClicked.value = false }) {
+                        Text(text = stringResource(R.string.okay))
+                    }
+                })
+            return
+        }
+        AlertDialog(title = { Text(text = stringResource(R.string.download_episodes)) }, text = {
             Column {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -199,26 +212,22 @@ fun DownloadButton(
                     }
                 }
             }
-        }, onDismissRequest = { showAlert = false }, confirmButton = {
+        }, onDismissRequest = { isDownloadClicked.value = false }, confirmButton = {
             Button(onClick = {
-                showAlert = false
+                isDownloadClicked.value = false
                 enqueueDownloadEpisodeWork(
                     selectedEpisodes, selectedAll, animeEntity, language, applicationContext
                 )
             }) {
-                Text(text = "Download")
+                Text(text = stringResource(R.string.download))
             }
         }, dismissButton = {
-            Button(onClick = { showAlert = false }) {
+            Button(onClick = { isDownloadClicked.value = false }) {
                 Text(text = "Cancel")
             }
         })
     }
-    Button(onClick = {
-        showAlert = true
-    }) {
-        Text("Download All Episode")
-    }
+
 }
 
 fun enqueueDownloadEpisodeWork(
@@ -322,6 +331,7 @@ private fun LanguageChooser(
     if (languages.isNotEmpty()) {
         ComboBox(label = "Language",
             options = languages,
+            modifier = Modifier.wrapContentWidth(),
             toString = { it?.language ?: "Select language" },
             getItem = { language }) {
             onChange(it)
@@ -334,14 +344,18 @@ private fun LanguageChooser(
 fun <T> ComboBox(
     label: String,
     options: List<T>,
+    modifier: Modifier = Modifier,
     getItem: () -> T,
     toString: (T) -> String,
-    selectItem: (T) -> Unit
+    selectItem: (T) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
-    ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = {
-        expanded = !expanded
-    }) {
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        modifier = modifier,
+        onExpandedChange = {
+            expanded = !expanded
+        }) {
         OutlinedTextField(
             readOnly = true,
             value = toString(getItem()),
@@ -349,9 +363,7 @@ fun <T> ComboBox(
             label = {
                 MarqueeText(
                     label,
-                    Modifier
-                        .background(Color.Transparent)
-                        .fillMaxWidth()
+                    Modifier.background(Color.Transparent)
                 )
             },
             trailingIcon = {
@@ -361,10 +373,11 @@ fun <T> ComboBox(
             },
             singleLine = true,
             colors = ExposedDropdownMenuDefaults.textFieldColors(),
-            modifier = Modifier.menuAnchor()
+            modifier = modifier.menuAnchor()
         )
         ExposedDropdownMenu(
             expanded = expanded,
+            modifier = modifier,
             onDismissRequest = {
                 expanded = false
             }) {
@@ -383,54 +396,60 @@ fun <T> ComboBox(
 @Composable
 @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
 fun Episode(episodeTile: EpisodeTile, onEpisodeClick: (EpisodeTile) -> Unit) {
-    Card(
+    Row(
         modifier = Modifier
-            .width(160.dp)
+            .fillMaxWidth()
             .height(120.dp)
             .padding(0.dp)
+            .fillMaxSize()
+            .clickable {
+                onEpisodeClick(episodeTile)
+            },
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Box(
-            modifier = Modifier
-                .padding(0.dp)
-                .fillMaxSize()
-                .clickable {
-                    onEpisodeClick(episodeTile)
-                }, contentAlignment = Alignment.BottomStart
-        ) {
+        val image = Modifier
+            .height(120.dp)
+            .width(180.dp)
+        if (!episodeTile.thumbnail.isNullOrBlank()) {
             KickassLoadingImage(
                 url = "${Strings.KICKASSANIME_URL}image/thumbnail/${episodeTile.thumbnail}",
                 description = episodeTile.episodeNumber.toString(),
-                modifier = Modifier.fillMaxSize(),
+                modifier = image,
                 contentScale = ContentScale.FillBounds,
             )
-            Text(
-                text = buildAnnotatedString {
-                    val text = stringResource(id = R.string.episode_tile_text)
-                    append(text)
-                    val episodeNumber = episodeTile.episodeNumber.toString()
-                    append(episodeNumber)
-                    appendLine()
-                    append(episodeTile.title?.subSequence(0, min(episodeTile.title.length, 18)))
-                    appendLine()
-                    val readableDuration = episodeTile.readableDuration()
-                    append(readableDuration)
-                    val start = text.length + episodeNumber.length
-                    val end = (episodeTile.title?.length ?: 0) + readableDuration.length
-                    addStyle(
-                        SpanStyle(
-                            fontSize = MaterialTheme.typography.bodySmall.fontSize
-                        ), start, start + end
-                    )
-                },
-                modifier = Modifier
-                    .padding(18.dp, 16.dp)
-                    .fillMaxWidth(),
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    color = MaterialTheme.colorScheme.error
-                ),
+        } else {
+            Image(
+                modifier = image,
+                asset = FontAwesome.Icon.faw_image,
+                colorFilter = ColorFilter.tint(color = MaterialTheme.colorScheme.onSurface)
             )
         }
+        Text(
+            text = buildAnnotatedString {
+                val text = stringResource(id = R.string.episode_tile_text)
+                append(text)
+                val episodeNumber = episodeTile.episodeNumber.toString()
+                append(episodeNumber)
+                appendLine()
+                append(episodeTile.title)
+                appendLine()
+                val readableDuration = episodeTile.readableDuration()
+                append(readableDuration)
+                val start = text.length + episodeNumber.length
+                val end = (episodeTile.title?.length ?: 0) + readableDuration.length
+                addStyle(
+                    SpanStyle(
+                        fontSize = MaterialTheme.typography.bodySmall.fontSize
+                    ), start, start + end
+                )
+            },
+            modifier = Modifier
+                .padding(18.dp, 16.dp)
+                .fillMaxWidth(),
+            style = MaterialTheme.typography.bodyMedium,
+        )
     }
+
 }
 
 @Composable

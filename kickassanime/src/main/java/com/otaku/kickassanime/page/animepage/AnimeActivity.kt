@@ -17,6 +17,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -24,6 +25,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.os.bundleOf
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.paging.PagingData
+import com.mikepenz.iconics.compose.Image
+import com.mikepenz.iconics.typeface.library.fontawesome.FontAwesome
 import com.otaku.fetch.base.livedata.State
 import com.otaku.kickassanime.db.models.entity.AnimeEntity
 import com.otaku.kickassanime.db.models.entity.AnimeLanguageEntity
@@ -110,6 +113,9 @@ class AnimeActivity : AppCompatActivity() {
     ) {
         val (isFavourite, setFavorite) = remember { mutableStateOf(isFavouriteValue) }
         val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+
+        val isDownloadClicked = remember { mutableStateOf(false) }
+
         KickassAnimeTheme {
             Scaffold(
                 modifier = Modifier.fillMaxSize(),
@@ -130,6 +136,14 @@ class AnimeActivity : AppCompatActivity() {
                                 applyFavourite(!isFavourite)
                                 setFavorite(!isFavourite)
                             }, isChecked = isFavourite)
+                            IconButton(onClick = {
+                                isDownloadClicked.value = true
+                            }) {
+                                Image(
+                                    asset = FontAwesome.Icon.faw_download,
+                                    colorFilter = ColorFilter.tint(color = MaterialTheme.colorScheme.onSurface)
+                                )
+                            }
                         },
                         scrollBehavior = scrollBehavior
                     )
@@ -147,6 +161,7 @@ class AnimeActivity : AppCompatActivity() {
                         getAnime,
                         getLanguages,
                         getEpisodeList,
+                        isDownloadClicked,
                         onEpisodeClick
                     )
                 }

@@ -43,5 +43,9 @@
     <string name="meanwhile_we_will_switch_the_playback_server_to_offline">. Meanwhile we will switch the playback server to offline</string>
     <string name="downloading_episode_failed">Downloading episode failed</string>
     <string name="listing_out_video_files">Listing out video files</string>
-
+    <string name="download_episodes">Download Episodes</string>
+    <string name="error">Error</string>
+    <string name="okay">Okay</string>
+    <string name="download">Download</string>
+    <string name="please_select_a_language_first_to_download_episode">Please select a language first to download episode</string>
 </resources>

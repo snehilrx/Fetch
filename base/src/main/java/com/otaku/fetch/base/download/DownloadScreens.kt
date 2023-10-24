@@ -118,7 +118,7 @@ fun DownloadList(tree: ItemTree) {
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "NO DOWNLOAD",
+                text = stringResource(R.string.no_download),
                 style = MaterialTheme.typography.displayMedium,
                 textAlign = TextAlign.Center,
                 fontWeight = FontWeight.W800
@@ -403,7 +403,7 @@ private fun DeleteWarning(
     dismiss: () -> Unit
 ) {
     AlertDialog(title = {
-        Text(text = "Delete")
+        Text(text = stringResource(R.string.delete))
     }, text = {
         Text(text = warning)
     }, onDismissRequest = {
@@ -413,13 +413,13 @@ private fun DeleteWarning(
             dismiss()
             onClick()
         }) {
-            Text(text = "Okay")
+            Text(text = stringResource(R.string.okay))
         }
     }, dismissButton = {
         Button(onClick = {
             dismiss()
         }) {
-            Text(text = "Cancel")
+            Text(text = stringResource(R.string.cancel))
         }
     })
 }
