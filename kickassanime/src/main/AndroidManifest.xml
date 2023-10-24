@@ -11,14 +11,14 @@
 
     <application>
 
-		<activity
-			android:name=".page.animepage.AnimeActivity"
-			android:exported="false" />
+        <activity
+                android:name=".page.animepage.AnimeActivity"
+                android:exported="false" />
         <activity
                 android:name=".page.episodepage.EpisodeActivity"
                 android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|screenLayout|smallestScreenSize|uiMode"
                 android:exported="false"
                 android:supportsPictureInPicture="true" />
-	</application>
+    </application>
 
 </manifest>

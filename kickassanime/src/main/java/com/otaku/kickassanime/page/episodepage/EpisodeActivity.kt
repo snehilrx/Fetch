@@ -2,6 +2,7 @@ package com.otaku.kickassanime.page.episodepage
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
+import android.app.ProgressDialog
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -9,16 +10,16 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.KeyEvent
-import android.webkit.WebViewClient
 import android.widget.*
 import androidx.activity.viewModels
+import androidx.compose.ui.text.intl.Locale
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.os.postDelayed
 import androidx.core.view.*
-import androidx.lifecycle.Lifecycle
+import androidx.datastore.preferences.core.Preferences
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.media3.cast.CastPlayer
 import androidx.media3.common.*
 import androidx.media3.common.MediaItem.SubtitleConfiguration
@@ -28,7 +29,6 @@ import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.FileDataSource
 import androidx.media3.datasource.cache.*
 import androidx.media3.datasource.okhttp.OkHttpDataSource
-import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.dash.DashMediaSource
 import androidx.media3.exoplayer.hls.HlsMediaSource
@@ -39,12 +39,18 @@ import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import androidx.media3.ui.PlayerControlView
 import androidx.media3.ui.PlayerView.ARTWORK_DISPLAY_MODE_FILL
 import androidx.navigation.navArgs
+import androidx.work.Constraints
+import androidx.work.ExistingWorkPolicy
+import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequest
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
 import com.google.android.gms.cast.framework.CastButtonFactory
 import com.google.android.gms.cast.framework.CastContext
+import com.maxkeppeler.sheets.info.InfoSheet
+import com.otaku.fetch.ModuleRegistry
 import com.otaku.fetch.base.TAG
 import com.otaku.fetch.base.download.DownloadUtils
-import com.otaku.fetch.base.download.changeOrigin
-import com.otaku.fetch.base.download.toMediaUri
 import com.otaku.fetch.base.livedata.State
 import com.otaku.fetch.base.settings.Settings
 import com.otaku.fetch.base.settings.dataStore
@@ -54,19 +60,29 @@ import com.otaku.fetch.base.utils.UiUtils.loadBitmapFromUrl
 import com.otaku.fetch.base.utils.UiUtils.showError
 import com.otaku.fetch.base.utils.UiUtils.statusBarHeight
 import com.otaku.kickassanime.R
+import com.otaku.kickassanime.Strings
 import com.otaku.kickassanime.api.model.CommonSubtitle
+import com.otaku.kickassanime.api.model.ServerLinks
 import com.otaku.kickassanime.databinding.ActivityEpisodeBinding
 import com.otaku.kickassanime.db.models.CommonVideoLink
 import com.otaku.kickassanime.db.models.TimestampType
 import com.otaku.kickassanime.db.models.entity.AnimeEntity
 import com.otaku.kickassanime.db.models.entity.EpisodeEntity
 import com.otaku.kickassanime.page.animepage.AnimeActivity
+import com.otaku.kickassanime.utils.Constants.headersMap
+import com.otaku.kickassanime.utils.OfflineSubsHelper
+import com.otaku.kickassanime.utils.Quality
 import com.otaku.kickassanime.utils.Utils.binarySearchGreater
+import com.otaku.kickassanime.utils.slugToEpisodeLink
+import com.otaku.kickassanime.work.DownloadAllEpisodeTask
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import javax.inject.Inject
+import javax.inject.Named
 import kotlin.math.abs
 
 
@@ -74,6 +90,7 @@ import kotlin.math.abs
 @AndroidEntryPoint
 class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activity_episode) {
 
+    private lateinit var castHelper: CastHelper
     private var castContext: CastContext? = null
 
     // region Threading stuff
@@ -86,52 +103,48 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
     private val viewModel: EpisodeViewModel by viewModels()
     private lateinit var args: EpisodeActivityArgs
 
-    private val useOfflineMode by lazy { args.mediaItem != null }
-
     // region Media stuff
     @Inject
     lateinit var cache: Cache
 
-    private val headersMap: Map<String, String> = mapOf("origin" to "https://kaavid.com")
+    @Inject
+    @Named("unlimited")
+    lateinit var offlineCache: Cache
 
-    private val cachingDataSourceFactory by lazy {
-        val cacheSink = if (useOfflineMode) {
-            null
-        } else {
-            CacheDataSink.Factory().setCache(cache)
-        }
-        val upstreamFactory = if (useOfflineMode) {
-            null
-        } else {
-            DefaultDataSource.Factory(
-                this,
-                OkHttpDataSource.Factory(okhttp.changeOrigin())
-                    .setDefaultRequestProperties(headersMap)
-            )
-        }
+    @Inject
+    lateinit var offlineSubsHelper: OfflineSubsHelper
+
+    private val offlineCachingDataSourceFactory by lazy {
+        return@lazy CacheDataSource.Factory()
+            .setCache(offlineCache).setCacheWriteDataSinkFactory(null)
+            .setCacheReadDataSourceFactory(FileDataSource.Factory())
+            .setUpstreamDataSourceFactory(null)
+            .setFlags(CacheDataSource.FLAG_BLOCK_ON_CACHE)
+    }
+
+    private val onlineCachingDataSourceFactory by lazy {
+        val cacheSink = CacheDataSink.Factory().setCache(cache)
+        val upstreamFactory = DefaultDataSource.Factory(
+            applicationContext,
+            OkHttpDataSource.Factory(okhttp).setDefaultRequestProperties(headersMap)
+        )
         return@lazy CacheDataSource.Factory().setCache(cache)
             .setCacheWriteDataSinkFactory(cacheSink)
             .setCacheReadDataSourceFactory(FileDataSource.Factory())
             .setUpstreamDataSourceFactory(upstreamFactory)
             .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
     }
-    private val hlsMediaSource by lazy {
-        HlsMediaSource.Factory(cachingDataSourceFactory)
+
+    private val onlineHlsMediaSource by lazy {
+        HlsMediaSource.Factory(onlineCachingDataSourceFactory)
     }
-    private val dashMediaSource by lazy {
-        DashMediaSource.Factory(cachingDataSourceFactory)
+    private val onlineDashMediaSource by lazy {
+        DashMediaSource.Factory(onlineCachingDataSourceFactory)
     }
-    private val trackSelector by lazy {
-        DefaultTrackSelector(this, AdaptiveTrackSelection.Factory()).apply {
-            setParameters(
-                DefaultTrackSelector.Parameters.Builder(this@EpisodeActivity)
-                    .setPreferredTextLanguage("en")
-            )
-        }
-    }
+
     private val mediaSource = ArrayList<MediaSource>()
     private val subtitleSources = ArrayList<CommonSubtitle>()
-    private val playerListener by lazy { PlayerListener(binding, viewModel, this::showPlayerError) }
+    private lateinit var playerListener: PlayerListener
     // endregion
 
     @Inject
@@ -142,6 +155,7 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
 
     override fun onBind(binding: ActivityEpisodeBinding, savedInstanceState: Bundle?) {
         args = navArgs<EpisodeActivityArgs>().value
+        freeWebView()
         fetchRemote()
         playerViewUiHelper = PlayerViewUiHelper(
             this, binding.playerView, binding.aspectRatioFrameLayout, isFullscreen()
@@ -155,7 +169,6 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
             binding.appbarImageView, binding.toolbar
         )
         initialize()
-        initializeWebView()
         setTransparentStatusBar()
         showBackButton()
         statusBarHeight {
@@ -165,31 +178,60 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
         }
     }
 
+    private fun freeWebView() {
+        val webView =
+            ModuleRegistry.modules[Strings.KICKASSANIME]?.appModule?.webView as? CustomWebView
+        webView?.release()
+    }
+
     private fun isFullscreen(): Boolean {
         return binding.playerView.parent != binding.aspectRatioFrameLayout
     }
 
-    private fun initPlayer() {
-        val player =
-            ExoPlayer.Builder(this)
-                .setUsePlatformDiagnostics(true)
-                .setTrackSelector(trackSelector)
-                .setMediaSourceFactory(
-                    DefaultMediaSourceFactory(this)
-                        .setDataSourceFactory(cachingDataSourceFactory)
-                )
-                .build()
+    private fun getTrackSelector(preferences: Preferences): DefaultTrackSelector {
+        val videoQuality = preferences[Settings.DOWNLOADS_VIDEO_QUALITY]?.let { quality ->
+            Quality.entries[quality.toIntOrNull() ?: 0].bitrate
+        } ?: Quality.MAX.bitrate
+        return DefaultTrackSelector(applicationContext, AdaptiveTrackSelection.Factory()).apply {
+            setParameters(
+                DefaultTrackSelector.Parameters.Builder(applicationContext)
+                    .apply {
+                        setAllowVideoMixedMimeTypeAdaptiveness(true)
+                        clearOverridesOfType(C.TRACK_TYPE_TEXT)
+                        setPreferredTextLanguage(null)
+                        setPreferredTextLanguages(
+                            preferences[Settings.SUBTITLE_LANGUAGE] ?: Locale.current.language
+                        )
+                        setPreferredAudioLanguages(
+                            preferences[Settings.SUBTITLE_LANGUAGE] ?: Locale.current.language
+                        )
+                        setMaxVideoBitrate(videoQuality)
+                        setMinVideoBitrate(videoQuality - 1000)
+                    }
+            )
+        }
+    }
 
-        initCastHelper(player)
-        trackSelector.setParameters(
-            trackSelector.buildUponParameters().setAllowVideoMixedMimeTypeAdaptiveness(true)
-        )
+    private fun initPlayer(preferences: Preferences) {
+        releasePlayer(binding.playerView.player)
+        if (this::castHelper.isInitialized) {
+            castHelper.release()
+        }
+        val player =
+            ExoPlayer.Builder(applicationContext)
+                .setTrackSelector(getTrackSelector(preferences))
+                .setMediaSourceFactory(
+                    DefaultMediaSourceFactory(applicationContext)
+                        .setDataSourceFactory(onlineCachingDataSourceFactory)
+                ).build()
+
         castContext = try {
             CastContext.getSharedInstance()
         } catch (e: RuntimeException) {
             Log.e(TAG, "creating media cast context failed", e)
             null
         }
+        initCastHelper(player)
         binding.playerView.setKeepContentOnPlayerReset(true)
         binding.animeDetails?.getImageUrl()?.let {
             loadBitmapFromUrl(
@@ -207,28 +249,17 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
         initPlayerControls()
 
         binding.playerView.setRepeatToggleModes(RepeatModeUtil.REPEAT_TOGGLE_MODE_NONE)
+        playerListener = PlayerListener(binding, viewModel, this::showPlayerError)
         player.addListener(playerListener)
         playerViewUiHelper.showLoading()
-        args.mediaItem?.toMediaUri()?.let { media ->
-            downloadUtils.getDownloadTracker()
-                .getDownloadRequest(media)
-                ?.let {
-                    player.addMediaSource(
-                        DownloadHelper.createMediaSource(
-                            it,
-                            cachingDataSourceFactory
-                        )
-                    )
-                    player.prepare()
-                    player.play()
-                }
-        }
     }
 
     private fun initCastHelper(player: ExoPlayer) {
         val playerView = binding.playerView
-        val castHelper = CastHelper(castContext, player, playerView)
-        castHelper.setCurrentPlayer = { currentPlayer ->
+        if (this::castHelper.isInitialized) {
+            castHelper.release()
+        }
+        castHelper = CastHelper(castContext, player) { currentPlayer ->
             val oldPlayer = playerView.player
             playerView.player = currentPlayer
             playerView.controllerHideOnTouch = currentPlayer === player
@@ -285,10 +316,10 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
                 currentPlayer.prepare()
             }
         }
+        playerView.player = player
         val controls = binding.episodeDetailsContainer
         CastButtonFactory.setUpMediaRouteButton(applicationContext, controls.mediaCast)
         controls.castBtn.setOnClick { controls.mediaCast.performClick() }
-
     }
 
     private fun initPlayerControls() {
@@ -310,9 +341,8 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
                                     ts.first.let { binding.playerView.player?.seekTo(it) }
                                 }
                                 oldPos = currentPos
-                                skipIntroButton.text =
-                                    getString(R.string.skip).format(type)
-                                skipIntroButton.isVisible = getSkipButtonVisiblity(type)
+                                skipIntroButton.text = getString(R.string.skip).format(type)
+                                skipIntroButton.isVisible = getSkipButtonVisibility(type)
                             } else {
                                 skipIntroButton.isVisible = false
                             }
@@ -332,7 +362,7 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
         }
     }
 
-    private fun getSkipButtonVisiblity(type: String) = when (type) {
+    private fun getSkipButtonVisibility(type: String) = when (type) {
         TimestampType.INTRO.type -> true
         TimestampType.RECAP.type -> true
         TimestampType.CANON.type -> false
@@ -374,28 +404,25 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
 
 
     override fun onDestroy() {
-        destroyWebView()
         val player = binding.playerView.player
-        if (player is ExoPlayer) {
-            releasePlayer()
-        }
+        releasePlayer(player)
+        castHelper.release()
         super.onDestroy()
     }
 
-    private fun releasePlayer() {
-        mediaSource.clear()
-        subtitleSources.clear()
-        binding.playerView.player?.clearMediaItems()
-        binding.playerView.player?.removeListener(playerListener)
-        binding.playerView.player?.release()
-        binding.playerView.player = null
+    private fun releasePlayer(player: Player?) {
+        if (player != null) {
+            playerListener.releaseReferences()
+            player.removeListener(playerListener)
+            player.release()
+        }
     }
 
     private fun loadLink(item: CommonVideoLink) {
         Log.i(TAG, "DataLink ${item.getLink()}")
         val mediaItem = MediaItem.Builder().setMediaMetadata(
-            MediaMetadata.Builder()
-                .setTitle("${args.title} ${binding.episodeDetails?.title}").build()
+            MediaMetadata.Builder().setTitle("${args.title} ${binding.episodeDetails?.title}")
+                .build()
         ).setUri(item.getLink()).setMimeType(
             when (item.getVideoType()) {
                 CommonVideoLink.HLS -> MimeTypes.APPLICATION_M3U8
@@ -405,8 +432,8 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
         ).build()
         mediaSource.add(
             when (item.getVideoType()) {
-                CommonVideoLink.HLS -> hlsMediaSource.createMediaSource(mediaItem)
-                CommonVideoLink.DASH -> dashMediaSource.createMediaSource(mediaItem)
+                CommonVideoLink.HLS -> onlineHlsMediaSource.createMediaSource(mediaItem)
+                CommonVideoLink.DASH -> onlineDashMediaSource.createMediaSource(mediaItem)
                 else -> return
             }
         )
@@ -416,15 +443,19 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
     private fun playMedia() {
         (binding.playerView.player as? ExoPlayer)?.let { player ->
             player.clearMediaItems()
-            val subs = subtitleSources.filter { it.getLink().isNotEmpty() }.map {
-                SingleSampleMediaSource.Factory(cachingDataSourceFactory).createMediaSource(
+            val onlineSubs = subtitleSources.filter { it.getLink().isNotEmpty() }.map {
+                SingleSampleMediaSource.Factory(onlineCachingDataSourceFactory).createMediaSource(
                     SubtitleConfiguration.Builder(Uri.parse(it.getLink()))
                         .setMimeType(it.getFormat()).setLanguage(it.getLanguage()).build(),
                     C.TIME_UNSET
                 )
             }
-            val mergingMediaSource =
-                MergingMediaSource(*mediaSource.toTypedArray(), *subs.toTypedArray())
+            val offlineSubs = offlineSubsHelper.loadSubs(
+                args.animeSlug, args.episodeSlug, onlineCachingDataSourceFactory
+            ) ?: emptyList()
+            val mergingMediaSource = MergingMediaSource(
+                *mediaSource.toTypedArray(), *(onlineSubs + offlineSubs).toTypedArray()
+            )
             player.addMediaSource(
                 mergingMediaSource
             )
@@ -450,44 +481,19 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
     }
 
     private fun initialize() {
-        initPlayer()
+        lifecycleScope.launch {
+            dataStore.data.collectLatest {
+                initPlayer(it)
+                cancel()
+            }
+        }
         initObservers()
     }
 
-    private fun initializeWebView() {
-        binding.webView.videoLinksCallback = {
-            viewModel.handleVideoLinks(it)
-        }
-        binding.webView.crunchyRollCallback = {
-            viewModel.handleCrunchyRoll(it)
-        }
-    }
-
-    private fun destroyWebView() {
-        binding.webView.videoLinksCallback = null
-        binding.webView.crunchyRollCallback = null
-        binding.webView.webViewClient = object : WebViewClient() {}
-        binding.webView.webChromeClient = null
-        binding.webView.clearHistory()
-        binding.webView.clearCache(true)
-        binding.webView.destroy()
-    }
-
     private fun fetchRemote() {
-        val pref = this.dataStore.data
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                pref.collectLatest {
-                    if (binding.webView.url == null)
-                        viewModel.fetchEpisode(
-                            args.animeSlug,
-                            args.episodeSlug,
-                            useOfflineMode,
-                            it[Settings.SKIP_ENABLED] == true
-                        )
-                }
-            }
-        }
+        viewModel.fetchEpisode(
+            args.animeSlug, args.episodeSlug, applicationContext.dataStore
+        )
     }
 
     private fun initLoadingState() {
@@ -507,9 +513,6 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
 
     private fun initObservers() {
         initLoadingState()
-        viewModel.getIsPlaying().observe(this) {
-            if (it) binding.playerView.player?.play()
-        }
 
         viewModel.getEpisodeWithAnime(args.episodeSlug, args.animeSlug).observe(this) { item ->
             val episode = item?.first
@@ -530,13 +533,27 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
             }
         }
 
-        var oldUrl: String? = null
-        if (!useOfflineMode) {
-            viewModel.getCurrentServer().observe(this) {
-                if (oldUrl == null || oldUrl != it) {
+        viewModel.getCurrentServer().observe(this) {
+            mediaSource.clear()
+            when (it) {
+                is ServerLinks.OfflineServerLink -> {
+                    binding.episodeDetailsContainer.download.isEnabled = false
                     mediaSource.clear()
-                    binding.webView.loadUrl(it)
-                    oldUrl = it
+                    mediaSource.add(
+                        DownloadHelper.createMediaSource(
+                            it.download.request,
+                            offlineCachingDataSourceFactory
+                        )
+                    )
+                    playMedia()
+                }
+
+                is ServerLinks.OnlineServerLink -> {
+                    viewModel.loadPage(it.link)
+                }
+
+                else -> {
+                    Log.e("Episode", "Invalid server link")
                 }
             }
         }
@@ -572,36 +589,97 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
         binding.episodeDetailsContainer.previous.setOnClick {
             openPrevEpisode(episode)
         }
-        binding.episodeDetailsContainer.links.setOnClick {
-            val currentMediaItem = binding.playerView.player?.currentMediaItem
-            if (currentMediaItem != null) {
-                downloadUtils.getDownloadTracker().toggleDownload(
-                    currentMediaItem.buildUpon()
-                        .setSubtitleConfigurations(
-                            subtitleSources.map {
-                                return@map SubtitleConfiguration.Builder(Uri.parse(it.getLink()))
-                                    .setMimeType(it.getFormat()).setLanguage(it.getLanguage())
-                                    .build()
-                            }
-                        )
-                        .setMediaId(episode.episodeSlug).build(),
-                    DefaultRenderersFactory(this),
-                    this
-                )
+        binding.episodeDetailsContainer.download.setOnClick {
+            binding.playerView.player?.pause()
+            binding.playerView.player?.playWhenReady = false
+            val title = getString(R.string.downloading_episode)
+            val successMessage = getString(R.string.your_requested_episode_is_being_downloaded)
+            val successMessage1 =
+                getString(R.string.meanwhile_we_will_switch_the_playback_server_to_offline)
+
+            val progressDialog =
+                ProgressDialog.show(this, title, getString(R.string.listing_out_video_files))
+            val taskInfo = createEpisodeDownloadWork(episode)
+            if (taskInfo == null) {
+                progressDialog.hide()
+                showError(getString(R.string.downloading_episode_failed), this)
             } else {
-                showError("Not media is found (Media Item is null)", this)
+                taskInfo.observe(this) { info ->
+                    when (info.state) {
+                        WorkInfo.State.ENQUEUED -> {
+                            progressDialog.show()
+                        }
+
+                        WorkInfo.State.RUNNING -> {
+                            progressDialog.show()
+                        }
+
+                        WorkInfo.State.SUCCEEDED -> {
+                            progressDialog.hide()
+                            lifecycleScope.launch {
+                                delay(200)
+                                InfoSheet().show(this@EpisodeActivity) {
+                                    title(title)
+                                    content(buildString {
+                                        append(successMessage)
+                                        append(anime.name)
+                                        append(" ")
+                                        append(episode.episodeNumber)
+                                        append(successMessage1)
+                                    })
+                                    displayPositiveButton(true)
+                                    onPositive("OK") {
+                                        switchToOfflineMode(episode.episodeSlug)
+                                        dismiss()
+                                    }
+                                }
+                            }
+                        }
+
+                        WorkInfo.State.FAILED -> {
+                            progressDialog.hide()
+                            showError(getString(R.string.downloading_episode_failed), this)
+                        }
+
+                        else -> {
+                            // no op
+                        }
+                    }
+                }
             }
+            binding.playerView.player?.pause()
         }
         initDropDown()
     }
 
+    private fun switchToOfflineMode(episodeSlug: String) {
+        viewModel.checkOfflineServers(episodeSlug)
+    }
+
+    private fun createEpisodeDownloadWork(episode: EpisodeEntity): LiveData<WorkInfo>? {
+        val animeSlug = episode.animeSlug ?: return null
+        val episodeSlug = episode.episodeSlug
+        val request = OneTimeWorkRequest.Builder(DownloadAllEpisodeTask::class.java).setInputData(
+            DownloadAllEpisodeTask.createNewInput(
+                arrayOf(episodeSlug.slugToEpisodeLink(animeSlug)),
+                arrayOf(episodeSlug),
+                animeSlug
+            )
+        ).setConstraints(
+            Constraints.Builder()
+                .setRequiredNetworkType(networkType = NetworkType.CONNECTED).build()
+        ).build()
+        val workManager = WorkManager.getInstance(applicationContext)
+        workManager.enqueueUniqueWork(
+            episode.episodeSlug,
+            ExistingWorkPolicy.KEEP,
+            request
+        )
+        return workManager.getWorkInfoByIdLiveData(request.id)
+    }
+
 
     private fun initDropDown() {
-        if (useOfflineMode) {
-            val offlineText = getString(R.string.offline)
-            binding.episodeDetailsContainer.servers.setSimpleItems(arrayOf(offlineText))
-            binding.episodeDetailsContainer.servers.setText(offlineText)
-        }
         viewModel.getServersLinks().observe(this) { links ->
             if (links.isNotEmpty()) {
                 val list = links.toTypedArray()
@@ -609,12 +687,11 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
                 binding.episodeDetailsContainer.servers.setSimpleItems(serverNames)
                 binding.episodeDetailsContainer.servers.onItemClickListener =
                     AdapterView.OnItemClickListener { _, _, position, _ ->
-                        viewModel.setCurrentServer(
-                            list[position].link
-                        )
+                        viewModel.setCurrentServer(list[position])
                     }
+                // first link will always be offline first
                 binding.episodeDetailsContainer.servers.setText(list[0].serverName)
-                viewModel.setCurrentServer(list[0].link)
+                viewModel.setCurrentServer(list[0])
             } else if (links !is LinkedHashSet) {
                 showError(Exception("No servers found"), this)
             }
@@ -626,7 +703,7 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
         if (next != null) {
             openEpisode(next)
         } else {
-            Toast.makeText(this, "No Next Episode", Toast.LENGTH_SHORT).show()
+            Toast.makeText(applicationContext, "No Next Episode", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -635,7 +712,7 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
         if (prev != null) {
             openEpisode(prev)
         } else {
-            Toast.makeText(this, "No Previous Episode", Toast.LENGTH_SHORT).show()
+            Toast.makeText(applicationContext, "No Previous Episode", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -653,12 +730,17 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
     @SuppressLint("MissingSuperCall")
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        releasePlayer()
+        releasePlayer(binding.playerView.player)
         viewModel.clearServers()
         showLoading()
         intent.extras?.let { args = EpisodeActivityArgs.fromBundle(it) }
         fetchRemote()
-        initPlayer()
+        lifecycleScope.launch {
+            dataStore.data.collectLatest {
+                initPlayer(it)
+                cancel()
+            }
+        }
     }
 
 
@@ -681,14 +763,11 @@ class EpisodeActivity : BindingActivity<ActivityEpisodeBinding>(R.layout.activit
 
     private fun onSelectStream(operation: (link: CommonVideoLink) -> Unit) {
         val streamList = viewModel.getVideoLink().value ?: return
-        AlertDialog.Builder(this)
-            .setTitle("Choose Stream")
-            .setItems(streamList.map {
-                it.getLinkName()
-            }.toTypedArray()) { _, which ->
-                operation(streamList[which])
-            }
-            .create()?.show()
+        AlertDialog.Builder(this).setTitle("Choose Stream").setItems(streamList.map {
+            it.getLinkName()
+        }.toTypedArray()) { _, which ->
+            operation(streamList[which])
+        }.create()?.show()
     }
 
 

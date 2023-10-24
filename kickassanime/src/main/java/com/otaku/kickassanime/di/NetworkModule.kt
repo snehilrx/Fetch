@@ -47,7 +47,8 @@ object NetworkModule {
                 override fun log(message: String) {
                     Log.v("Ok2Curl", message)
                 }
-            })).build())
+            })).build()
+        )
         .baseUrl(Strings.ANIME_SKIP_URL)
         .build()
 }

@@ -1,6 +1,6 @@
 pluginManagement {
     repositories {
-        maven { url 'https://repo.maven.apache.org'}
+        maven { url 'https://repo.maven.apache.org' }
         gradlePluginPortal()
         google()
         mavenCentral()

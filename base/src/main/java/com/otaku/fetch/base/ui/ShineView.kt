@@ -120,14 +120,15 @@ class ShineView : View, AppBarLayout.OnOffsetChangedListener {
     // to fix view flickering
     private var lock = true
     private fun sendViewToBack() {
-        if(lock) return
+        if (lock) return
         val parent = parent as ViewGroup
         parent.removeView(this)
         parent.addView(this, 0)
         lock = true
     }
+
     private fun bringViewToFront() {
-        if(!lock) return
+        if (!lock) return
         parent.bringChildToFront(this)
         lock = false
     }

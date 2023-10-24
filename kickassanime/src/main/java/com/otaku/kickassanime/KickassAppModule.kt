@@ -16,6 +16,7 @@ import androidx.core.app.TaskStackBuilder
 import androidx.core.graphics.drawable.IconCompat
 import androidx.core.os.bundleOf
 import androidx.media3.common.util.UnstableApi
+import androidx.room.withTransaction
 import com.mikepenz.iconics.Iconics
 import com.mikepenz.iconics.IconicsColor
 import com.mikepenz.iconics.IconicsDrawable
@@ -29,6 +30,7 @@ import com.otaku.kickassanime.api.KickassAnimeService
 import com.otaku.kickassanime.api.model.Recent
 import com.otaku.kickassanime.db.KickassAnimeDb
 import com.otaku.kickassanime.db.models.AnimeTile
+import com.otaku.kickassanime.page.episodepage.CustomWebView
 import com.otaku.kickassanime.page.episodepage.EpisodeActivity
 import com.otaku.kickassanime.page.episodepage.EpisodeActivityArgs
 import com.otaku.kickassanime.ui.theme.KickassAnimeTheme
@@ -83,25 +85,30 @@ class KickassAppModule @Inject constructor(
         mediaLink: String,
         mediaType: String
     ): DownloadItem? {
-        val episode =
-            kickassAnimeDb.episodeEntityDao().getAnimeIdAndEpisodeNumber(mediaId) ?: return null
-        val animeTitle =
-            kickassAnimeDb.animeEntityDao().getAnimeName(episode.animeSlug)
-                ?: return null
-        val animeKey = episode.animeSlug ?: "1"
-        return DownloadItem(
-            animeTitle = animeTitle,
-            episodeNumber = episode.episodeNumber ?: 0f,
-            episodeKey = episode.episodeSlug,
-            animeKey = animeKey,
-            launchActivity = EpisodeActivity::class.java,
-            launchBundle = EpisodeActivityArgs(
-                title = animeTitle,
-                episodeSlug = episode.episodeSlug,
-                animeSlug = animeKey
-            ).toBundle()
-        )
+        return kickassAnimeDb.withTransaction {
+            val episode =
+                kickassAnimeDb.episodeEntityDao().getAnimeIdAndEpisodeNumber(mediaId)
+                    ?: return@withTransaction null
+            val animeTitle =
+                kickassAnimeDb.animeEntityDao().getAnimeName(episode.animeSlug)
+                    ?: return@withTransaction null
+            val animeKey = episode.animeSlug ?: "1"
+            return@withTransaction DownloadItem(
+                animeTitle = animeTitle,
+                episodeNumber = episode.episodeNumber ?: 0f,
+                episodeKey = episode.episodeSlug,
+                animeKey = animeKey,
+                launchActivity = EpisodeActivity::class.java,
+                launchBundle = EpisodeActivityArgs(
+                    title = animeTitle,
+                    episodeSlug = episode.episodeSlug,
+                    animeSlug = animeKey
+                ).toBundle()
+            )
+        }
     }
+
+    override val webView = CustomWebView(context)
 
     override suspend fun triggerNotification(
         context: Context,
@@ -141,7 +148,7 @@ class KickassAppModule @Inject constructor(
             .edit().putLong(PREF_KEY, newHash).apply()
     }
 
-    suspend fun showNotification(
+    private suspend fun showNotification(
         newEpisodes: List<Recent>,
         oldEpisodes: List<AnimeTile>,
         oldHash: Long,
@@ -151,7 +158,6 @@ class KickassAppModule @Inject constructor(
             Utils.saveRecent(it, kickassAnimeDb, 0)
         }
     ): Long {
-
         val newHash = HashUtils.hash64(newEpisodes)
         if (oldHash != newHash) {
             val dbSet = oldEpisodes.map { it.episodeSlug }.toHashSet()

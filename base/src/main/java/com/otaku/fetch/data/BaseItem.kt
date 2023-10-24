@@ -8,7 +8,7 @@ interface BaseItem {
         const val ITEM_TYPE_SEARCH = 3
     }
 
-    fun getItemViewType() : Int
+    fun getItemViewType(): Int
     fun areItemsTheSame(newItem: BaseItem): Boolean
     fun areContentsTheSame(newItem: BaseItem): Boolean
 }

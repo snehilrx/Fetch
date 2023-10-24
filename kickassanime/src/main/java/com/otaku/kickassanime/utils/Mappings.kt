@@ -1,5 +1,6 @@
 package com.otaku.kickassanime.utils
 
+import com.otaku.kickassanime.Strings
 import com.otaku.kickassanime.api.model.EpisodeApiResponse
 import com.otaku.kickassanime.api.model.EpisodesWithPreview
 import com.otaku.kickassanime.api.model.Recent
@@ -132,3 +133,6 @@ fun EpisodesWithPreview.asEpisodeEntity(
 fun EpisodesWithPreview.slug(): String {
     return "ep-${episodeNumber?.toInt()}-$slug"
 }
+
+fun String.slugToEpisodeLink(animeSlug: String) =
+    "${Strings.KICKASSANIME_URL}$animeSlug/$this"

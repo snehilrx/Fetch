@@ -22,7 +22,7 @@ class EpisodeRepositoryTest {
     lateinit var episodeRepository: EpisodeRepository
 
     @Test
-    fun testAnimeSkip(){
+    fun testAnimeSkip() {
         runBlocking {
             assertNotNull(episodeRepository.fetchAnimeSkipTime("dragon", 1f))
         }

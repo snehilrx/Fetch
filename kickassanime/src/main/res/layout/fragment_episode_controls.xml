@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+        xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
         <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/videoPicker"
@@ -14,6 +14,7 @@
                 android:layout_marginStart="14dp"
                 android:layout_marginTop="14dp"
                 android:layout_marginEnd="14dp"
+                app:shapeAppearance="?attr/shapeAppearance"
                 android:hint="@string/servers"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -22,15 +23,16 @@
             <com.otaku.fetch.base.ui.ComboBox
                     android:id="@+id/servers"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
+                    android:minHeight="@dimen/mdtp_material_button_height"
                     android:inputType="none" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/anime"
-            style="@style/Widget.KickassAnime.NoSpacingButton"
-            android:layout_width="0dp"
+                android:id="@+id/anime"
+                style="@style/Widget.KickassAnime.NoSpacingButton"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:gravity="start|center_vertical"
                 android:insetTop="0dp"
@@ -44,9 +46,9 @@
                 app:layout_constraintTop_toBottomOf="@+id/videoPicker" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/links"
-            style="@style/Widget.KickassAnime.NoSpacingButton"
-            android:layout_width="0dp"
+                android:id="@+id/download"
+                style="@style/Widget.KickassAnime.NoSpacingButton"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:gravity="start|center_vertical"
                 android:insetTop="0dp"
@@ -60,22 +62,22 @@
                 app:layout_constraintTop_toBottomOf="@+id/next" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/previous"
-            style="@style/Widget.KickassAnime.NoSpacingButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:drawableBottom="@color/sheetsDividerColor"
-            android:gravity="start|center_vertical"
-            android:paddingStart="14dp"
-            android:paddingEnd="14dp"
-            android:text="@string/prev"
-            app:layout_constraintEnd_toStartOf="@+id/guideline2"
+                android:id="@+id/previous"
+                style="@style/Widget.KickassAnime.NoSpacingButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:drawableBottom="@color/sheetsDividerColor"
+                android:gravity="start|center_vertical"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:text="@string/prev"
+                app:layout_constraintEnd_toStartOf="@+id/guideline2"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/anime"
                 app:startIcon="@{`faw_chevron_left`}" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/next"
+                android:id="@+id/next"
                 style="@style/Widget.KickassAnime.NoSpacingButton"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -89,28 +91,28 @@
                 app:layout_constraintTop_toBottomOf="@+id/anime" />
 
         <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/guideline2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            app:layout_constraintGuide_percent="0.5"
-            app:layout_constraintWidth_percent="0.5" />
+                android:id="@+id/guideline2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent="0.5"
+                app:layout_constraintWidth_percent="0.5" />
 
         <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintEnd_toEndOf="@+id/links"
-            app:layout_constraintStart_toStartOf="@+id/links"
-            app:layout_constraintTop_toBottomOf="@+id/links">
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="@+id/download"
+                app:layout_constraintStart_toStartOf="@+id/download"
+                app:layout_constraintTop_toBottomOf="@+id/download">
 
             <androidx.mediarouter.app.MediaRouteButton
-                android:id="@+id/mediaCast"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_gravity="center|start"
-                android:layout_marginStart="@dimen/md_icon_margin"
-                app:iconTint="?attr/colorOnSurface"
-                android:layout_marginTop="4dp" />
+                    android:id="@+id/mediaCast"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center|start"
+                    android:layout_marginStart="@dimen/md_icon_margin"
+                    app:iconTint="?attr/colorOnSurface"
+                    android:layout_marginTop="4dp" />
 
             <com.google.android.material.button.MaterialButton
                     android:id="@+id/castBtn"

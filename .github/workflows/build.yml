@@ -77,7 +77,7 @@ jobs:
           echo "version=${new_version}" >> "$GITHUB_OUTPUT"
           echo ${commit}
           echo ${new_version}
-          
+
       - name: apk
         env:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
@@ -100,13 +100,13 @@ jobs:
           echo -e "${property_content}" > version.properties
           ./gradlew :app:assembleRelease --scan
           rm -f ${KEY_PATH}
-       
+
       # attaches the build apks in workflow run page 
       - uses: actions/upload-artifact@v3
         with:
           name: builds
           path: ${{ github.workspace }}/app/build/outputs/apk/release/*.apk
-          
+
       # attaches the build report in workflow run page 
       - uses: actions/upload-artifact@v3
         with:

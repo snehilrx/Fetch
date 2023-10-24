@@ -16,7 +16,6 @@ import com.otaku.fetch.base.livedata.State
 import com.otaku.kickassanime.db.models.AnimeSearchResult
 import com.otaku.kickassanime.page.search.SearchRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
@@ -84,11 +83,10 @@ class FrontPageViewModel @Inject constructor(
 
     @OptIn(FlowPreview::class)
     fun transformToQueryFlow(
-        scope: CoroutineScope,
         registerCallback: (MaterialSearchView.OnQueryTextListener) -> Unit,
         unregisterCallback: () -> Unit,
     ) {
-        scope.launch {
+        viewModelScope.launch {
             callbackFlow {
                 val onQueryTextChange = object : MaterialSearchView.OnQueryTextListener {
                     override fun onQueryTextChange(newText: CharSequence) {

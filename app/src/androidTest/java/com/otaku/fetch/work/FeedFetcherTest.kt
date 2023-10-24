@@ -25,6 +25,7 @@ internal class FeedFetcherTest {
     @Inject
     @ApplicationContext
     lateinit var context: Context
+
     @Inject
     lateinit var workerFactory: HiltWorkerFactory
 
@@ -42,11 +43,13 @@ internal class FeedFetcherTest {
         val request = PeriodicWorkRequest.Builder(FeedFetcher::class.java, 15, TimeUnit.MINUTES)
             .build()
         val synchronousExecutor = SynchronousExecutor()
-        WorkManagerTestInitHelper.initializeTestWorkManager(context, Configuration.Builder()
-            .setMinimumLoggingLevel(Log.DEBUG)
-            .setExecutor(synchronousExecutor)
-            .setWorkerFactory(workerFactory)
-            .build())
+        WorkManagerTestInitHelper.initializeTestWorkManager(
+            context, Configuration.Builder()
+                .setMinimumLoggingLevel(Log.DEBUG)
+                .setExecutor(synchronousExecutor)
+                .setWorkerFactory(workerFactory)
+                .build()
+        )
         // Enqueue periodic request
         val instance = WorkManager.getInstance(context)
         instance
@@ -54,7 +57,7 @@ internal class FeedFetcherTest {
 
         // Initialize testDriver
         val testDriver: TestDriver? = WorkManagerTestInitHelper.getTestDriver(context)
-        if(testDriver == null) {
+        if (testDriver == null) {
             assert(false) {
                 "Test Driver was null"
             }

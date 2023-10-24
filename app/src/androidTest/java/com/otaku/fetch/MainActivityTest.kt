@@ -20,7 +20,7 @@ class MainActivityTest {
     fun setup() = hiltRule.inject()
 
     @Test
-    fun testActivityStates(){
+    fun testActivityStates() {
         ActivityScenario.launch(MainActivity::class.java).use {
             it.onActivity { activity ->
                 Toast.makeText(activity, "Launched Anything", Toast.LENGTH_SHORT).show()

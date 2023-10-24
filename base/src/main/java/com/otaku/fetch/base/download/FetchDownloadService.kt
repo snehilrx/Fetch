@@ -39,6 +39,12 @@ class FetchDownloadService : DownloadService(
         // This will only happen once, because getDownloadManager is guaranteed to be called only once
         // in the life cycle of the process.
         val downloadManager: DownloadManager = downloadUtils.getDownloadManager()
+        downloadUtils.getDownloadTracker().attach()
+        return downloadManager
+    }
+
+    override fun onCreate() {
+        super.onCreate()
         val downloadNotificationHelper: DownloadNotificationHelper =
             getDownloadNotificationHelper( /* context= */this)
         terminalStateNotification = TerminalStateNotificationHelper(
@@ -46,8 +52,6 @@ class FetchDownloadService : DownloadService(
             FOREGROUND_NOTIFICATION_ID + 1
         )
         downloadManager.addListener(terminalStateNotification)
-        downloadUtils.getDownloadTracker().attach()
-        return downloadManager
     }
 
     override fun onDestroy() {

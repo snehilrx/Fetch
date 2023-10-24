@@ -8,7 +8,7 @@ import androidx.paging.RemoteMediator
 import com.otaku.fetch.base.TAG
 import com.otaku.kickassanime.api.KickassAnimeService
 import com.otaku.kickassanime.db.KickassAnimeDb
-import com.otaku.kickassanime.utils.Constraints
+import com.otaku.kickassanime.utils.Constants
 import com.otaku.kickassanime.utils.Utils
 import org.threeten.bp.Duration
 import org.threeten.bp.LocalDateTime
@@ -76,7 +76,7 @@ class EpisodeRemoteMediator(
 
     override suspend fun initialize(): InitializeAction {
         val lastUpdate = database.lastUpdateDao().lastUpdate()
-            ?.minusHours(Constraints.cacheTimeoutInHours)
+            ?.minusHours(Constants.cacheTimeoutInHours)
         return if (lastUpdate?.isAfter(LocalDateTime.now()) == true) {
             InitializeAction.SKIP_INITIAL_REFRESH
         } else {

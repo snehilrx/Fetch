@@ -1,27 +1,33 @@
 package com.otaku.fetch.base.download
 
 import android.content.Context
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.database.DatabaseProvider
 import androidx.media3.database.StandaloneDatabaseProvider
 import androidx.media3.datasource.DataSource
 import androidx.media3.datasource.cache.Cache
+import androidx.media3.datasource.cache.CacheDataSource
 import androidx.media3.datasource.cronet.CronetDataSource
 import androidx.media3.datasource.cronet.CronetUtil
 import androidx.media3.datasource.okhttp.OkHttpDataSource
+import androidx.media3.exoplayer.offline.DefaultDownloadIndex
 import androidx.media3.exoplayer.offline.DownloadManager
-import okhttp3.Interceptor
+import androidx.media3.exoplayer.offline.DownloadRequest
 import okhttp3.OkHttpClient
 import org.chromium.net.CronetEngine
 import java.net.CookieHandler
 import java.net.CookieManager
 import java.net.CookiePolicy
+import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
+@UnstableApi
 class DownloadUtils constructor(
     private val okhttp: OkHttpClient,
     private val context: Context,
-    private val cache: Cache
-) {
+    private val cache: Cache,
+    private val standaloneDatabaseProvider: StandaloneDatabaseProvider
+) : PTDownloaderFactory.Tracker {
 
     /**
      * Whether the demo application uses Cronet for networking. Note that Cronet does not provide
@@ -32,13 +38,15 @@ class DownloadUtils constructor(
      * configured in [.getHttpDataSourceFactory].
      */
 
-    private lateinit var databaseProvider: DatabaseProvider
     private lateinit var downloadManager: DownloadManager
     private lateinit var downloadTracker: DownloadTracker
     private lateinit var httpDataSourceFactory: DataSource.Factory
 
+
+    var downloadsProgressCallback: PTDownloaderFactory.Tracker? = null
+
     @Synchronized
-    private fun getHttpDataSourceFactory(context: Context): DataSource.Factory {
+    fun getHttpDataSourceFactory(context: Context): DataSource.Factory {
         if (!this::httpDataSourceFactory.isInitialized) {
             if (USE_CRONET_FOR_NETWORKING) {
                 val cronetEngine: CronetEngine? = CronetUtil.buildCronetEngine(context)
@@ -56,7 +64,7 @@ class DownloadUtils constructor(
                 cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ORIGINAL_SERVER)
                 CookieHandler.setDefault(cookieManager)
 
-                httpDataSourceFactory = OkHttpDataSource.Factory(okhttp.changeOrigin())
+                httpDataSourceFactory = OkHttpDataSource.Factory(okhttp)
             }
         }
         return httpDataSourceFactory
@@ -78,9 +86,9 @@ class DownloadUtils constructor(
     @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
     private fun ensureDownloadManagerInitialized() {
         if (!this::downloadManager.isInitialized) {
-            downloadManager = DownloadManager(
+            downloadManager = getDownloadManager(
                 context,
-                getDatabaseProvider(context),
+                standaloneDatabaseProvider,
                 cache,
                 getHttpDataSourceFactory(context),
                 Executors.newFixedThreadPool(6)
@@ -90,34 +98,41 @@ class DownloadUtils constructor(
         }
     }
 
-    @Synchronized
     @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
-    private fun getDatabaseProvider(context: Context): DatabaseProvider {
-        if (!this::databaseProvider.isInitialized) {
-            databaseProvider = StandaloneDatabaseProvider(context)
+    fun getDownloadManager(
+        context: Context,
+        databaseProvider: DatabaseProvider?,
+        cache: Cache?,
+        upstreamFactory: DataSource.Factory?,
+        executor: Executor?
+    ) = DownloadManager(
+        context,
+        DefaultDownloadIndex(databaseProvider!!),
+        PTDownloaderFactory(
+            CacheDataSource.Factory()
+                .setCache(cache!!)
+                .setUpstreamDataSourceFactory(upstreamFactory),
+            executor!!
+        ).apply {
+            this.progressHook = this@DownloadUtils
         }
-        return databaseProvider
-    }
+    )
 
     companion object {
         private const val USE_CRONET_FOR_NETWORKING = false
     }
-}
 
-
-fun OkHttpClient.changeOrigin(): OkHttpClient {
-    return newBuilder().addInterceptor(Interceptor { chain ->
-        val original = chain.request()
-
-        val request = original.newBuilder()
-            .header("origin", "https://kaavid.com")
-            .header(
-                "user-agent",
-                "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1"
-            )
-            .method(original.method, original.body)
-            .build()
-
-        chain.proceed(request)
-    }).build()
+    override fun onProgressChanged(
+        request: DownloadRequest,
+        contentLength: Long,
+        bytesDownloaded: Long,
+        percentDownloaded: Float
+    ) {
+        downloadsProgressCallback?.onProgressChanged(
+            request,
+            contentLength,
+            bytesDownloaded,
+            percentDownloaded
+        )
+    }
 }

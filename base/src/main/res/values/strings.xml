@@ -17,6 +17,9 @@
     <string name="notifications">New videos notification</string>
     <string name="notifications_desc">Get new video releases notification</string>
     <string name="streaming">Streaming</string>
+    <string name="language">Language</string>
+    <string name="subtitle_language">Subtitle Language</string>
+    <string name="audio_language">Audio Language</string>
     <string name="video_quality">Video Quality</string>
     <string name="downloading">Downloading</string>
     <string name="auto_resume_videos">Auto Resume Videos</string>
@@ -26,4 +29,9 @@
     <string name="notifications_updates_unavailable">As you have not allowed notifications pemission, you won\'t be reciving anime release updates</string>
     <string name="new_update_avalaible">New Update Available</string>
     <string name="new_update_avalaible_desc">A new update is released on github</string>
+    <string name="no_download">NO DOWNLOAD</string>
+    <string name="delete">Delete</string>
+    <string name="okay">Okay</string>
+    <string name="cancel">Cancel</string>
+    <string name="select">Select</string>
 </resources>

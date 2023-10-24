@@ -28,15 +28,20 @@ class FavouritesFragment : ListFragment<ItemFavoriteBinding>() {
 
     private fun onItemClick(item: ITileData) {
         val fav = item as? AnimeFavorite ?: return
-        FavouritesFragmentDirections.actionFavouritesFragmentToAnimeActivity(
-            AnimeEntity(
-                animeSlug = fav.animeSlug
+        val animeScreen =
+            FavouritesFragmentDirections.actionFavouritesFragmentToAnimeActivity(
+                AnimeEntity(
+                    animeSlug = fav.animeSlug,
+                    name = fav.title,
+                    favourite = true
+                )
             )
-        )
+        findNavController().navigate(animeScreen)
     }
 
     override val layoutId: Int
         get() = R.layout.item_favorite
+
     override fun hideBackButton() = true
 
     override val onBind: (ItemFavoriteBinding, ITileData) -> Unit =

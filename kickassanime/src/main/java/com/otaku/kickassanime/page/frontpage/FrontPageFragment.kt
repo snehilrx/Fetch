@@ -4,12 +4,12 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.ActivityNavigator
-import androidx.navigation.Navigation
+import androidx.navigation.Navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.DiffUtil
@@ -36,6 +36,7 @@ import com.otaku.fetch.data.BaseItem.Companion.ITEM_TYPE_SEARCH
 import com.otaku.fetch.data.ITileData
 import com.otaku.kickassanime.R
 import com.otaku.kickassanime.databinding.FragmentFrontPageBinding
+import com.otaku.kickassanime.databinding.HeaderFrontPageBinding
 import com.otaku.kickassanime.databinding.HeaderMaterialSearchBarBinding
 import com.otaku.kickassanime.databinding.ItemSearchHintBinding
 import com.otaku.kickassanime.db.models.AnimeSearchResult
@@ -61,16 +62,20 @@ class FrontPageFragment : BindingFragment<FragmentFrontPageBinding>(R.layout.fra
             binding.refreshLayout.isEnabled = verticalOffset == 0
         }
 
-    private val frontPageAdapter = FrontPageAdapter { binding, item ->
+    private val frontPageAdapter = FrontPageAdapter({ binding, item ->
         binding.tileData = item
-        binding.root.setOnClick { onItemClick(item) }
-    }
+        binding.root.setOnClick { onItemClick(item, binding.root) }
+    }, { binding ->
+        if (binding is HeaderFrontPageBinding) {
+            binding.carousel.adapter = null
+        }
+    })
 
     private val carouselAdapter = AnimeTileAdapterNoPaging<CarouselItemLayoutBinding>(
         com.otaku.fetch.base.R.layout.carousel_item_layout
     ) { binding, item ->
         binding.tileData = item
-        binding.card.setOnClickListener { onItemClick(item) }
+        binding.card.setOnClickListener { onItemClick(item, binding.root) }
     }
 
     private val searchHintAdapter = AnimeTileAdapterNoPaging(
@@ -82,7 +87,7 @@ class FrontPageFragment : BindingFragment<FragmentFrontPageBinding>(R.layout.fra
                 startActivity(
                     AnimeActivity.newInstance(
                         requireActivity(),
-                        iTileData.animeEntity
+                        iTileData.animeEntity,
                     )
                 )
             }
@@ -94,6 +99,10 @@ class FrontPageFragment : BindingFragment<FragmentFrontPageBinding>(R.layout.fra
         if (data is String) {
             openSearchResultFragment(data)
         }
+    }
+
+    val onRefresh = {
+        frontPageViewModel.refreshAllPages()
     }
 
     override fun onBind(binding: FragmentFrontPageBinding, savedInstanceState: Bundle?) {
@@ -184,12 +193,11 @@ class FrontPageFragment : BindingFragment<FragmentFrontPageBinding>(R.layout.fra
                     searchInterface?.showContent()
                 }
 
-                else -> {}
+                else -> throw IllegalArgumentException("Invalid state")
             }
         }
 
         frontPageViewModel.transformToQueryFlow(
-            lifecycleScope,
             { listener: MaterialSearchView.OnQueryTextListener ->
                 searchInterface?.setQueryListener(object :
                     MaterialSearchView.OnQueryTextListener by listener {
@@ -199,25 +207,38 @@ class FrontPageFragment : BindingFragment<FragmentFrontPageBinding>(R.layout.fra
                         openSearchResultFragment(queryValue)
                     }
                 })
-            }, {
-                searchInterface?.setQueryListener(null)
-            })
+            }
+        ) {
+            searchInterface?.setQueryListener(null)
+        }
     }
 
     private fun openSearchResultFragment(query: String) {
         searchInterface?.closeSearch()
         val actionFrontPageFragmentToSearchFragment =
             FrontPageFragmentDirections.actionFrontPageFragmentToSearchFragment(query)
-        Navigation.findNavController(requireView())
+        findNavController(requireView())
             .navigate(actionFrontPageFragmentToSearchFragment)
     }
 
     private fun initFrontPageList() {
         binding.container.adapter = frontPageAdapter
+        val spanCount = resources.getInteger(com.otaku.fetch.base.R.integer.span_count)
+        (binding.container.layoutManager as? GridLayoutManager)?.spanSizeLookup =
+            object : SpanSizeLookup() {
+                override fun getSpanSize(position: Int): Int {
+                    if (position < 4) return spanCount
+                    return when (frontPageAdapter.getItemViewType(position)) {
+                        ITEM_TYPE_HEADER_CAROUSEL -> spanCount
+                        ITEM_TYPE_HEADER_TITLE -> spanCount
+                        ITEM_TYPE_SEARCH -> spanCount
+                        ITEM_TYPE_LIST -> 1
+                        else -> 2
+                    }
+                }
+            }
         binding.appbarLayout.addOnOffsetChangedListener(disableRefreshOnOffset)
-        binding.refreshLayout.setOnRefreshListener {
-            frontPageViewModel.refreshAllPages()
-        }
+        binding.refreshLayout.setOnRefreshListener(onRefresh)
     }
 
     private fun initCarousel(carousel: CarouselRecyclerview) {
@@ -286,6 +307,16 @@ class FrontPageFragment : BindingFragment<FragmentFrontPageBinding>(R.layout.fra
         }
     }
 
+    override fun onPause() {
+        binding.refreshLayout.isEnabled = false
+        super.onPause()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        binding.refreshLayout.isEnabled = true
+    }
+
     private fun showContent() {
         binding.shimmerLoading.stopShimmer()
         binding.shimmerLoading.isVisible = false
@@ -296,41 +327,27 @@ class FrontPageFragment : BindingFragment<FragmentFrontPageBinding>(R.layout.fra
         super.onDestroyView()
         binding.container.adapter = null
         binding.refreshLayout.setOnRefreshListener(null)
+        searchInterface?.setQueryListener(null)
         binding.appbarLayout.removeOnOffsetChangedListener(disableRefreshOnOffset)
         (binding.container.layoutManager as? GridLayoutManager)?.spanSizeLookup = null
     }
 
-    override fun onResume() {
-        super.onResume()
-        val spanCount = resources.getInteger(com.otaku.fetch.base.R.integer.span_count)
-        (binding.container.layoutManager as? GridLayoutManager)?.spanSizeLookup =
-            object : SpanSizeLookup() {
-                override fun getSpanSize(position: Int): Int {
-                    return when (frontPageAdapter.getItemViewType(position)) {
-                        ITEM_TYPE_HEADER_CAROUSEL -> spanCount
-                        ITEM_TYPE_HEADER_TITLE -> spanCount
-                        ITEM_TYPE_SEARCH -> spanCount
-                        ITEM_TYPE_LIST -> 1
-                        else -> spanCount
-                    }
+    companion object {
+        private fun onItemClick(item: ITileData, view: View) {
+            val extras = ActivityNavigator.Extras.Builder()
+                .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                .build()
+            when (item) {
+                is AnimeTile -> {
+                    findNavController(view).navigate(
+                        FrontPageFragmentDirections.actionFrontPageFragmentToEpisodeActivity(
+                            title = item.title ?: "",
+                            episodeSlug = item.episodeSlug ?: "",
+                            animeSlug = item.animeSlug
+                        ),
+                        extras
+                    )
                 }
-            }
-    }
-
-    private fun onItemClick(item: ITileData) {
-        val extras = ActivityNavigator.Extras.Builder()
-            .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
-            .build()
-        when (item) {
-            is AnimeTile -> {
-                findNavController().navigate(
-                    FrontPageFragmentDirections.actionFrontPageFragmentToEpisodeActivity(
-                        title = item.title ?: "",
-                        episodeSlug = item.episodeSlug ?: "",
-                        animeSlug = item.animeSlug
-                    ),
-                    extras
-                )
             }
         }
     }
