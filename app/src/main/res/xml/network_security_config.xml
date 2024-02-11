@@ -3,6 +3,7 @@
     <domain-config>
         <domain includeSubdomains="true">kaaplayer.com</domain>
         <domain includeSubdomains="true">kaas.am</domain>
+        <domain includeSubdomains="true">kickassanime.mx</domain>
         <domain includeSubdomains="true">localhost</domain>
     </domain-config>
 </network-security-config>

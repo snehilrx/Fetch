@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="ShaderView">
+        <attr name="vertex_shader_raw_res_id" format="reference" />
+        <attr name="fragment_shader_raw_res_id" format="reference" />
+    </declare-styleable>
+</resources>

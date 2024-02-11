@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.ActivityNavigator
 import androidx.navigation.Navigation.findNavController
 import androidx.navigation.fragment.findNavController
@@ -50,6 +51,15 @@ import com.otaku.kickassanime.page.animepage.AnimeActivity
 import com.otaku.kickassanime.page.frontpage.data.FrontPageViewModel
 import com.otaku.kickassanime.utils.Utils.showError
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 
 @AndroidEntryPoint
@@ -57,10 +67,9 @@ class FrontPageFragment : BindingFragment<FragmentFrontPageBinding>(R.layout.fra
 
     private val frontPageViewModel: FrontPageViewModel by activityViewModels()
 
-    private val disableRefreshOnOffset =
-        AppBarLayout.OnOffsetChangedListener { _, verticalOffset ->
-            binding.refreshLayout.isEnabled = verticalOffset == 0
-        }
+    private val disableRefreshOnOffset = AppBarLayout.OnOffsetChangedListener { _, verticalOffset ->
+        binding.refreshLayout.isEnabled = verticalOffset == 0
+    }
 
     private val frontPageAdapter = FrontPageAdapter({ binding, item ->
         binding.tileData = item
@@ -101,16 +110,13 @@ class FrontPageFragment : BindingFragment<FragmentFrontPageBinding>(R.layout.fra
         }
     }
 
-    val onRefresh = {
+    private val onRefresh = {
         frontPageViewModel.refreshAllPages()
     }
 
     override fun onBind(binding: FragmentFrontPageBinding, savedInstanceState: Bundle?) {
         initAppbar(
-            binding.shinebar,
-            binding.toolbar,
-            binding.collapsingToolbar,
-            findNavController()
+            binding.appbar, findNavController()
         )
         initFrontPageList()
         initSearchBar()
@@ -118,27 +124,19 @@ class FrontPageFragment : BindingFragment<FragmentFrontPageBinding>(R.layout.fra
     }
 
     inner class StringAdapter(private val onClick: (Pair<String, Any>) -> Unit) :
-        ListAdapter<Pair<String, Any>, RecyclerView.ViewHolder>(
-            object : DiffUtil.ItemCallback<Pair<String, Any>>() {
-                override fun areItemsTheSame(
-                    oldItem: Pair<String, Any>,
-                    newItem: Pair<String, Any>
-                ): Boolean =
-                    oldItem.first == newItem.first
+        ListAdapter<Pair<String, Any>, RecyclerView.ViewHolder>(object :
+            DiffUtil.ItemCallback<Pair<String, Any>>() {
+            override fun areItemsTheSame(
+                oldItem: Pair<String, Any>, newItem: Pair<String, Any>
+            ): Boolean = oldItem.first == newItem.first
 
-                override fun areContentsTheSame(
-                    oldItem: Pair<String, Any>,
-                    newItem: Pair<String, Any>
-                ): Boolean =
-                    oldItem.first == newItem.first
-            }
-        ) {
+            override fun areContentsTheSame(
+                oldItem: Pair<String, Any>, newItem: Pair<String, Any>
+            ): Boolean = oldItem.first == newItem.first
+        }) {
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-            val view = LayoutInflater.from(parent.context)
-                .inflate(
-                    R.layout.simple_item_iconics,
-                    parent,
-                    false
+            val view = LayoutInflater.from(parent.context).inflate(
+                    R.layout.simple_item_iconics, parent, false
                 )
             return object : RecyclerView.ViewHolder(view) {}
         }
@@ -160,8 +158,7 @@ class FrontPageFragment : BindingFragment<FragmentFrontPageBinding>(R.layout.fra
             setHint(getString(R.string.search_anime))
             setOnClick {
                 searchInterface?.openSearch()
-                historyAdapter.submitList(
-                    frontPageViewModel.getSearchHistory().map { it to it })
+                historyAdapter.submitList(frontPageViewModel.getSearchHistory().map { it to it })
             }
         }
     }
@@ -169,8 +166,7 @@ class FrontPageFragment : BindingFragment<FragmentFrontPageBinding>(R.layout.fra
     private fun initSearchBar() {
         searchInterface?.setSuggestions(
             ConcatAdapter(
-                searchHintAdapter,
-                historyAdapter
+                searchHintAdapter, historyAdapter
             )
         )
         frontPageViewModel.getSearchSuggestions().observe(this) { list ->
@@ -197,19 +193,43 @@ class FrontPageFragment : BindingFragment<FragmentFrontPageBinding>(R.layout.fra
             }
         }
 
-        frontPageViewModel.transformToQueryFlow(
-            { listener: MaterialSearchView.OnQueryTextListener ->
-                searchInterface?.setQueryListener(object :
-                    MaterialSearchView.OnQueryTextListener by listener {
-                    override fun onQueryTextSubmit(query: CharSequence) {
-                        val queryValue = query.toString()
-                        frontPageViewModel.addToSearchHistory(queryValue)
-                        openSearchResultFragment(queryValue)
-                    }
-                })
-            }
-        ) {
+        transformToQueryFlow({ listener: MaterialSearchView.OnQueryTextListener ->
+            searchInterface?.setQueryListener(object :
+                MaterialSearchView.OnQueryTextListener by listener {
+                override fun onQueryTextSubmit(query: CharSequence) {
+                    val queryValue = query.toString()
+                    frontPageViewModel.addToSearchHistory(queryValue)
+                    openSearchResultFragment(queryValue)
+                }
+            })
+        }) {
             searchInterface?.setQueryListener(null)
+        }
+    }
+
+    @OptIn(FlowPreview::class)
+    fun transformToQueryFlow(
+        registerCallback: (MaterialSearchView.OnQueryTextListener) -> Unit,
+        unregisterCallback: () -> Unit,
+    ) {
+        lifecycleScope.launch {
+            val flow = callbackFlow {
+                val onQueryTextChange = object : MaterialSearchView.OnQueryTextListener {
+                    override fun onQueryTextChange(newText: CharSequence) {
+                        trySend(newText.toString())
+                    }
+
+                    override fun onQueryTextSubmit(query: CharSequence) {
+                        // no-op as we need only text change listener
+                    }
+                }
+                registerCallback(onQueryTextChange)
+                awaitClose { unregisterCallback() }
+            }.conflate().debounce(300).distinctUntilChanged { x, y ->
+                x.equals(y, true)
+            }
+            flow.stateIn(lifecycleScope).collectLatest { query -> frontPageViewModel.search(query) }
+
         }
     }
 
@@ -217,8 +237,7 @@ class FrontPageFragment : BindingFragment<FragmentFrontPageBinding>(R.layout.fra
         searchInterface?.closeSearch()
         val actionFrontPageFragmentToSearchFragment =
             FrontPageFragmentDirections.actionFrontPageFragmentToSearchFragment(query)
-        findNavController(requireView())
-            .navigate(actionFrontPageFragmentToSearchFragment)
+        findNavController(requireView()).navigate(actionFrontPageFragmentToSearchFragment)
     }
 
     private fun initFrontPageList() {
@@ -237,7 +256,7 @@ class FrontPageFragment : BindingFragment<FragmentFrontPageBinding>(R.layout.fra
                     }
                 }
             }
-        binding.appbarLayout.addOnOffsetChangedListener(disableRefreshOnOffset)
+        binding.appbar.appbarLayout.addOnOffsetChangedListener(disableRefreshOnOffset)
         binding.refreshLayout.setOnRefreshListener(onRefresh)
     }
 
@@ -265,8 +284,7 @@ class FrontPageFragment : BindingFragment<FragmentFrontPageBinding>(R.layout.fra
             it.title = getString(R.string.sub)
             it.actionButtonText = getString(R.string.more)
             it.actionButton.setOnClick {
-                findNavController()
-                    .navigate(FrontPageFragmentDirections.actionFrontPageFragmentToTrending())
+                findNavController().navigate(FrontPageFragmentDirections.actionFrontPageFragmentToTrending())
             }
         })
         frontPageViewModel.zipped().observe(viewLifecycleOwner) { data ->
@@ -277,8 +295,7 @@ class FrontPageFragment : BindingFragment<FragmentFrontPageBinding>(R.layout.fra
                 it.title = getString(R.string.dub)
                 it.actionButtonText = getString(R.string.more)
                 it.actionButton.setOnClick {
-                    findNavController()
-                        .navigate(FrontPageFragmentDirections.actionFrontPageFragmentToPopular())
+                    findNavController().navigate(FrontPageFragmentDirections.actionFrontPageFragmentToPopular())
                 }
             })
             frontPageViews.addAll(data.third)
@@ -314,7 +331,8 @@ class FrontPageFragment : BindingFragment<FragmentFrontPageBinding>(R.layout.fra
 
     override fun onResume() {
         super.onResume()
-        binding.refreshLayout.isEnabled = true
+        val appbarLayout = binding.appbar.appbarLayout
+        binding.refreshLayout.isEnabled = (appbarLayout.height - appbarLayout.bottom) == 0
     }
 
     private fun showContent() {
@@ -328,15 +346,14 @@ class FrontPageFragment : BindingFragment<FragmentFrontPageBinding>(R.layout.fra
         binding.container.adapter = null
         binding.refreshLayout.setOnRefreshListener(null)
         searchInterface?.setQueryListener(null)
-        binding.appbarLayout.removeOnOffsetChangedListener(disableRefreshOnOffset)
+        binding.appbar.appbarLayout.removeOnOffsetChangedListener(disableRefreshOnOffset)
         (binding.container.layoutManager as? GridLayoutManager)?.spanSizeLookup = null
     }
 
     companion object {
         private fun onItemClick(item: ITileData, view: View) {
-            val extras = ActivityNavigator.Extras.Builder()
-                .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
-                .build()
+            val extras =
+                ActivityNavigator.Extras.Builder().addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP).build()
             when (item) {
                 is AnimeTile -> {
                     findNavController(view).navigate(
@@ -344,8 +361,7 @@ class FrontPageFragment : BindingFragment<FragmentFrontPageBinding>(R.layout.fra
                             title = item.title ?: "",
                             episodeSlug = item.episodeSlug ?: "",
                             animeSlug = item.animeSlug
-                        ),
-                        extras
+                        ), extras
                     )
                 }
             }

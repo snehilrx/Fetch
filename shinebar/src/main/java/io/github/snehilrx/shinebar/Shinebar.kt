@@ -9,7 +9,6 @@ import android.view.WindowInsets
 import android.widget.FrameLayout
 import androidx.annotation.ColorInt
 import androidx.core.view.children
-import com.appspell.shaderview.BuildConfig
 import com.appspell.shaderview.ShaderView
 import com.appspell.shaderview.gl.params.ShaderParams
 import com.appspell.shaderview.gl.params.ShaderParamsBuilder
@@ -21,7 +20,7 @@ import kotlin.math.abs
 
 class Shinebar : FrameLayout, AppBarLayout.OnOffsetChangedListener {
 
-
+    private lateinit var shaderView: ShaderView
     private var oProgress: Float = -1f
     private var progress: Float = 0f
 
@@ -74,17 +73,16 @@ class Shinebar : FrameLayout, AppBarLayout.OnOffsetChangedListener {
             .build()
 
         a.recycle()
-        val shaderView = ShaderView(context, attrs, defStyle).apply {
+        setPadding(0, 0, 0, 0)
+        shaderView = ShaderView(context, attrs, defStyle).apply {
             shaderParams = this@Shinebar.shaderParams
             fragmentShaderRawResId = R.raw.shader
             layoutParams =
                 LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT).apply {
                     this.setMargins(0, 0, 0, 0)
                 }
-            updateContinuously = true
-            debugMode = BuildConfig.DEBUG
+            debugMode = false
         }
-        setPadding(0, 0, 0, 0)
         addView(shaderView)
         setBackgroundColor(Color.TRANSPARENT)
     }
@@ -100,14 +98,7 @@ class Shinebar : FrameLayout, AppBarLayout.OnOffsetChangedListener {
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
         shaderParams.updateValue(SHADER_PARAM_VIEW_SIZE, floatArrayOf(w.toFloat(), h.toFloat()))
-    }
-
-    override fun onAttachedToWindow() {
-        super.onAttachedToWindow()
-        val views = (parent as? ViewGroup)?.children ?: return
-        for (view in views) {
-            (view as? AppBarLayout)?.addOnOffsetChangedListener(this)
-        }
+        shaderView.requestRender()
     }
 
     override fun onOffsetChanged(appBarLayout: AppBarLayout, verticalOffset: Int) {
@@ -121,6 +112,7 @@ class Shinebar : FrameLayout, AppBarLayout.OnOffsetChangedListener {
         if (progress.isFinite()) {
             shaderParams.updateValue(SHADER_PARAM_TOTAL_SCROLL, totalScrollRange)
             shaderParams.updateValue(SHADER_PARAM_DISTANCE_SCROLLED, abs(verticalOffset).toFloat())
+            shaderView.requestRender()
         }
         oProgress = progress
     }

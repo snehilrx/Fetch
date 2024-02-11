@@ -24,7 +24,7 @@ data class AnimeEntity(
     val year: Int? = null
 ) : Parcelable {
     fun getImageUrl(): String {
-        return "${KICKASSANIME_URL}image/poster/$image"
+        return "${KICKASSANIME_URL}/image/poster/$image"
     }
 }
 

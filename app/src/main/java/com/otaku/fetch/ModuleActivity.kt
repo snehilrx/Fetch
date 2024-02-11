@@ -3,6 +3,7 @@ package com.otaku.fetch
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -25,16 +26,19 @@ import com.otaku.fetch.base.settings.Settings
 import com.otaku.fetch.base.settings.dataStore
 import com.otaku.fetch.base.ui.BindingActivity
 import com.otaku.fetch.base.ui.SearchInterface
+import com.otaku.fetch.base.ui.ShineBarInterface
 import com.otaku.fetch.base.utils.UiUtils.statusBarHeight
 import com.otaku.fetch.databinding.ActivityModuleBinding
 import dagger.hilt.android.AndroidEntryPoint
+import io.github.snehilrx.shinebar.Shinebar
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 
 @AndroidEntryPoint
 class ModuleActivity :
-    BindingActivity<ActivityModuleBinding>(R.layout.activity_module), SearchInterface {
+    BindingActivity<ActivityModuleBinding>(R.layout.activity_module), SearchInterface,
+    ShineBarInterface {
 
     inner class SearchComponents(
         val suggestionsList: RecyclerView,
@@ -44,12 +48,31 @@ class ModuleActivity :
 
     private lateinit var searchUi: SearchComponents
 
+    override val shinebar: Shinebar
+        get() = binding.shinebar
+
+    private fun setupShineBar(shinebar: Shinebar) {
+        val start = TypedValue()
+        val end = TypedValue()
+        theme?.resolveAttribute(
+            com.google.android.material.R.attr.colorPrimary,
+            start,
+            true
+        )
+        theme?.resolveAttribute(com.google.android.material.R.attr.colorAccent, end, true)
+        shinebar.apply {
+            setStartColor(start.data)
+            setEndColor(end.data)
+        }
+    }
+
     override fun onBind(binding: ActivityModuleBinding, savedInstanceState: Bundle?) {
         super.onBind(binding, savedInstanceState)
         initNavigationView()
         setTransparentStatusBar()
         initSearchView(binding)
         checkPermissions()
+        setupShineBar(shinebar)
     }
 
     private fun checkPermissions() {

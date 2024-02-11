@@ -79,6 +79,7 @@ dependencies {
     implementation "androidx.work:work-runtime-ktx:$versions.work"
     implementation project(path: ':kickassanime')
     implementation 'com.google.firebase:firebase-perf:20.5.0'
+    implementation project(path: ':shinebar')
     androidTestImplementation "io.github.rascaler:assertj:$versions.assertJ"
     testImplementation "junit:junit:$versions.junit"
     androidTestImplementation "androidx.test.ext:junit:$versions.androidx_junit"

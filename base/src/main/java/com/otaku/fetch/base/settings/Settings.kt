@@ -30,7 +30,6 @@ import com.otaku.fetch.base.ui.composepref.PrefsScreen
 import com.otaku.fetch.base.ui.composepref.prefs.ListPref
 import com.otaku.fetch.base.ui.composepref.prefs.SwitchPref
 import dagger.hilt.android.internal.managers.ViewComponentManager.FragmentContextWrapper
-import io.github.snehilrx.shinebar.Shinebar
 import java.util.Locale
 
 
@@ -79,11 +78,10 @@ object Settings {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Settings(
-    statusBarHeight: Float? = null, setupShineBar: (Shinebar) -> Unit = { _ -> run {} }
+    statusBarHeight: Float? = null
 ) {
     FetchScaffold(title = stringResource(id = R.string.settings),
         statusBarHeight = statusBarHeight ?: 0f,
-        setupShineBar = setupShineBar,
         content = {
             val context = LocalContext.current
             val dataStore = context.dataStore

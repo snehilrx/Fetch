@@ -100,7 +100,7 @@ class EpisodeViewModel @Inject constructor(
                         loadOfflineFile(offlineDownloads)
                     }
                     launch {
-                        val link = "$KICKASSANIME_URL$animeSlug/$episodeSlug"
+                        val link = "$KICKASSANIME_URL/$animeSlug/$episodeSlug"
                         try {
                             loadEpisodePage(link)
                         } catch (e: Exception) {

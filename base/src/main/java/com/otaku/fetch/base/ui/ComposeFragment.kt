@@ -68,12 +68,12 @@ class ComposeFragment : BindingFragment<ComposeBinding>(R.layout.compose) {
                 DownloadScreen(
                     downloadsVM,
                     statusBarHeight
-                ) { shinebar -> setupShineBar(shinebar) }
+                )
             }
             composable(BaseRoutes.SETTINGS) {
                 Settings(
                     statusBarHeight,
-                ) { shinebar -> setupShineBar(shinebar) }
+                )
             }
         }
     }
