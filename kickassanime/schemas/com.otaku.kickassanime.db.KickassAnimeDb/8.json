@@ -1,0 +1,472 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 8,
+    "identityHash": "3ba1ab1059234bcd99f6e528454e032e",
+    "entities": [
+      {
+        "tableName": "anime",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`animeSlug` TEXT NOT NULL, `name` TEXT, `description` TEXT, `image` TEXT, `status` TEXT, `type` TEXT, `rating` TEXT, `favourite` INTEGER NOT NULL, `year` INTEGER, PRIMARY KEY(`animeSlug`))",
+        "fields": [
+          {
+            "fieldPath": "animeSlug",
+            "columnName": "animeSlug",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "image",
+            "columnName": "image",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "rating",
+            "columnName": "rating",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "favourite",
+            "columnName": "favourite",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "year",
+            "columnName": "year",
+            "affinity": "INTEGER",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "animeSlug"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "episode",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`episodeNumber` REAL, `title` TEXT, `duration` INTEGER, `episodeSlug` TEXT NOT NULL, `animeSlug` TEXT, `link1` TEXT, `link2` TEXT, `link3` TEXT, `link4` TEXT, `createdDate` TEXT, `next` TEXT, `prev` TEXT, `language` TEXT, `thumbnail` TEXT, `favourite` INTEGER, PRIMARY KEY(`episodeSlug`), FOREIGN KEY(`animeSlug`) REFERENCES `anime`(`animeSlug`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "episodeNumber",
+            "columnName": "episodeNumber",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "duration",
+            "columnName": "duration",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "episodeSlug",
+            "columnName": "episodeSlug",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "animeSlug",
+            "columnName": "animeSlug",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "link1",
+            "columnName": "link1",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "link2",
+            "columnName": "link2",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "link3",
+            "columnName": "link3",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "link4",
+            "columnName": "link4",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "createdDate",
+            "columnName": "createdDate",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "next",
+            "columnName": "next",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "prev",
+            "columnName": "prev",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "language",
+            "columnName": "language",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "thumbnail",
+            "columnName": "thumbnail",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "favourite",
+            "columnName": "favourite",
+            "affinity": "INTEGER",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "episodeSlug"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_episode_animeSlug",
+            "unique": false,
+            "columnNames": [
+              "animeSlug"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_episode_animeSlug` ON `${TABLE_NAME}` (`animeSlug`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "anime",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "animeSlug"
+            ],
+            "referencedColumns": [
+              "animeSlug"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "search_results",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `animeSlug` TEXT NOT NULL, `page` INTEGER NOT NULL, `index` INTEGER NOT NULL, `last_accessed` INTEGER NOT NULL, PRIMARY KEY(`animeSlug`, `id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "animeSlug",
+            "columnName": "animeSlug",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "page",
+            "columnName": "page",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "index",
+            "columnName": "index",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastAccessed",
+            "columnName": "last_accessed",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "animeSlug",
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "anime_genre",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`animeSlug` TEXT NOT NULL, `genre` TEXT NOT NULL, PRIMARY KEY(`animeSlug`, `genre`))",
+        "fields": [
+          {
+            "fieldPath": "animeSlug",
+            "columnName": "animeSlug",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "genre",
+            "columnName": "genre",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "animeSlug",
+            "genre"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "recent",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`animeSlug` TEXT NOT NULL, `episodeSlug` TEXT NOT NULL, `pageNo` INTEGER NOT NULL, PRIMARY KEY(`episodeSlug`, `animeSlug`))",
+        "fields": [
+          {
+            "fieldPath": "animeSlug",
+            "columnName": "animeSlug",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "episodeSlug",
+            "columnName": "episodeSlug",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pageNo",
+            "columnName": "pageNo",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "episodeSlug",
+            "animeSlug"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "trending",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`animeSlug` TEXT NOT NULL, `pageNo` INTEGER NOT NULL, PRIMARY KEY(`animeSlug`))",
+        "fields": [
+          {
+            "fieldPath": "animeSlug",
+            "columnName": "animeSlug",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pageNo",
+            "columnName": "pageNo",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "animeSlug"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "episode_page",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`episodeSlug` TEXT NOT NULL, `pageNo` INTEGER NOT NULL, PRIMARY KEY(`episodeSlug`))",
+        "fields": [
+          {
+            "fieldPath": "episodeSlug",
+            "columnName": "episodeSlug",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pageNo",
+            "columnName": "pageNo",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "episodeSlug"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "video_history",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`episodeSlug` TEXT NOT NULL, `timestamp` INTEGER NOT NULL, `lastPlayed` TEXT NOT NULL, PRIMARY KEY(`episodeSlug`), FOREIGN KEY(`episodeSlug`) REFERENCES `episode`(`episodeSlug`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "episodeSlug",
+            "columnName": "episodeSlug",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timestamp",
+            "columnName": "timestamp",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastPlayed",
+            "columnName": "lastPlayed",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "episodeSlug"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": [
+          {
+            "table": "episode",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "episodeSlug"
+            ],
+            "referencedColumns": [
+              "episodeSlug"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "popular",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`animeSlug` TEXT NOT NULL, `pageNo` INTEGER NOT NULL, PRIMARY KEY(`animeSlug`))",
+        "fields": [
+          {
+            "fieldPath": "animeSlug",
+            "columnName": "animeSlug",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pageNo",
+            "columnName": "pageNo",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "animeSlug"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "anime_language",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`language` TEXT NOT NULL, `animeSlug` TEXT NOT NULL, PRIMARY KEY(`language`, `animeSlug`))",
+        "fields": [
+          {
+            "fieldPath": "language",
+            "columnName": "language",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "animeSlug",
+            "columnName": "animeSlug",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "language",
+            "animeSlug"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_anime_language_animeSlug",
+            "unique": false,
+            "columnNames": [
+              "animeSlug"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_anime_language_animeSlug` ON `${TABLE_NAME}` (`animeSlug`)"
+          }
+        ],
+        "foreignKeys": []
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '3ba1ab1059234bcd99f6e528454e032e')"
+    ]
+  }
+}
