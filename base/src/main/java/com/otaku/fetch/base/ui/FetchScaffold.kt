@@ -1,5 +1,8 @@
 package com.otaku.fetch.base.ui
 
+import android.content.Context
+import android.content.ContextWrapper
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.RowScope
@@ -15,9 +18,11 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -30,25 +35,14 @@ fun FetchScaffold(
     title: String,
     statusBarHeight: Float = 0f,
     scrollBehavior: TopAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(),
-    setupShineBar: (Shinebar) -> Unit = { _ -> run {} },
     actions: @Composable (RowScope.() -> Unit) = {},
     content: @Composable () -> Unit,
 ) {
     val top = statusBarHeight.dp
     val windowInsets = WindowInsets(0.dp, top / LocalDensity.current.density, 0.dp, 0.dp)
+    UpdateShineBar(-scrollBehavior.state.heightOffsetLimit, scrollBehavior.state.heightOffset.toInt())
     Box(Modifier.fillMaxSize()) {
-        AndroidView(factory = { context ->
-            Shinebar(context).apply {
-                setupShineBar(this)
-            }
-        },
-            update = { shinebar ->
-                shinebar.redrawCurve(
-                    -scrollBehavior.state.heightOffsetLimit,
-                    scrollBehavior.state.heightOffset.toInt()
-                )
-            }
-        )
+
         Scaffold(
             modifier = Modifier
                 .fillMaxSize()
@@ -78,4 +72,19 @@ fun FetchScaffold(
             }
         }
     }
+}
+
+@Composable
+private fun UpdateShineBar(totalScrollRange: Float, heightOffset: Int) {
+    val shineBarInterface = LocalContext.current.getActivity() as? ShineBarInterface
+    shineBarInterface?.shinebar?.redrawCurve(
+        totalScrollRange,
+        heightOffset
+    )
+}
+
+fun Context.getActivity(): AppCompatActivity? = when (this) {
+    is AppCompatActivity -> this
+    is ContextWrapper -> baseContext.getActivity()
+    else -> null
 }

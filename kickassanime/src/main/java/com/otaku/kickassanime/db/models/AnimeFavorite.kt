@@ -20,7 +20,7 @@ data class AnimeFavorite(
 
 
     override val imageUrl: String
-        get() = "${Strings.KICKASSANIME_URL}image/poster/$image"
+        get() = "${Strings.KICKASSANIME_URL}/image/poster/$image"
 
     override val tags: List<String>
         get() = emptyList()

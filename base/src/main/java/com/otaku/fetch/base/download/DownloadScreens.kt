@@ -49,8 +49,7 @@ import kotlin.math.min
 @androidx.annotation.OptIn(UnstableApi::class)
 fun DownloadScreen(
     downloadsVM: DownloadViewModel,
-    statusBarHeight: Float? = null,
-    setupShineBar: (Shinebar) -> Unit = { _ -> run {} }
+    statusBarHeight: Float? = null
 ) {
 
     val items = downloadsVM.anime()
@@ -65,7 +64,6 @@ fun DownloadScreen(
                 downloadsVM.resume(context)
             }, isPaused = downloadsVM.isDownloadPaused)
         },
-        setupShineBar = setupShineBar
     ) {
         DownloadList(items.toItemTreeIndex(downloadsVM))
     }

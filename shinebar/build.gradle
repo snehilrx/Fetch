@@ -64,5 +64,4 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation "androidx.test.ext:junit:$versions.androidx_junit"
     androidTestImplementation "androidx.test.espresso:espresso-core:$versions.espresso_core"
-    implementation 'com.github.appspell:ShaderView:0.8.8'
 }

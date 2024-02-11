@@ -7,6 +7,12 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
+        <io.github.snehilrx.shinebar.Shinebar
+                android:id="@+id/shinebar"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:fitsSystemWindows="false" />
+
         <androidx.fragment.app.FragmentContainerView
                 android:id="@+id/fragmentContainerView"
                 android:name="androidx.navigation.fragment.NavHostFragment"
@@ -22,12 +28,11 @@
         <com.google.android.material.navigationrail.NavigationRailView
                 android:id="@+id/railNavigation"
                 android:layout_gravity="bottom"
+                android:background="@android:color/transparent"
                 app:menuAlignmentMode="auto"
                 android:orientation="vertical"
-                android:paddingStart="@dimen/cardview_margin"
-                android:paddingEnd="@dimen/cardview_margin"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />

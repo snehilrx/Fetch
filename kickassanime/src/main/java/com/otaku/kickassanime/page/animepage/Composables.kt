@@ -412,7 +412,7 @@ fun Episode(episodeTile: EpisodeTile, onEpisodeClick: (EpisodeTile) -> Unit) {
             .width(180.dp)
         if (!episodeTile.thumbnail.isNullOrBlank()) {
             KickassLoadingImage(
-                url = "${Strings.KICKASSANIME_URL}image/thumbnail/${episodeTile.thumbnail}",
+                url = "${Strings.KICKASSANIME_URL}/image/thumbnail/${episodeTile.thumbnail}",
                 description = episodeTile.episodeNumber.toString(),
                 modifier = image,
                 contentScale = ContentScale.FillBounds,
