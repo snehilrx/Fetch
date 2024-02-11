@@ -4,12 +4,6 @@
 
     <merge android:animateLayoutChanges="true">
 
-        <io.github.snehilrx.shinebar.Shinebar
-                android:id="@+id/shinebar"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:fitsSystemWindows="false" />
-
         <com.google.android.material.appbar.AppBarLayout
                 android:id="@+id/appbarLayout"
                 android:layout_width="match_parent"

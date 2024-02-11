@@ -135,4 +135,4 @@ fun EpisodesWithPreview.slug(): String {
 }
 
 fun String.slugToEpisodeLink(animeSlug: String) =
-    "${Strings.KICKASSANIME_URL}$animeSlug/$this"
+    "${Strings.KICKASSANIME_URL}/$animeSlug/$this"

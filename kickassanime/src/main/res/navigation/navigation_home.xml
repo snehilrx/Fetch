@@ -28,6 +28,10 @@
                 app:uri="https://kaas.am"
                 android:autoVerify="true"
                 app:action="ACTION_VIEW" />
+        <deepLink
+                app:uri="https://kickassanime.mx"
+                android:autoVerify="true"
+                app:action="ACTION_VIEW" />
     </fragment>
     <fragment
             android:id="@+id/recent"

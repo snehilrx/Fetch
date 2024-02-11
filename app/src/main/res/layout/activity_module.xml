@@ -8,6 +8,12 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
+        <io.github.snehilrx.shinebar.Shinebar
+                android:id="@+id/shinebar"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:fitsSystemWindows="false" />
+
         <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/container"
                 android:fitsSystemWindows="false"

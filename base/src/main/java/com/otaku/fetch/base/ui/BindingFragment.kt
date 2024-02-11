@@ -3,7 +3,6 @@
 package com.otaku.fetch.base.ui
 
 import android.os.Bundle
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -23,7 +22,6 @@ import com.otaku.fetch.base.databinding.AppbarImageBinding
 import com.otaku.fetch.base.databinding.AppbarShineBinding
 import com.otaku.fetch.base.utils.UiUtils.statusBarHeight
 import com.otaku.fetch.bindings.ImageViewBindings
-import io.github.snehilrx.shinebar.Shinebar
 import java.lang.ref.WeakReference
 
 
@@ -49,50 +47,22 @@ open class BindingFragment<T : ViewDataBinding>(@LayoutRes private val layoutRes
     protected fun AppBarLayout.getAppBarBehavior() =
         (layoutParams as? CoordinatorLayout.LayoutParams)?.behavior as? AppBarLayout.Behavior
 
+    private lateinit var appBarLayout: AppBarLayout
+
     protected fun initAppbar(
         binding: AppbarShineBinding?,
         navController: NavController,
         hideBackButton: Boolean = false
     ) {
         if (binding == null) return
+        appBarLayout = binding.appbarLayout
+        appBarLayout.addOnOffsetChangedListener((activity as? ShineBarInterface)?.shinebar)
         initAppbar(
-            binding.shinebar,
             binding.toolbar,
             binding.collapsingToolbar,
             navController,
             hideBackButton
         )
-    }
-
-    protected fun initAppbar(
-        shinebar: Shinebar?,
-        toolbar: Toolbar?,
-        collapsingToolbar: CollapsingToolbarLayout?,
-        navController: NavController?,
-        hideBackButton: Boolean = false
-    ) {
-        setupShineBar(shinebar)
-        initAppbar(
-            toolbar,
-            collapsingToolbar,
-            navController,
-            hideBackButton
-        )
-    }
-
-    fun setupShineBar(shinebar: Shinebar?) {
-        val start = TypedValue()
-        val end = TypedValue()
-        context?.theme?.resolveAttribute(
-            com.google.android.material.R.attr.colorPrimary,
-            start,
-            true
-        )
-        context?.theme?.resolveAttribute(com.google.android.material.R.attr.colorAccent, end, true)
-        shinebar?.apply {
-            setStartColor(start.data)
-            setEndColor(end.data)
-        }
     }
 
     private fun initAppbar(
@@ -186,9 +156,32 @@ open class BindingFragment<T : ViewDataBinding>(@LayoutRes private val layoutRes
         // no-op̊
     }
 
+    override fun onResume() {
+        super.onResume()
+        if (this::appBarLayout.isInitialized) {
+            (activity as? ShineBarInterface)?.shinebar?.let {
+                appBarLayout.addOnOffsetChangedListener(it)
+            }
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if (this::appBarLayout.isInitialized) {
+            (activity as? ShineBarInterface)?.shinebar?.let {
+                appBarLayout.removeOnOffsetChangedListener(it)
+            }
+        }
+    }
+
     override fun onDestroy() {
         super.onDestroy()
-        (activity as AppCompatActivity).setSupportActionBar(null)
+        (activity as? AppCompatActivity)?.setSupportActionBar(null)
+        if (this::appBarLayout.isInitialized) {
+            (activity as? ShineBarInterface)?.shinebar?.let {
+                appBarLayout.removeOnOffsetChangedListener(it)
+            }
+        }
         if (this::weakReference.isInitialized) {
             weakReference.clear()
         }

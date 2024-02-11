@@ -53,7 +53,7 @@ object ApplicationModule {
             .header("origin", origin)
             .header(
                 "user-agent",
-                "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1"
+                "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1"
             )
             .method(original.method, original.body)
             .build()
@@ -61,7 +61,8 @@ object ApplicationModule {
         chain.proceed(request)
     }).callTimeout(4, TimeUnit.MINUTES)
         .connectTimeout(4, TimeUnit.MINUTES)
-        .addInterceptor(logger).build()
+        .addInterceptor(logger)
+        .build()
 
     private const val MAX_CACHE_SIZE: Long = 2000000000
 
